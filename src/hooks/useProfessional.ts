@@ -11,11 +11,15 @@ export function useProfessional() {
 
   const getProfessionalByUserId = async (userId: string) => {
     try {
+      console.log('🔍 Debug - Buscando profesional para userId:', userId);
+      
       const { data, error } = await supabase
         .from('professionals')
         .select('*')
         .eq('user_id', userId)
         .single();
+
+      console.log('🔍 Debug - Resultado de la consulta:', { data, error });
 
       if (error) throw error;
       return data;
