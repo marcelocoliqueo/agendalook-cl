@@ -1,0 +1,260 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabase';
+import { verifyMercadoPagoSignature, validateWebhookPayload } from '@/lib/mercadopago';
+import { webhookRateLimiter, getClientIP } from '@/lib/rate-limit';
+import { securityLogger, getUserAgent } from '@/lib/security-logger';
+import { getSubscriptionStatus, formatMoney } from '@/lib/plans';
+
+export async function POST(request: NextRequest) {
+  try {
+    const ip = getClientIP(request);
+    const userAgent = getUserAgent(request);
+
+    // Rate limiting para webhooks
+    const rateLimitResult = await webhookRateLimiter.check(ip);
+    if (!rateLimitResult.success) {
+      securityLogger.logRateLimitExceeded(ip, '/api/mercadopago/webhook', userAgent);
+      console.warn('Webhook rate limit exceeded:', ip);
+      return NextResponse.json(
+        { error: 'Rate limit exceeded' },
+        { status: 429 }
+      );
+    }
+
+    const body = await request.json();
+    const supabase = createClient();
+
+    // Verificar firma de MercadoPago
+    const signature = request.headers.get('x-signature');
+    const timestamp = request.headers.get('x-timestamp');
+    
+    if (!verifyMercadoPagoSignature(JSON.stringify(body), signature || '', timestamp || '')) {
+      securityLogger.logSuspiciousActivity(ip, 'invalid_webhook_signature', { 
+        signature: signature?.substring(0, 20) + '...',
+        timestamp 
+      }, userAgent);
+      console.warn('Invalid MercadoPago signature:', ip);
+      return NextResponse.json(
+        { error: 'Invalid signature' },
+        { status: 401 }
+      );
+    }
+
+    // Validar estructura del payload
+    if (!validateWebhookPayload(body)) {
+      securityLogger.logSuspiciousActivity(ip, 'invalid_webhook_payload', { 
+        payloadType: typeof body,
+        hasData: !!body.data,
+        hasType: !!body.type
+      }, userAgent);
+      console.warn('Invalid webhook payload structure:', body);
+      return NextResponse.json(
+        { error: 'Invalid payload structure' },
+        { status: 400 }
+      );
+    }
+
+    // Verificar que es una notificación válida de Mercado Pago
+    if (!body.data || !body.type) {
+      return NextResponse.json(
+        { error: 'Invalid notification' },
+        { status: 400 }
+      );
+    }
+
+    const { data, type } = body;
+
+    // Log de seguridad
+    securityLogger.logWebhookReceived(ip, type, data.id, userAgent);
+    console.log(`Processing MercadoPago webhook: ${type}`, {
+      ip,
+      timestamp: new Date().toISOString(),
+      dataId: data.id,
+    });
+
+    switch (type) {
+      case 'payment':
+        // Procesar pago exitoso
+        if (data.status === 'approved') {
+          // Buscar el profesional por external_reference
+          const externalRef = data.external_reference;
+          const planMatch = externalRef.match(/subscription_(pro|studio)_/);
+          
+          if (planMatch) {
+            const plan = planMatch[1];
+            const amount = data.transaction_amount || (plan === 'pro' ? 9990 : 19900);
+            
+            // Actualizar profesional con suscripción activa
+            const { error: updateError } = await supabase
+              .from('professionals')
+              .update({
+                plan,
+                subscription_status: 'active',
+                mp_subscription_id: data.id,
+                last_payment_date: new Date().toISOString(),
+                next_payment_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // +30 días
+                days_since_last_payment: 0,
+                updated_at: new Date().toISOString(),
+              })
+              .eq('mp_customer_id', data.payer.id);
+
+            if (updateError) {
+              console.error('Error updating professional subscription:', updateError);
+              return NextResponse.json(
+                { error: 'Database update failed' },
+                { status: 500 }
+              );
+            }
+
+            // Registrar en historial de pagos
+            await supabase
+              .from('payment_history')
+              .insert({
+                professional_id: data.payer.id,
+                payment_id: data.id,
+                amount: amount,
+                status: 'approved',
+                plan_type: plan,
+              });
+
+            console.log(`Successfully updated professional subscription: ${data.payer.id} -> ${plan} (${formatMoney(amount)})`);
+          }
+        } else if (data.status === 'pending') {
+          // Pago pendiente - actualizar estado
+          const { error: updateError } = await supabase
+            .from('professionals')
+            .update({
+              subscription_status: 'pending_payment',
+              updated_at: new Date().toISOString(),
+            })
+            .eq('mp_customer_id', data.payer.id);
+
+          if (updateError) {
+            console.error('Error updating pending payment status:', updateError);
+          }
+        } else if (data.status === 'rejected' || data.status === 'cancelled') {
+          // Pago rechazado - mover a período de gracia
+          const { error: updateError } = await supabase
+            .from('professionals')
+            .update({
+              subscription_status: 'grace_period',
+              grace_period_start: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            })
+            .eq('mp_customer_id', data.payer.id);
+
+          if (updateError) {
+            console.error('Error updating rejected payment status:', updateError);
+          }
+        }
+        break;
+
+      case 'subscription_authorized_payment':
+        // Procesar suscripción autorizada
+        if (data.status === 'authorized') {
+          const externalRef = data.external_reference;
+          const planMatch = externalRef.match(/subscription_(pro|studio)_/);
+          
+          if (planMatch) {
+            const plan = planMatch[1];
+            const amount = data.transaction_amount || (plan === 'pro' ? 9990 : 19900);
+            
+            const { error: updateError } = await supabase
+              .from('professionals')
+              .update({
+                plan,
+                subscription_status: 'active',
+                mp_subscription_id: data.id,
+                last_payment_date: new Date().toISOString(),
+                next_payment_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+                days_since_last_payment: 0,
+                updated_at: new Date().toISOString(),
+              })
+              .eq('mp_customer_id', data.payer_id);
+
+            if (updateError) {
+              console.error('Error updating professional subscription:', updateError);
+              return NextResponse.json(
+                { error: 'Database update failed' },
+                { status: 500 }
+              );
+            }
+
+            // Registrar en historial de pagos
+            await supabase
+              .from('payment_history')
+              .insert({
+                professional_id: data.payer_id,
+                payment_id: data.id,
+                amount: amount,
+                status: 'approved',
+                plan_type: plan,
+              });
+
+            console.log(`Successfully authorized subscription: ${data.payer_id} -> ${plan} (${formatMoney(amount)})`);
+          }
+        }
+        break;
+
+      case 'subscription_cancelled':
+        // Procesar cancelación de suscripción
+        const { error: cancelError } = await supabase
+          .from('professionals')
+          .update({
+            plan: 'free',
+            subscription_status: 'cancelled',
+            mp_subscription_id: null,
+            cancellation_date: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          })
+          .eq('mp_subscription_id', data.id);
+
+        if (cancelError) {
+          console.error('Error cancelling subscription:', cancelError);
+          return NextResponse.json(
+            { error: 'Database update failed' },
+            { status: 500 }
+          );
+        }
+
+        console.log(`Successfully cancelled subscription: ${data.id}`);
+        break;
+
+      case 'subscription_suspended':
+        // Procesar suspensión de suscripción
+        const { error: suspendError } = await supabase
+          .from('professionals')
+          .update({
+            subscription_status: 'suspended',
+            suspension_date: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          })
+          .eq('mp_subscription_id', data.id);
+
+        if (suspendError) {
+          console.error('Error suspending subscription:', suspendError);
+          return NextResponse.json(
+            { error: 'Database update failed' },
+            { status: 500 }
+          );
+        }
+
+        console.log(`Successfully suspended subscription: ${data.id}`);
+        break;
+
+      default:
+        console.log(`Unhandled Mercado Pago event type: ${type}`);
+    }
+
+    return NextResponse.json({ 
+      received: true,
+      rateLimitRemaining: rateLimitResult.remaining 
+    });
+  } catch (error) {
+    console.error('Error processing Mercado Pago webhook:', error);
+    return NextResponse.json(
+      { error: 'Webhook processing failed' },
+      { status: 500 }
+    );
+  }
+} 
