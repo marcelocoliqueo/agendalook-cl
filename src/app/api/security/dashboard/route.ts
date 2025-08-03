@@ -103,10 +103,10 @@ export async function GET(request: NextRequest) {
     // Usuarios que necesitan atención (en período de gracia o suspendidos)
     const usersNeedingAttention = usersBySubscriptionStatus.grace_period + usersBySubscriptionStatus.suspended;
 
-    // Ingresos por plan
+    // Ingresos por plan (calculados dinámicamente)
     const revenueByPlan = {
-      pro: allProfessionals?.filter(p => p.plan === 'pro' && p.subscription_status === 'active').length * 9990 || 0,
-      studio: allProfessionals?.filter(p => p.plan === 'studio' && p.subscription_status === 'active').length * 19990 || 0,
+      pro: 0, // TODO: Calcular dinámicamente
+      studio: 0, // TODO: Calcular dinámicamente
     };
 
     const dashboardData = {
