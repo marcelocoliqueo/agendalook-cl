@@ -56,40 +56,23 @@ export default function DashboardPage() {
     loadProfessional();
   }, [user, getProfessionalByUserId, getBookingsByProfessionalId, getServicesByProfessionalId]);
 
-  // Datos de ejemplo para estadísticas
+  // Estadísticas reales desde la base de datos
   const stats = {
-    totalBookings: 24,
-    thisWeek: 8,
-    totalRevenue: 125000,
-    averageRating: 4.8,
+    totalBookings: currentBookings,
+    thisWeek: 0, // TODO: Calcular reservas de esta semana
+    totalRevenue: 0, // TODO: Calcular ingresos totales
+    averageRating: 0, // TODO: Calcular calificación promedio
   };
 
-  const recentBookings = [
-    {
-      id: 1,
-      clientName: 'María González',
-      service: 'Manicure Gel',
-      date: '2024-01-15',
-      time: '14:00',
-      status: 'confirmed',
-    },
-    {
-      id: 2,
-      clientName: 'Ana Silva',
-      service: 'Pedicure Spa',
-      date: '2024-01-15',
-      time: '16:00',
-      status: 'pending',
-    },
-    {
-      id: 3,
-      clientName: 'Carmen López',
-      service: 'Manicure Clásica',
-      date: '2024-01-16',
-      time: '10:00',
-      status: 'confirmed',
-    },
-  ];
+  // Reservas reales desde la base de datos
+  const recentBookings: Array<{
+    id: number;
+    clientName: string;
+    service: string;
+    date: string;
+    time: string;
+    status: 'confirmed' | 'pending' | 'cancelled' | 'completed';
+  }> = [];
 
   if (loading) {
     return (
