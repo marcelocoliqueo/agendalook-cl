@@ -56,7 +56,7 @@ export default function ServicesPage() {
     defaultValues: {
       name: '',
       duration: 60,
-      price: 15000,
+      price: 0,
     },
   });
 
