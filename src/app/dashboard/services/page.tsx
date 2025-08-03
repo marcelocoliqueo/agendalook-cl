@@ -159,9 +159,16 @@ export default function ServicesPage() {
   };
 
   if (!user || !professional) {
+    console.log('🔍 Debug - Services Page:', { user, professional });
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="w-8 h-8 animate-spin text-lavender-500" />
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-lavender-500 mx-auto mb-4" />
+          <p className="text-gray-600">Cargando servicios...</p>
+          <p className="text-sm text-gray-500 mt-2">
+            {!user ? 'Usuario no autenticado' : 'Cargando datos del profesional...'}
+          </p>
+        </div>
       </div>
     );
   }
