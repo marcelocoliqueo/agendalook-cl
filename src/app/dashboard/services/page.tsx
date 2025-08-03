@@ -69,7 +69,7 @@ export default function ServicesPage() {
     } catch (error) {
       showFeedback('error', 'Error al cargar los servicios');
     }
-  }, [professional?.id, getServicesByProfessionalId]);
+  }, [professional?.id]);
 
   // Cargar servicios al montar el componente
   useEffect(() => {
