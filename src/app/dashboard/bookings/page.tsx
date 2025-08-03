@@ -32,7 +32,7 @@ export default function BookingsPage() {
     if (professional?.id) {
       loadBookings();
     }
-  }, [professional]);
+  }, [professional?.id]);
 
   const loadBookings = async () => {
     try {

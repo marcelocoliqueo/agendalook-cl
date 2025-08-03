@@ -189,44 +189,32 @@ export default function DashboardLayout({
                 <span>Reservas</span>
               </Link>
               
-                                   <Link
-                       href="/dashboard/availability"
-                       className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors ${
-                         isActiveRoute('/dashboard/availability')
-                           ? 'bg-lavender-50 text-lavender-700 border border-lavender-200'
-                           : 'text-gray-600 hover:bg-gray-50'
-                       }`}
-                     >
-                       <Clock className="w-5 h-5" />
-                       <span>Disponibilidad</span>
-                     </Link>
-                     
-                     {/* Dashboard de Seguridad - Solo para administradores */}
-                     {professional?.role === 'admin' && (
-                       <Link
-                         href="/dashboard/security"
-                         className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors ${
-                           isActiveRoute('/dashboard/security')
-                             ? 'bg-lavender-50 text-lavender-700 border border-lavender-200'
-                             : 'text-gray-600 hover:bg-gray-50'
-                         }`}
-                       >
-                         <Shield className="w-5 h-5" />
-                         <span>Seguridad</span>
-                       </Link>
-                     )}
-                     
-                     <Link
-                       href="/dashboard/bookings"
-                       className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors ${
-                         isActiveRoute('/dashboard/bookings')
-                           ? 'bg-lavender-50 text-lavender-700 border border-lavender-200'
-                           : 'text-gray-600 hover:bg-gray-50'
-                       }`}
-                     >
-                       <Users className="w-5 h-5" />
-                       <span>Reservas</span>
-                     </Link>
+              <Link
+                href="/dashboard/availability"
+                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors ${
+                  isActiveRoute('/dashboard/availability')
+                    ? 'bg-lavender-50 text-lavender-700 border border-lavender-200'
+                    : 'text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                <Clock className="w-5 h-5" />
+                <span>Disponibilidad</span>
+              </Link>
+              
+              {/* Dashboard de Seguridad - Solo para administradores */}
+              {professional?.role === 'admin' && (
+                <Link
+                  href="/dashboard/security"
+                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors ${
+                    isActiveRoute('/dashboard/security')
+                      ? 'bg-lavender-50 text-lavender-700 border border-lavender-200'
+                      : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  <Shield className="w-5 h-5" />
+                  <span>Seguridad</span>
+                </Link>
+              )}
                      
                      <Link
                        href="/dashboard/settings"

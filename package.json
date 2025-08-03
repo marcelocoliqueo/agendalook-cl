@@ -13,7 +13,12 @@
     "format:check": "prettier --check .",
     "create-admin": "node scripts/create-admin.js",
     "fix-rls": "node scripts/fix-rls.js",
-    "fix-rls-simple": "node scripts/fix-rls-simple.js"
+    "fix-rls-simple": "node scripts/fix-rls-simple.js",
+    "fix-rls-production": "node scripts/fix-rls-production.js",
+    "generate-dummy-data": "node scripts/generate-dummy-data.js",
+    "clean-dummy-data": "node scripts/clean-dummy-data.js",
+    "check-db": "node scripts/check-database-status.js",
+    "clean-all": "node scripts/clean-all-except-real-user.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",

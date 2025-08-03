@@ -114,7 +114,7 @@ export default function AvailabilityPage() {
     if (professional?.id) {
       loadAvailability();
     }
-  }, [professional?.id]);
+  }, [professional?.id, getAvailabilityByProfessionalId]);
 
   const loadAvailability = async () => {
     if (!professional?.id) return;
