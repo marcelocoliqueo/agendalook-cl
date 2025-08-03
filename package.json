@@ -12,7 +12,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "create-admin": "node scripts/create-admin.js",
-    "fix-rls": "node scripts/fix-rls.js"
+    "fix-rls": "node scripts/fix-rls.js",
+    "fix-rls-simple": "node scripts/fix-rls-simple.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
