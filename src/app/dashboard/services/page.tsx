@@ -60,13 +60,6 @@ export default function ServicesPage() {
     },
   });
 
-  // Cargar servicios al montar el componente
-  useEffect(() => {
-    if (professional?.id) {
-      loadServices();
-    }
-  }, [loadServices]);
-
   const loadServices = useCallback(async () => {
     if (!professional?.id) return;
     
@@ -77,6 +70,13 @@ export default function ServicesPage() {
       showFeedback('error', 'Error al cargar los servicios');
     }
   }, [professional?.id, getServicesByProfessionalId]);
+
+  // Cargar servicios al montar el componente
+  useEffect(() => {
+    if (professional?.id) {
+      loadServices();
+    }
+  }, [loadServices]);
 
   const showFeedback = (type: 'success' | 'error', message: string) => {
     setFeedback({ type, message });
