@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -65,9 +65,9 @@ export default function ServicesPage() {
     if (professional?.id) {
       loadServices();
     }
-  }, [professional?.id]);
+  }, [loadServices]);
 
-  const loadServices = async () => {
+  const loadServices = useCallback(async () => {
     if (!professional?.id) return;
     
     try {
@@ -76,7 +76,7 @@ export default function ServicesPage() {
     } catch (error) {
       showFeedback('error', 'Error al cargar los servicios');
     }
-  };
+  }, [professional?.id, getServicesByProfessionalId]);
 
   const showFeedback = (type: 'success' | 'error', message: string) => {
     setFeedback({ type, message });
