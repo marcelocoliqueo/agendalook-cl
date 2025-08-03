@@ -1,22 +1,25 @@
 import { dirname } from "path";
 import { fileURLToPath } from "url";
 import { FlatCompat } from "@eslint/eslintrc";
+import path from "path";
+import { createRequire } from "module";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const compat = new FlatCompat({
   baseDirectory: __dirname,
+  recommendedConfig: { js: { ignorePatterns: [] } },
+  allConfig: { js: { ignorePatterns: [] } },
 });
 
-const eslintConfig = [
+const js = () => [
   ...compat.extends("next/core-web-vitals"),
-  {
-    rules: {
-      "prefer-const": "error",
-      "no-console": "warn",
-    },
-  },
 ];
 
-export default eslintConfig;
+export default [
+  {
+    ignores: ["node_modules/", ".next/", "out/", "dist/"],
+  },
+  ...js(),
+];

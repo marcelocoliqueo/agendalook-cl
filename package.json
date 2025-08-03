@@ -11,7 +11,8 @@
     "type-check": "tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "create-admin": "node scripts/create-admin.js"
+    "create-admin": "node scripts/create-admin.js",
+    "fix-rls": "node scripts/fix-rls.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
