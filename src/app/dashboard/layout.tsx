@@ -35,12 +35,9 @@ export default function DashboardLayout({
 
   useEffect(() => {
     const loadProfessional = async () => {
-      console.log('🔍 Debug - User:', user);
       if (user) {
         try {
-          console.log('🔍 Debug - Loading professional for user ID:', user.id);
           const profData = await getProfessionalByUserId(user.id);
-          console.log('🔍 Debug - Professional data:', profData);
           setProfessional(profData);
         } catch (error) {
           console.error('Error loading professional:', error);
@@ -48,7 +45,6 @@ export default function DashboardLayout({
           setLoading(false);
         }
       } else {
-        console.log('🔍 Debug - No user found');
         setLoading(false);
       }
     };
