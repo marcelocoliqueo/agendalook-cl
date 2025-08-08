@@ -112,6 +112,22 @@ export default function VerifyEmailPage() {
     }
   }, [router]);
 
+  // Auto-chequeo cada 5s y escucha cambios de auth (multi-pestaña)
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      serverConfirmCheck();
+    }, 5000);
+
+    const { data: listener } = supabase.auth.onAuthStateChange(() => {
+      serverConfirmCheck();
+    });
+
+    return () => {
+      clearInterval(intervalId);
+      listener.subscription.unsubscribe();
+    };
+  }, [serverConfirmCheck, supabase.auth]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-lavender-50 via-white to-coral-50 flex items-center justify-center p-6">
       <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
