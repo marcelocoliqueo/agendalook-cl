@@ -12,11 +12,14 @@ export default function WelcomePage() {
   const [loading, setLoading] = useState(true);
   const [professional, setProfessional] = useState<any>(null);
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { getProfessionalByUserId } = useProfessional();
 
   useEffect(() => {
     const checkUser = async () => {
+      // Esperar a que se resuelva la sesión para evitar redirección temprana
+      if (authLoading) return;
+
       if (!user) {
         router.push('/login');
         return;
@@ -35,7 +38,7 @@ export default function WelcomePage() {
     };
 
     checkUser();
-  }, [user, router, getProfessionalByUserId]);
+  }, [user, authLoading, router, getProfessionalByUserId]);
 
   const handleContinue = () => {
     router.push('/plans');
