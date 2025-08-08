@@ -77,6 +77,10 @@ export function useProfessional() {
 
     try {
       console.log('🔍 Buscando profesional con slug:', slug);
+      if (slug === 'plans') {
+        // Evitar consultar con slug reservado de ruta
+        return null;
+      }
       
       const { data, error } = await supabase
         .from('professionals')
