@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient as createServiceClient } from '@supabase/supabase-js';
 import { ResendService } from '@/lib/resend-service';
+import { issueCode } from '@/lib/verification';
 
 function slugify(businessName: string): string {
   return businessName
@@ -59,22 +60,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: `No se pudo crear el perfil profesional: ${profError.message}` }, { status: 500 });
     }
 
-    // 3) Generar action_link de verificación
-    const redirectTo = `${appUrl}/verify-email`;
-    const { data: linkData, error: linkError } = await (service as any).auth.admin.generateLink({
-      type: 'signup',
-      email,
-      options: { redirectTo },
-    });
-    if (linkError) {
-      return NextResponse.json({ error: `No se pudo generar el enlace de verificación: ${linkError.message}` }, { status: 500 });
-    }
-    const actionLink = (linkData as any)?.properties?.action_link || (linkData as any)?.action_link || redirectTo;
+    // 3) Flujo OTP: emitir código y enviarlo por correo (sin abrir pestañas)
+    const { code } = await issueCode({ request, email, purpose: 'signup', ttlMinutes: 15 });
+    await ResendService.sendVerificationCode(email, code);
 
-    // 4) Enviar email elegante con Resend apuntando al action_link
-    await ResendService.sendWelcomeEmail(email, actionLink, businessName);
-
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, method: 'otp' });
   } catch (error: any) {
     console.error('Error en registro server-side:', error);
     return NextResponse.json({ error: error?.message || 'Error interno' }, { status: 500 });
