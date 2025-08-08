@@ -330,7 +330,7 @@ export class ResendService {
                   Para comenzar a usar tu cuenta y acceder a todas las funcionalidades, confirma tu dirección de email.
                 </div>
                 
-                <a href="${safeConfirmationUrl}" class="button">
+                <a href="${safeConfirmationUrl}" class="button" target="_self" rel="noopener noreferrer">
                   ✨ Confirmar mi cuenta
                 </a>
                 

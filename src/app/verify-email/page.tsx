@@ -94,6 +94,10 @@ export default function VerifyEmailPage() {
       }
       await check();
     })();
+    // Limpieza: detener polling/listeners al salir de la página
+    return () => {
+      setChecking(false);
+    };
   }, [processAuthCallback, check, router]);
 
   const serverConfirmCheck = useCallback(async () => {
@@ -114,16 +118,29 @@ export default function VerifyEmailPage() {
 
   // Auto-chequeo cada 5s y escucha cambios de auth (multi-pestaña)
   useEffect(() => {
-    const intervalId = setInterval(() => {
-      serverConfirmCheck();
-    }, 5000);
+    let delay = 2000;
+    let timer: any;
+    let isActive = true;
+
+    const schedule = () => {
+      if (!isActive) return;
+      timer = setTimeout(async () => {
+        await serverConfirmCheck();
+        // backoff hasta 10s
+        delay = Math.min(delay * 2, 10000);
+        schedule();
+      }, delay);
+    };
+
+    schedule();
 
     const { data: listener } = supabase.auth.onAuthStateChange(() => {
       serverConfirmCheck();
     });
 
     return () => {
-      clearInterval(intervalId);
+      isActive = false;
+      if (timer) clearTimeout(timer);
       listener.subscription.unsubscribe();
     };
   }, [serverConfirmCheck, supabase.auth]);
