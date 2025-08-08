@@ -74,10 +74,11 @@ export default function PlansPage() {
   const [selectedPlan, setSelectedPlan] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { getProfessionalByUserId, updateProfessional } = useProfessional();
 
   useEffect(() => {
+    if (authLoading) return;
     if (!user) {
       router.push('/login');
       return;
@@ -87,7 +88,7 @@ export default function PlansPage() {
       router.push('/verify-email');
       return;
     }
-  }, [user, router]);
+  }, [authLoading, user, router]);
 
   const handlePlanSelect = (planId: string) => {
     setSelectedPlan(planId);
