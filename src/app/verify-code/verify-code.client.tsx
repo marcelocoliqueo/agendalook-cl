@@ -32,7 +32,7 @@ export default function VerifyCodeClient() {
         return;
       }
       setMessage('Código enviado. Revisa tu correo.');
-      setCountdown(30);
+      setCountdown(20);
     } finally {
       setLoading(false);
     }
@@ -45,7 +45,7 @@ export default function VerifyCodeClient() {
       const resp = await fetch('/api/auth/verify-code', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, code })
+        body: JSON.stringify({ email, code, purpose: 'signup' })
       });
       const data = await resp.json();
       if (!resp.ok) {
@@ -121,7 +121,7 @@ export default function VerifyCodeClient() {
 
         <div className="flex gap-3 justify-center">
           <button onClick={requestCode} disabled={loading || !email || countdown > 0} className="px-4 py-2 rounded-lg bg-gray-100">
-            {countdown > 0 ? `Reenviar en ${countdown}s` : 'Reenviar código'}
+            {countdown > 0 ? `Reenviar código (${countdown}s)` : 'Reenviar código'}
           </button>
           <button onClick={verifyCode} disabled={loading || code.length !== 6 || !email} className="px-4 py-2 rounded-lg bg-primary-500 text-white">Confirmar</button>
         </div>
