@@ -81,6 +81,29 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // Si no ha completado onboarding, forzar paso por /welcome
+  const isOnboarded = Boolean((user as any)?.user_metadata?.onboarded);
+  if (request.nextUrl.pathname.startsWith('/dashboard') && !isOnboarded) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/welcome';
+    return NextResponse.redirect(url);
+  }
+
+  // Restricción de rutas de admin: /dashboard/admin y /dashboard/security
+  if (request.nextUrl.pathname.startsWith('/dashboard/admin') || request.nextUrl.pathname.startsWith('/dashboard/security')) {
+    const { data: prof } = await supabase
+      .from('professionals')
+      .select('role')
+      .eq('user_id', user!.id)
+      .maybeSingle();
+    const isAdmin = prof?.role === 'admin';
+    if (!isAdmin) {
+      const url = request.nextUrl.clone();
+      url.pathname = '/dashboard';
+      return NextResponse.redirect(url);
+    }
+  }
+
   const response = NextResponse.next();
   
   // Headers de seguridad adicionales para rutas protegidas

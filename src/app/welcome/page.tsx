@@ -45,6 +45,11 @@ export default function WelcomePage() {
             role: 'owner',
             subscription_status: 'none',
           } as any);
+          // Marcar onboarding completado en metadata
+          try {
+            const supabase = (await import('@/lib/supabase')).createClient();
+            await supabase.auth.updateUser({ data: { ...(user as any)?.user_metadata, onboarded: true } });
+          } catch {}
         }
         setProfessional(prof);
       } catch (error) {
