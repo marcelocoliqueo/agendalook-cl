@@ -9,6 +9,7 @@ export function useAuth() {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
+  const verified = Boolean((user as any)?.user_metadata?.verified || (user as any)?.email_confirmed_at);
 
   useEffect(() => {
     // Obtener sesión inicial
@@ -66,6 +67,7 @@ export function useAuth() {
     user,
     session,
     loading,
+    verified,
     signUp,
     signIn,
     signOut,

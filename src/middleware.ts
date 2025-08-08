@@ -71,6 +71,16 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // Bloquear acceso al dashboard si el usuario no está verificado
+  const { data: { user } } = await supabase.auth.getUser();
+  const isVerified = Boolean(user?.user_metadata?.verified || user?.email_confirmed_at);
+  if (!isVerified) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/verify-code';
+    if (user?.email) url.searchParams.set('email', user.email);
+    return NextResponse.redirect(url);
+  }
+
   const response = NextResponse.next();
   
   // Headers de seguridad adicionales para rutas protegidas
