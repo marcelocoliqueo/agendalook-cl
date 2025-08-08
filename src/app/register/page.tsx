@@ -58,125 +58,31 @@ export default function RegisterPage() {
     try {
       console.log('🚀 Iniciando proceso de registro...');
       
-      // Registrar usuario en Supabase Auth
-      const { data: authData, error: authError } = await signUp(
-        formData.email,
-        formData.password,
-        {
+      // Registro server-side: crea usuario, profesional y envía email de verificación con Resend
+      const resp = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           name: formData.name,
-          business_name: formData.businessName,
-        }
-      );
+          businessName: formData.businessName,
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
 
-      if (authError) {
-        console.error('❌ Error en autenticación:', authError);
-        setError(authError.message);
+      if (!resp.ok) {
+        const { error } = await resp.json();
+        setError(error || 'No se pudo completar el registro');
         return;
       }
 
-      console.log('✅ Usuario autenticado:', authData.user?.id);
+      setMessage({
+        type: 'success',
+        text: `¡Registro exitoso! Te enviamos un email a ${formData.email} para confirmar tu cuenta.`,
+      });
 
-      if (authData.user) {
-        // Crear perfil profesional
-        const businessSlug = generateSlug(formData.businessName);
-        
-        const professionalData = {
-          user_id: authData.user.id,
-          business_name: formData.businessName,
-          business_slug: businessSlug,
-          email: formData.email,
-          phone: '',
-          description: '',
-          address: '',
-          plan: 'free',
-        };
-
-        console.log('📝 Datos del profesional a crear:', professionalData);
-
-        try {
-          const newProfessional = await createProfessional(professionalData);
-          console.log('✅ Profesional creado:', newProfessional);
-          
-          // Enviar email de bienvenida elegante con Resend
-          if (newProfessional?.id) {
-            try {
-              // Enviar email elegante de bienvenida usando API route
-              const emailResponse = await fetch('/api/send-welcome-email', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                  email: formData.email,
-                  businessName: formData.businessName
-                })
-              });
-
-              if (emailResponse.ok) {
-                console.log('✅ Email de bienvenida elegante enviado');
-                // Mostrar mensaje de éxito con información del email
-                setMessage({
-                  type: 'success',
-                  text: `¡Registro exitoso! Se ha enviado un email elegante a ${formData.email} con las instrucciones para confirmar tu cuenta.`
-                });
-              } else {
-                console.error('⚠️ Error sending welcome email:', await emailResponse.text());
-                // Mostrar mensaje de éxito pero con advertencia sobre el email
-                setMessage({
-                  type: 'success',
-                  text: `¡Registro exitoso! Tu cuenta ha sido creada. Revisa tu email (${formData.email}) para confirmar tu cuenta.`
-                });
-              }
-            } catch (emailError) {
-              console.error('⚠️ Error sending welcome email:', emailError);
-              // Mostrar mensaje de éxito pero con advertencia sobre el email
-              setMessage({
-                type: 'success',
-                text: `¡Registro exitoso! Tu cuenta ha sido creada. Revisa tu email (${formData.email}) para confirmar tu cuenta.`
-              });
-            }
-            
-            // Crear notificación de bienvenida (mantener para compatibilidad)
-            try {
-              await NotificationService.notifyWelcome(newProfessional.id, {
-                businessName: formData.businessName,
-                plan: 'free'
-              });
-              console.log('✅ Notificación de bienvenida creada');
-            } catch (notificationError) {
-              console.error('⚠️ Error creating welcome notification:', notificationError);
-              // No fallar el registro si la notificación falla
-            }
-          }
-          
-          // Redirigir a verificar email
-          console.log('🎉 Registro completado, redirigiendo a verificación de email...');
-          router.push('/verify-email');
-        } catch (error) {
-          console.error('❌ Error creating professional profile:', error);
-          
-          // Verificar si el registro fue exitoso a pesar del error
-          if (authData.user) {
-            try {
-              const { data: checkProfessional } = await supabase
-                .from('professionals')
-                .select('*')
-                .eq('user_id', authData.user.id)
-                .single();
-              
-              if (checkProfessional) {
-                console.log('✅ Registro encontrado a pesar del error, continuando...');
-                router.push('/welcome');
-                return;
-              }
-            } catch (checkError) {
-              console.error('Error verificando registro:', checkError);
-            }
-          }
-          
-          setError(`Error al crear el perfil profesional: ${error instanceof Error ? error.message : 'Error desconocido'}`);
-        }
-      }
+      // Redirigir a verificar email
+      router.push('/verify-email');
     } catch (error) {
       console.error('❌ Error general en registro:', error);
       setError(`Error al crear la cuenta: ${error instanceof Error ? error.message : 'Error desconocido'}`);
