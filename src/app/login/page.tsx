@@ -24,11 +24,20 @@ export default function LoginPage() {
     
     try {
       const { data, error } = await signIn(email, password, rememberMe);
-      
+
       if (error) {
-        setError(error.message);
-      } else if (data.user) {
-        // Redirigir al dashboard después del login exitoso
+        // Si el error es de email no confirmado, redirigir a verify-code
+        const msg = (error as any)?.message || '';
+        if (/email\s*not\s*confirmed/i.test(msg)) {
+          try { localStorage.setItem('pendingEmail', email); } catch {}
+          router.push(`/verify-code?email=${encodeURIComponent(email)}`);
+          return;
+        }
+        setError(msg || 'Error al iniciar sesión');
+        return;
+      }
+
+      if (data?.user) {
         router.push('/dashboard');
       }
     } catch (error) {
