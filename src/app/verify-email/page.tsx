@@ -45,7 +45,17 @@ export default function VerifyEmailPage() {
   const check = useCallback(async () => {
     try {
       setChecking(true);
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (error) {
+        // Caso típico tras borrar usuarios: token inválido/usuario no existe
+        if ((error as any)?.status === 403 || (error as any)?.message?.includes('user_not_found')) {
+          await supabase.auth.signOut();
+          router.push('/login?redirect=/verify-email');
+          return;
+        }
+        setMessage('Error de sesión. Intenta iniciar sesión nuevamente.');
+        return;
+      }
       if (!user) {
         setMessage('No hay sesión activa. Inicia sesión para continuar.');
         return;
