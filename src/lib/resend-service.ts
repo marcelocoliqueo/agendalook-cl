@@ -17,6 +17,7 @@ function renderBaseEmail(params: {
   const action = params.action;
   const bodyHtml = params.bodyHtml || '';
   const footerNote = params.footerNote || '© 2025 Agendalook.cl — Tu cita, tu estilo';
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.agendalook.cl';
 
   return `<!DOCTYPE html>
   <html lang="es">
@@ -32,8 +33,9 @@ function renderBaseEmail(params: {
         <td align="center">
           <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width:600px; width:100%; background:#ffffff; border:1px solid #e5e7eb; border-radius:12px;">
             <tr>
-              <td style="padding:24px 24px 8px 24px; text-align:center; font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;">
-                <div style="font-size:18px; font-weight:600; color:#111827;">Agendalook</div>
+              <td style="padding:20px 24px 8px 24px; text-align:center; font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;">
+                <img src="${appUrl}/logo.png" width="40" height="40" alt="Agendalook" style="display:inline-block; width:40px; height:40px; border-radius:8px; margin-bottom:8px;"/>
+                <div style="font-size:16px; font-weight:600; color:#111827;">Agendalook</div>
               </td>
             </tr>
             <tr>
