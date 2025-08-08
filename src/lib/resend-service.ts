@@ -5,6 +5,8 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 export class ResendService {
   static async sendWelcomeEmail(email: string, confirmationUrl: string, businessName: string) {
     try {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+      const safeConfirmationUrl = confirmationUrl || `${appUrl}/verify-email`;
       // Usar dominio de producción cuando esté verificado
       const fromEmail = process.env.NODE_ENV === 'production' 
         ? 'Agendalook <noreply@agendalook.cl>'
@@ -324,7 +326,7 @@ export class ResendService {
                   Para comenzar a usar tu cuenta y acceder a todas las funcionalidades, confirma tu dirección de email.
                 </div>
                 
-                <a href="${confirmationUrl}" class="button">
+                <a href="${safeConfirmationUrl}" class="button">
                   ✨ Confirmar mi cuenta
                 </a>
                 
@@ -378,7 +380,7 @@ export class ResendService {
           Gracias por unirte a la plataforma más elegante para agendar servicios de belleza.
           
           Para confirmar tu cuenta y acceder a todas las funcionalidades, visita este enlace:
-          ${confirmationUrl}
+          ${safeConfirmationUrl}
           
           Características principales:
           📅 Agenda Inteligente - Gestiona tu disponibilidad y recibe reservas automáticamente

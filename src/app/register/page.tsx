@@ -100,8 +100,8 @@ export default function RegisterPage() {
           // Enviar email de bienvenida elegante con Resend
           if (newProfessional?.id) {
             try {
-              // Crear URL de confirmación (Supabase maneja esto automáticamente)
-              const confirmationUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard`;
+              // URL de confirmación alineada al nuevo flujo
+              const confirmationUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/verify-email`;
 
               // Enviar email elegante de bienvenida usando API route
               const emailResponse = await fetch('/api/send-welcome-email', {
