@@ -1,13 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSubscriptionPreference, createMPCustomer, isMercadoPagoSandbox } from '@/lib/mercadopago';
-import { createClient } from '@/lib/supabase';
+import { createServerClient } from '@supabase/ssr';
 
 export async function POST(request: NextRequest) {
   try {
     const { plan, successUrl, cancelUrl } = await request.json();
 
-    // Verificar autenticación
-    const supabase = createClient();
+    // Verificar autenticación con cookies del request (server-side)
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+    const supabase = createServerClient(supabaseUrl, anonKey, {
+      cookies: {
+        get(name: string) {
+          return request.cookies.get(name)?.value;
+        },
+        set() {},
+        remove() {},
+      },
+    });
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {
