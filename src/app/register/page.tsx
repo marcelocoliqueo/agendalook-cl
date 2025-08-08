@@ -9,7 +9,6 @@ import { useAuth } from '@/hooks/useAuth';
 import { useProfessional } from '@/hooks/useProfessional';
 import { RegisterFormData } from '@/types';
 import { NotificationService } from '@/lib/notifications';
-import { supabase } from '@/lib/supabase';
 // Removido import de ResendService - ahora usamos API route
 
 export default function RegisterPage() {
@@ -81,8 +80,8 @@ export default function RegisterPage() {
         text: `¡Registro exitoso! Te enviamos un email a ${formData.email} para confirmar tu cuenta.`,
       });
 
-      // Redirigir a verificar email
-      router.push('/verify-email');
+      // Redirigir a verificación por código (OTP)
+      router.push('/verify-code');
     } catch (error) {
       console.error('❌ Error general en registro:', error);
       setError(`Error al crear la cuenta: ${error instanceof Error ? error.message : 'Error desconocido'}`);

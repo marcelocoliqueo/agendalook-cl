@@ -3,6 +3,38 @@ import { resend as sharedResend } from '@/lib/resend';
 const resend = sharedResend;
 
 export class ResendService {
+  static async sendVerificationCode(email: string, code: string) {
+    try {
+      if (!resend) {
+        console.warn('⚠️ Resend no configurado. No se envía verification code.');
+        return null;
+      }
+      const fromEmail = process.env.NODE_ENV === 'production' 
+        ? 'Agendalook <noreply@agendalook.cl>'
+        : 'Agendalook <onboarding@resend.dev>';
+
+      const { data, error } = await resend.emails.send({
+        from: fromEmail,
+        to: [email],
+        subject: 'Tu código de verificación - Agendalook',
+        html: `
+          <div style="font-family: system-ui, -apple-system, Segoe UI, Roboto; max-width: 520px; margin:auto; padding:24px;">
+            <h1 style="font-size:20px; margin-bottom:16px;">Verifica tu correo</h1>
+            <p style="color:#555;">Usa este código para confirmar tu cuenta:</p>
+            <div style="font-size:32px; letter-spacing:8px; font-weight:700; margin:16px 0;">${code}</div>
+            <p style="color:#777; font-size:14px;">El código expira en 10 minutos. Si no fuiste tú, ignora este mensaje.</p>
+          </div>
+        `,
+        text: `Tu código de verificación es: ${code}`
+      });
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error in sendVerificationCode:', error);
+      throw error;
+    }
+  }
   static async sendWelcomeEmail(email: string, confirmationUrl: string, businessName: string) {
     try {
       const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
