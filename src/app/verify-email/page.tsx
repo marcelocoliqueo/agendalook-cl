@@ -32,19 +32,13 @@ export default function VerifyEmailPage() {
   const resend = useCallback(async () => {
     try {
       setChecking(true);
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user || !user.email) {
-        setMessage('No hay usuario para reenviar verificación.');
+      const resp = await fetch('/api/auth/resend-verification', { method: 'POST' });
+      if (!resp.ok) {
+        const { error } = await resp.json();
+        setMessage(error || 'No se pudo reenviar el correo.');
         return;
       }
-      // En Supabase v2, se usa signUp con emailRedirectTo o reset para magic link.
-      const redirectTo = `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/verify-email`;
-      const { error } = await supabase.auth.signUp({ email: user.email, password: 'temporary_dummy_password', options: { emailRedirectTo: redirectTo } });
-      if (error) {
-        setMessage('No se pudo reenviar el correo. Intenta nuevamente.');
-      } else {
-        setMessage('Correo de verificación reenviado. Revisa tu bandeja.');
-      }
+      setMessage('Correo de verificación reenviado. Revisa tu bandeja.');
     } finally {
       setChecking(false);
     }
