@@ -1,6 +1,6 @@
-import { Resend } from 'resend';
+import { resend as sharedResend } from '@/lib/resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = sharedResend;
 
 export class ResendService {
   static async sendWelcomeEmail(email: string, confirmationUrl: string, businessName: string) {
@@ -12,6 +12,10 @@ export class ResendService {
         ? 'Agendalook <noreply@agendalook.cl>'
         : 'Agendalook <onboarding@resend.dev>';
 
+      if (!resend) {
+        console.warn('⚠️ Resend no configurado. No se envía welcome email.');
+        return null;
+      }
       const { data, error } = await resend.emails.send({
         from: fromEmail,
         to: [email],
@@ -424,6 +428,10 @@ export class ResendService {
         ? 'Agendalook <noreply@agendalook.cl>'
         : 'Agendalook <onboarding@resend.dev>';
 
+      if (!resend) {
+        console.warn('⚠️ Resend no configurado. No se envía booking confirmation.');
+        return null;
+      }
       const { data, error } = await resend.emails.send({
         from: fromEmail,
         to: [email],
@@ -702,6 +710,10 @@ export class ResendService {
     }
   ) {
     try {
+      if (!resend) {
+        console.warn('⚠️ Resend no configurado. No se envía notificación a profesional.');
+        return null;
+      }
       const { data, error } = await resend.emails.send({
         from: 'Agendalook <onboarding@resend.dev>',
         to: [email],
