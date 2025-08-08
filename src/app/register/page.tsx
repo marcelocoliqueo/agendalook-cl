@@ -100,9 +100,6 @@ export default function RegisterPage() {
           // Enviar email de bienvenida elegante con Resend
           if (newProfessional?.id) {
             try {
-              // URL de confirmación alineada al nuevo flujo
-              const confirmationUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/verify-email`;
-
               // Enviar email elegante de bienvenida usando API route
               const emailResponse = await fetch('/api/send-welcome-email', {
                 method: 'POST',
@@ -111,7 +108,6 @@ export default function RegisterPage() {
                 },
                 body: JSON.stringify({
                   email: formData.email,
-                  confirmationUrl,
                   businessName: formData.businessName
                 })
               });
