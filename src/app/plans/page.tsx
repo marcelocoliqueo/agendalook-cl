@@ -111,8 +111,24 @@ export default function PlansPage() {
       if (selectedPlan === 'free') {
         router.push('/onboarding');
       } else {
-        // Para planes pagos (pro, studio), redirigir a checkout
-        router.push(`/checkout?plan=${selectedPlan}`);
+        // Para planes pagos, crear preferencia y redirigir directo a MP
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
+        const resp = await fetch('/api/mercadopago/create-preference', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            plan: selectedPlan,
+            successUrl: `${appUrl}/dashboard`,
+            cancelUrl: `${appUrl}/plans`,
+          }),
+        });
+        if (!resp.ok) {
+          console.error('Error creando preferencia:', await resp.text());
+          setLoading(false);
+          return;
+        }
+        const { initPoint } = await resp.json();
+        window.location.href = initPoint;
       }
     } catch (error) {
       console.error('Error updating plan:', error);

@@ -77,7 +77,7 @@ export function useProfessional() {
 
     try {
       console.log('🔍 Buscando profesional con slug:', slug);
-      if (slug === 'plans') {
+      if (slug === 'plans' || slug === 'checkout') {
         // Evitar consultar con slug reservado de ruta
         return null;
       }

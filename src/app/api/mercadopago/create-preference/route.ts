@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     const { data: professional, error: profError } = await supabase
       .from('professionals')
       .select('*')
-      .eq('id', user.id)
+      .eq('user_id', user.id)
       .single();
 
     if (profError || !professional) {
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
       await supabase
         .from('professionals')
         .update({ mp_customer_id: mpCustomerId })
-        .eq('id', user.id);
+        .eq('id', professional.id);
     }
 
     // Crear preferencia de pago
