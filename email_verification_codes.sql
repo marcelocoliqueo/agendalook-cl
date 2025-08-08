@@ -1,15 +1,17 @@
-create table if not exists public.email_verification_codes (
-  id bigserial primary key,
-  user_id uuid not null,
+create table if not exists public.auth_verification_codes (
+  id uuid primary key default gen_random_uuid(),
+  email text not null,
+  purpose text not null check (purpose in ('signup','email_change')),
   code_hash text not null,
-  code_salt text not null,
+  salt text not null,
   expires_at timestamptz not null,
+  attempts int not null default 0,
+  max_attempts int not null default 5,
   consumed_at timestamptz,
   created_at timestamptz not null default now()
 );
 
-create index if not exists idx_email_verification_codes_user on public.email_verification_codes(user_id);
-create index if not exists idx_email_verification_codes_expires on public.email_verification_codes(expires_at);
-create index if not exists idx_email_verification_codes_consumed on public.email_verification_codes(consumed_at);
+create index if not exists idx_auth_verification_email_purpose on public.auth_verification_codes(email, purpose);
+create index if not exists idx_auth_verification_expires on public.auth_verification_codes(expires_at);
 
 
