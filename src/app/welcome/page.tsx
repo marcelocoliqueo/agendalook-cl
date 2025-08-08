@@ -93,7 +93,7 @@ export default function WelcomePage() {
               </div>
               
               <h2 className="text-2xl font-bold text-gray-800 mb-4">
-                ¡Hola, {professional?.business_name || 'Profesional'}!
+                ¡Hola, {professional?.business_name || (user as any)?.user_metadata?.business_name || 'Profesional'}!
               </h2>
               
               <p className="text-gray-600 text-lg">
