@@ -153,9 +153,9 @@ export default function RegisterPage() {
             }
           }
           
-          // Redirigir a la página de bienvenida
-          console.log('🎉 Registro completado, redirigiendo a bienvenida...');
-          router.push('/welcome');
+          // Redirigir a verificar email
+          console.log('🎉 Registro completado, redirigiendo a verificación de email...');
+          router.push('/verify-email');
         } catch (error) {
           console.error('❌ Error creating professional profile:', error);
           
