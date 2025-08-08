@@ -54,6 +54,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           max={max}
           className={cn(
             'w-full border border-gray-300 rounded-lg transition-colors focus:ring-2 focus:ring-primary-500 focus:border-transparent',
+            'text-gray-900 placeholder-gray-500',
             icon ? 'pl-10' : 'pl-4',
             'pr-4 py-3',
             disabled && 'opacity-50 cursor-not-allowed',

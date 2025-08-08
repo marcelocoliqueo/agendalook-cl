@@ -18,7 +18,15 @@
     "generate-dummy-data": "node scripts/generate-dummy-data.js",
     "clean-dummy-data": "node scripts/clean-dummy-data.js",
     "check-db": "node scripts/check-database-status.js",
-    "clean-all": "node scripts/clean-all-except-real-user.js"
+    "clean-all": "node scripts/clean-all-except-real-user.js",
+    "create-test-notifications": "node scripts/create-test-notifications.js",
+    "test-welcome": "node scripts/test-welcome-notification.js",
+    "clean-notifications": "node scripts/clean-notifications.js",
+    "create-real-notifications": "node scripts/create-real-notifications.js",
+    "check-slugs": "node scripts/check-business-slugs.js",
+    "test-public": "node scripts/test-public-access.js",
+    "create-test-data": "node scripts/create-test-data.js",
+    "clean-test-data": "node scripts/clean-test-data.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
@@ -28,8 +36,10 @@
     "@supabase/supabase-js": "^2.53.0",
     "autoprefixer": "^10.4.21",
     "clsx": "^2.1.0",
-    "date-fns": "^3.3.1",
+    "date-fns": "^3.6.0",
     "dotenv": "^17.2.1",
+    "jspdf": "^3.0.1",
+    "jspdf-autotable": "^5.0.2",
     "lucide-react": "^0.344.0",
     "mercadopago": "^2.8.0",
     "next": "15.4.5",
@@ -37,6 +47,7 @@
     "react-dom": "^18",
     "react-hook-form": "^7.50.1",
     "resend": "^4.7.0",
+    "sharp": "^0.34.3",
     "tailwind-merge": "^2.2.1",
     "zod": "^3.22.4"
   },

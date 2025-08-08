@@ -1,117 +1,187 @@
-# 📧 Configuración de Resend para Emails
+# 📧 Configuración de Resend para Agendalook.cl
 
-## 🚀 Pasos para Configurar Resend
+## 🚀 Configuración Inicial
 
-### 1. Crear cuenta en Resend
-1. Ve a [resend.com](https://resend.com)
-2. Crea una cuenta gratuita
-3. Verifica tu email
-
-### 2. Obtener API Key
-1. En el dashboard de Resend, ve a "API Keys"
-2. Crea una nueva API key
-3. Copia la clave (empieza con `re_`)
-
-### 3. Configurar Dominio (Opcional)
-Para usar `noreply@agendalook.cl`:
-1. Ve a "Domains" en Resend
-2. Agrega tu dominio
-3. Configura los registros DNS según las instrucciones
-
-### 4. Configurar Variables de Entorno
-Agrega estas variables a tu archivo `.env.local`:
-
-```env
-# Resend API Key
-RESEND_API_KEY=re_tu_api_key_aqui
-
-# URL de la aplicación (para links en emails)
-NEXT_PUBLIC_APP_URL=http://localhost:3000
+### 1. Instalación del Paquete
+```bash
+npm install resend
 ```
 
-### 5. Verificar Configuración
-1. Reinicia el servidor de desarrollo
-2. Crea una reserva de prueba
-3. Verifica que los emails se envíen correctamente
+### 2. Configuración de Variables de Entorno
+Agrega tu API key de Resend a tu archivo `.env.local`:
+```env
+RESEND_API_KEY=re_Mkta7bk5_J3rDZPY9guBQ1aJXmYee9y8h
+```
 
-## 📧 Tipos de Emails
+## 🎨 Tipos de Emails Elegantes
 
-### Email al Cliente
+### 1. Email de Bienvenida
+- **Asunto**: "¡Bienvenido a Agendalook! Confirma tu cuenta"
+- **Características**:
+  - Logo de Agendalook
+  - Diseño responsivo
+  - Gradientes elegantes
+  - Características destacadas
+  - Links de contacto
+
+### 2. Confirmación de Reserva
 - **Asunto**: "✨ Tu cita está confirmada - Agendalook"
-- **Contenido**: Confirmación con detalles de la cita
-- **Enviado**: Cuando el cliente proporciona email
+- **Características**:
+  - Detalles de la reserva
+  - Información del servicio
+  - Horario y precio
+  - Datos del profesional
 
-### Email al Profesional
-- **Asunto**: "✨ Tienes una nueva cita agendada - Agendalook"
-- **Contenido**: Notificación con detalles del cliente y servicio
-- **Enviado**: Siempre que se crea una reserva
+## 🧪 Páginas de Prueba
 
-## 🎨 Características de los Emails
+### 1. Preview de Emails
+**URL**: `http://localhost:3000/email-preview`
 
-### Diseño
-- **Plantillas HTML** responsivas
-- **Estilo femenino** con gradientes lavanda/coral
-- **Tipografías** Poppins y Playfair Display
-- **Iconos y emojis** para mejor UX
+Visualiza cómo se ven los emails antes de enviarlos:
+- ✅ Preview en tiempo real
+- ✅ Múltiples tipos de email
+- ✅ Diseño responsivo
+- ✅ Características destacadas
 
-### Contenido
-- **Detalles completos** de la reserva
-- **Información del negocio** (nombre, dirección)
-- **Consejos útiles** para cliente y profesional
-- **Links al dashboard** para el profesional
+### 2. Envío de Prueba
+**URL**: `http://localhost:3000/test-email`
+
+Envía emails de prueba para verificar la configuración:
+- ✅ Selección de tipo de email
+- ✅ Email personalizado
+- ✅ Verificación de entrega
 
 ## 🔧 Configuración Técnica
 
-### Variables Requeridas
-```env
-RESEND_API_KEY=re_xxxxxxxxxxxxx
-NEXT_PUBLIC_APP_URL=http://localhost:3000
+### Headers Anti-Spam
+```javascript
+headers: {
+  'List-Unsubscribe': '<mailto:unsubscribe@agendalook.cl>',
+  'X-Priority': '3',
+  'X-MSMail-Priority': 'Normal',
+  'Importance': 'normal'
+}
 ```
 
-### Funciones Disponibles
+### Configuración de Remitente
+```javascript
+{
+  from: 'Agendalook <onboarding@resend.dev>',
+  replyTo: 'soporte@agendalook.cl',
+  to: [email],
+  subject: 'Asunto claro y descriptivo'
+}
+```
+
+## 🧪 Pruebas y Limitaciones
+
+### Limitaciones de Prueba
+- **Solo emails verificados**: Resend solo permite enviar emails de prueba a tu propia dirección de email
+- **Dominio requerido**: Para enviar a otros destinatarios, necesitas verificar un dominio en Resend
+- **Email de prueba**: Usa `marcelo.coliqueo@gmail.com` para las pruebas
+
+### Páginas de Prueba
+1. **Preview**: `http://localhost:3000/email-preview`
+   - Visualiza el diseño de los emails
+   - Selecciona entre diferentes tipos
+   - Ver características y asuntos
+
+2. **Test**: `http://localhost:3000/test-email`
+   - Usa tu email verificado en Resend
+   - Selecciona el tipo de email
+   - Haz clic en "Enviar Email de Prueba"
+
+## 🎯 Características del Diseño
+
+### Logo y Branding
+- **Logo**: `https://agendalook.cl/logo.png`
+- **Colores**: Gradiente púrpura-naranja
+- **Tipografía**: Segoe UI, elegante y moderna
+- **Responsive**: Adaptable a móviles
+
+### Elementos Visuales
+- **Gradientes**: Fondo y botones con gradientes elegantes
+- **Sombras**: Efectos de profundidad sutiles
+- **Iconos**: Emojis para mejor engagement
+- **Espaciado**: Diseño limpio y profesional
+
+### Funcionalidades
+- **Headers anti-spam**: Mejor entregabilidad
+- **Links de contacto**: Soporte y redes sociales
+- **Opción de baja**: Cumplimiento legal
+- **Meta tags**: SEO y descripción
+
+## 🔧 Integración en el Código
+
+### Servicio de Resend
 ```typescript
-// Enviar confirmación al cliente
-sendClientConfirmationEmail(clientEmail, bookingData)
+// src/lib/resend-service.ts
+import { Resend } from 'resend';
 
-// Enviar notificación al profesional
-sendProfessionalNotificationEmail(professionalEmail, bookingData)
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+export class ResendService {
+  static async sendWelcomeEmail(email: string, confirmationUrl: string, businessName: string) {
+    // Implementación del email de bienvenida
+  }
+  
+  static async sendBookingConfirmation(email: string, bookingData: any) {
+    // Implementación del email de confirmación
+  }
+}
 ```
 
-## 🚨 Troubleshooting
+### API Endpoint
+```typescript
+// src/app/api/test-email/route.ts
+export async function POST(request: NextRequest) {
+  // Lógica para enviar emails de prueba
+}
+```
 
-### Error: "RESEND_API_KEY no está configurada"
-- Verifica que la variable esté en `.env.local`
-- Reinicia el servidor después de agregar la variable
+## 📊 Métricas de Entregabilidad
 
-### Error: "Invalid API key"
-- Verifica que la API key sea correcta
-- Asegúrate de que la cuenta esté verificada
+### KPIs Importantes
+- **Tasa de entrega**: >95%
+- **Tasa de apertura**: >20%
+- **Tasa de clics**: >2%
+- **Tasa de bounce**: <2%
+- **Tasa de spam**: <0.1%
 
-### Emails no se envían
-- Revisa la consola del servidor para errores
-- Verifica que el dominio esté configurado (si usas dominio personalizado)
+### Mejores Prácticas
+- ✅ Asunto claro y descriptivo
+- ✅ Contenido relevante y útil
+- ✅ Diseño profesional
+- ✅ Headers técnicos correctos
+- ✅ Link de baja presente
+- ✅ Información de contacto válida
 
-## 📊 Límites de Resend
+## 🚀 Próximos Pasos
 
-### Plan Gratuito
-- **3,000 emails/mes**
-- **Dominio personalizado** incluido
-- **Soporte por email**
+### Para Producción
+1. **Verificar dominio** `agendalook.cl` en Resend
+2. **Configurar registros DNS** (SPF, DKIM, DMARC)
+3. **Cambiar remitente** a `noreply@agendalook.cl`
+4. **Monitorear métricas** de entregabilidad
 
-### Planes Pagos
-- **100,000 emails/mes**: $20/mes
-- **1,000,000 emails/mes**: $80/mes
+### Integración Completa
+1. **Email de bienvenida** en el registro
+2. **Confirmación de reservas** automática
+3. **Notificaciones** de recordatorio
+4. **Emails de seguimiento** post-servicio
 
-## 🔒 Seguridad
+## 📚 Recursos Adicionales
 
-### Buenas Prácticas
-- **Nunca** compartas tu API key
-- **Usa variables de entorno** para las claves
-- **Verifica** los dominios antes de usar en producción
-- **Monitorea** el uso de emails
+### Documentación
+- [Resend API Documentation](https://resend.com/docs)
+- [Email Best Practices](https://resend.com/docs/best-practices)
+- [Domain Verification](https://resend.com/docs/domains)
 
-### Configuración de Producción
-```env
-RESEND_API_KEY=re_production_key
-NEXT_PUBLIC_APP_URL=https://agendalook.cl
-``` 
+### Herramientas de Prueba
+- [Mail Tester](https://mail-tester.com)
+- [Sender Score](https://senderscore.org)
+- [MXToolbox](https://mxtoolbox.com)
+
+---
+
+**Nota**: Los emails están optimizados para evitar spam y mejorar la entregabilidad. El diseño es responsivo y profesional, reflejando la calidad de Agendalook.cl. 

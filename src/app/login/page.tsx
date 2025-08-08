@@ -57,7 +57,7 @@ export default function LoginPage() {
           <h1 className="text-3xl font-playfair font-bold text-gray-800 mb-2">
             ¡Hola de nuevo!
           </h1>
-          <p className="text-gray-600">
+          <p className="text-gray-700">
             Inicia sesión en tu cuenta para continuar
           </p>
         </div>
@@ -82,7 +82,7 @@ export default function LoginPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors text-gray-900 placeholder-gray-500"
                   placeholder="tu@email.com"
                   required
                 />
@@ -100,7 +100,7 @@ export default function LoginPage() {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
+                  className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors text-gray-900 placeholder-gray-500"
                   placeholder="••••••••"
                   required
                 />
@@ -122,7 +122,7 @@ export default function LoginPage() {
                   onChange={(e) => setRememberMe(e.target.checked)}
                   className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                 />
-                <span className="ml-2 text-sm text-gray-600">Recordarme</span>
+                <span className="ml-2 text-sm text-gray-700">Recordarme</span>
               </label>
               <Link
                 href="/forgot-password"
@@ -142,7 +142,7 @@ export default function LoginPage() {
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-gray-600">
+            <p className="text-gray-700">
               ¿No tienes una cuenta?{' '}
               <Link
                 href="/register"

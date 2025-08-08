@@ -1,9 +1,12 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { useAuth } from '@/hooks/useAuth';
 import { useBookings } from '@/hooks/useBookings';
 import { useProfessional } from '@/hooks/useProfessional';
+import { Professional } from '@/types';
 import { Calendar, Clock, User, Phone, Mail, CheckCircle, XCircle, Clock as ClockIcon } from 'lucide-react';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 
 interface Booking {
   id: string;
@@ -22,11 +25,36 @@ interface Booking {
 }
 
 export default function BookingsPage() {
-  const { professional } = useProfessional();
+  const { user } = useAuth();
+  const { getProfessionalByUserId } = useProfessional();
   const { getBookings, updateBookingStatus } = useBookings();
+  
+  const [professional, setProfessional] = useState<Professional | null>(null);
+  const [professionalLoading, setProfessionalLoading] = useState(true);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'pending' | 'confirmed' | 'cancelled' | 'completed'>('all');
+
+  // Cargar profesional
+  useEffect(() => {
+    const loadProfessional = async () => {
+      if (!user?.id) {
+        setProfessionalLoading(false);
+        return;
+      }
+      
+      try {
+        const profData = await getProfessionalByUserId(user.id);
+        setProfessional(profData);
+      } catch (error) {
+        console.error('Error loading professional:', error);
+      } finally {
+        setProfessionalLoading(false);
+      }
+    };
+
+    loadProfessional();
+  }, [user?.id, getProfessionalByUserId]);
 
   useEffect(() => {
     if (professional?.id) {
@@ -92,12 +120,8 @@ export default function BookingsPage() {
     return timeString.substring(0, 5);
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-lavender-500"></div>
-      </div>
-    );
+  if (loading || professionalLoading || !user || !professional) {
+    return <LoadingSpinner size="lg" />;
   }
 
   return (

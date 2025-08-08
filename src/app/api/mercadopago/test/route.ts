@@ -3,24 +3,14 @@ import { testMercadoPagoConnection } from '@/lib/mercadopago';
 
 export async function GET(request: NextRequest) {
   try {
-    // Verificar que las variables de entorno estén configuradas
-    const accessToken = process.env.MERCADOPAGO_ACCESS_TOKEN;
-
-    if (!accessToken) {
-      return NextResponse.json({
-        error: 'MERCADOPAGO_ACCESS_TOKEN no está configurado',
-        status: 'error',
-        message: 'Configura la variable de entorno MERCADOPAGO_ACCESS_TOKEN'
-      }, { status: 500 });
-    }
-
-    // Probar conexión con Mercado Pago
+    // Probar conexión con Mercado Pago (incluye modo simulado)
     const result = await testMercadoPagoConnection();
     
     if (result.success) {
       return NextResponse.json({
         status: 'success',
         message: result.message,
+        mode: result.mode,
         preference: {
           id: result.preferenceId,
           test: true
@@ -39,7 +29,7 @@ export async function GET(request: NextRequest) {
         },
         environment: process.env.NODE_ENV === 'production' ? 'production' : 'test',
         config: {
-          accessTokenConfigured: !!accessToken,
+          accessTokenConfigured: !!process.env.MERCADOPAGO_ACCESS_TOKEN,
           appUrl: process.env.NEXT_PUBLIC_APP_URL || 'No configurado'
         }
       });
@@ -49,7 +39,7 @@ export async function GET(request: NextRequest) {
         details: result.error,
         status: 'error',
         config: {
-          accessTokenConfigured: !!accessToken,
+          accessTokenConfigured: !!process.env.MERCADOPAGO_ACCESS_TOKEN,
           appUrl: process.env.NEXT_PUBLIC_APP_URL || 'No configurado'
         }
       }, { status: 500 });

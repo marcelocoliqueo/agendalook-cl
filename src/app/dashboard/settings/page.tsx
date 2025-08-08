@@ -1,246 +1,157 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import { useProfessional } from '@/hooks/useProfessional';
-import { useBookings } from '@/hooks/useBookings';
-import { useServices } from '@/hooks/useServices';
-import { Professional } from '@/types';
-import { Settings, Crown, Sparkles, Check, X } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { PLANS, getCurrentPlan, getUsageProgress, formatPlanPrice } from '@/lib/plans';
-import SubscriptionButton from '@/components/SubscriptionButton';
+import { useState } from 'react';
+import { Settings, Save, Database, Mail, Shield } from 'lucide-react';
 
 export default function SettingsPage() {
-  const [professional, setProfessional] = useState<Professional | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [currentBookings, setCurrentBookings] = useState(0);
-  const [currentServices, setCurrentServices] = useState(0);
-  
-  const { user } = useAuth();
-  const { getProfessionalByUserId } = useProfessional();
-  const { getBookingsByProfessionalId } = useBookings();
-  const { getServicesByProfessionalId } = useServices();
+  const [settings, setSettings] = useState({
+    emailNotifications: true,
+    autoBackup: false,
+    debugMode: true,
+    analytics: true
+  });
 
-  useEffect(() => {
-    const loadData = async () => {
-      if (user) {
-        try {
-          const profData = await getProfessionalByUserId(user.id);
-          setProfessional(profData);
-          
-          if (profData) {
-            // Cargar estadísticas de uso
-            const [bookings, services] = await Promise.all([
-              getBookingsByProfessionalId(profData.id),
-              getServicesByProfessionalId(profData.id)
-            ]);
-            
-            // Contar reservas del mes actual
-            const currentDate = new Date();
-            const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-            const monthlyBookings = bookings?.filter(booking => 
-              new Date(booking.booking_date) >= startOfMonth
-            ) || [];
-            
-            setCurrentBookings(monthlyBookings.length);
-            setCurrentServices(services?.length || 0);
-          }
-        } catch (error) {
-          console.error('Error loading data:', error);
-        } finally {
-          setLoading(false);
-        }
-      }
-    };
-
-    loadData();
-  }, [user, getProfessionalByUserId, getBookingsByProfessionalId, getServicesByProfessionalId]);
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-lavender-500 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Cargando...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user || !professional) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <p className="text-gray-600">No tienes acceso a la configuración</p>
-        </div>
-      </div>
-    );
-  }
-
-  const currentPlan = getCurrentPlan(professional.plan);
-  const planDetails = PLANS[currentPlan];
-  const usage = getUsageProgress(currentPlan, currentBookings, currentServices);
+  const handleSettingChange = (key: string, value: boolean) => {
+    setSettings(prev => ({
+      ...prev,
+      [key]: value
+    }));
+  };
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-playfair font-bold text-gray-800">
-          Configuración
+      <div className="bg-white rounded-xl shadow-sm p-6">
+        <h1 className="text-2xl font-playfair font-bold text-gray-800 mb-2">
+          Configuración del Sistema
         </h1>
-        <p className="text-gray-600 mt-2 font-poppins">
-          Gestiona tu cuenta y plan de suscripción
+        <p className="text-gray-600 font-poppins">
+          Ajustes y configuraciones del panel de administración
         </p>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-8">
-        {/* Plan Actual */}
-        <div className="lg:col-span-2">
-          <div className="bg-white rounded-2xl shadow-lg p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-gray-800 font-playfair">
-                Plan Actual
-              </h2>
-              <div className="flex items-center space-x-2">
-                <Crown className={`w-5 h-5 ${planDetails.color}`} />
-                <span className={`font-semibold ${planDetails.color}`}>
-                  {planDetails.name}
-                </span>
+      {/* Configuraciones */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Notificaciones */}
+        <div className="bg-white rounded-xl shadow-sm p-6">
+          <div className="flex items-center space-x-3 mb-4">
+            <Mail className="w-6 h-6 text-blue-600" />
+            <h3 className="text-lg font-semibold text-gray-800">Notificaciones</h3>
+          </div>
+          
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium text-gray-800">Notificaciones por Email</p>
+                <p className="text-sm text-gray-600">Recibir alertas por email</p>
               </div>
-            </div>
-
-            <div className="mb-6">
-              <p className="text-gray-600 mb-4">{planDetails.description}</p>
-              <div className="text-2xl font-bold text-gray-800">
-                {formatPlanPrice(planDetails.price)}
-                <span className="text-sm font-normal text-gray-500">/mes</span>
-              </div>
-            </div>
-
-            {/* Uso actual */}
-            <div className="space-y-4 mb-6">
-              <h3 className="font-semibold text-gray-800">Uso actual:</h3>
-              
-              {usage.bookings.limit !== Infinity && (
-                <div>
-                  <div className="flex justify-between text-sm mb-2">
-                    <span>Reservas este mes</span>
-                    <span className="font-medium">
-                      {usage.bookings.current}/{usage.bookings.limit}
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
-                      className={`h-2 rounded-full transition-all ${
-                        usage.bookings.percentage >= 100 
-                          ? 'bg-red-500' 
-                          : usage.bookings.percentage >= 80 
-                            ? 'bg-amber-500' 
-                            : 'bg-green-500'
-                      }`}
-                      style={{ width: `${usage.bookings.percentage}%` }}
-                    />
-                  </div>
-                </div>
-              )}
-              
-              {usage.services.limit !== Infinity && (
-                <div>
-                  <div className="flex justify-between text-sm mb-2">
-                    <span>Servicios</span>
-                    <span className="font-medium">
-                      {usage.services.current}/{usage.services.limit}
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
-                      className={`h-2 rounded-full transition-all ${
-                        usage.services.percentage >= 100 
-                          ? 'bg-red-500' 
-                          : usage.services.percentage >= 80 
-                            ? 'bg-amber-500' 
-                            : 'bg-green-500'
-                      }`}
-                      style={{ width: `${usage.services.percentage}%` }}
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Características del plan */}
-            <div>
-              <h3 className="font-semibold text-gray-800 mb-3">Características incluidas:</h3>
-              <div className="space-y-2">
-                {planDetails.features.map((feature, index) => (
-                  <div key={index} className="flex items-center space-x-2">
-                    <Check className="w-4 h-4 text-green-500" />
-                    <span className="text-sm text-gray-600">{feature}</span>
-                  </div>
-                ))}
-              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={settings.emailNotifications}
+                  onChange={(e) => handleSettingChange('emailNotifications', e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              </label>
             </div>
           </div>
         </div>
 
-        {/* Planes Disponibles */}
-        <div className="space-y-6">
-          <h2 className="text-xl font-semibold text-gray-800 font-playfair">
-            Planes Disponibles
-          </h2>
+        {/* Sistema */}
+        <div className="bg-white rounded-xl shadow-sm p-6">
+          <div className="flex items-center space-x-3 mb-4">
+            <Settings className="w-6 h-6 text-green-600" />
+            <h3 className="text-lg font-semibold text-gray-800">Sistema</h3>
+          </div>
           
-          {Object.entries(PLANS).map(([planKey, planInfo]) => {
-            const isCurrentPlan = planKey === currentPlan;
-            
-            return (
-              <div 
-                key={planKey}
-                className={`bg-white rounded-xl shadow-lg p-6 border-2 ${
-                  isCurrentPlan 
-                    ? 'border-lavender-300 bg-lavender-50' 
-                    : 'border-gray-200 hover:border-lavender-300'
-                }`}
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <h3 className={`font-semibold text-lg ${planInfo.color}`}>
-                      {planInfo.name}
-                    </h3>
-                    <p className="text-sm text-gray-600">{planInfo.description}</p>
-                  </div>
-                  {isCurrentPlan && (
-                    <div className="bg-lavender-100 text-lavender-700 px-2 py-1 rounded-full text-xs font-medium">
-                      Actual
-                    </div>
-                  )}
-                </div>
-
-                <div className="text-2xl font-bold text-gray-800 mb-4">
-                  {formatPlanPrice(planInfo.price)}
-                  <span className="text-sm font-normal text-gray-500">/mes</span>
-                </div>
-
-                <div className="space-y-2 mb-4">
-                  {planInfo.features.slice(0, 3).map((feature, index) => (
-                    <div key={index} className="flex items-center space-x-2">
-                      <Check className="w-4 h-4 text-green-500" />
-                      <span className="text-sm text-gray-600">{feature}</span>
-                    </div>
-                  ))}
-                </div>
-
-                {planKey !== 'free' && (
-                  <SubscriptionButton
-                    plan={planKey as 'pro' | 'studio'}
-                    currentPlan={currentPlan}
-                    className="w-full"
-                  />
-                )}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium text-gray-800">Modo Debug</p>
+                <p className="text-sm text-gray-600">Mostrar logs detallados</p>
               </div>
-            );
-          })}
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={settings.debugMode}
+                  onChange={(e) => handleSettingChange('debugMode', e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              </label>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium text-gray-800">Analytics</p>
+                <p className="text-sm text-gray-600">Recopilar datos de uso</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={settings.analytics}
+                  onChange={(e) => handleSettingChange('analytics', e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              </label>
+            </div>
+          </div>
         </div>
+
+        {/* Base de Datos */}
+        <div className="bg-white rounded-xl shadow-sm p-6">
+          <div className="flex items-center space-x-3 mb-4">
+            <Database className="w-6 h-6 text-purple-600" />
+            <h3 className="text-lg font-semibold text-gray-800">Base de Datos</h3>
+          </div>
+          
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium text-gray-800">Backup Automático</p>
+                <p className="text-sm text-gray-600">Crear backups diarios</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={settings.autoBackup}
+                  onChange={(e) => handleSettingChange('autoBackup', e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        {/* Seguridad */}
+        <div className="bg-white rounded-xl shadow-sm p-6">
+          <div className="flex items-center space-x-3 mb-4">
+            <Shield className="w-6 h-6 text-red-600" />
+            <h3 className="text-lg font-semibold text-gray-800">Seguridad</h3>
+          </div>
+          
+          <div className="space-y-4">
+            <div className="p-4 bg-yellow-50 rounded-lg">
+              <p className="text-sm text-yellow-800">
+                <strong>Estado:</strong> RLS deshabilitado temporalmente
+              </p>
+              <p className="text-xs text-yellow-600 mt-1">
+                Las políticas de seguridad están siendo reconfiguradas
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Botón Guardar */}
+      <div className="bg-white rounded-xl shadow-sm p-6">
+        <button className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-300 flex items-center justify-center space-x-2">
+          <Save className="w-5 h-5" />
+          <span>Guardar Configuración</span>
+        </button>
       </div>
     </div>
   );

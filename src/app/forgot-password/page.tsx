@@ -53,7 +53,7 @@ export default function ForgotPasswordPage() {
             <h1 className="text-3xl font-playfair font-bold text-gray-800 mb-2">
               Email enviado
             </h1>
-            <p className="text-gray-600">
+            <p className="text-gray-700">
               Revisa tu bandeja de entrada
             </p>
           </div>
@@ -67,7 +67,7 @@ export default function ForgotPasswordPage() {
               <h2 className="text-xl font-semibold text-gray-800 mb-4">
                 ¡Email de recuperación enviado!
               </h2>
-              <p className="text-gray-600 mb-6">
+              <p className="text-gray-700 mb-6">
                 Hemos enviado un enlace de recuperación a <strong>{email}</strong>. 
                 Revisa tu bandeja de entrada y sigue las instrucciones para restablecer tu contraseña.
               </p>
@@ -114,7 +114,7 @@ export default function ForgotPasswordPage() {
           <h1 className="text-3xl font-playfair font-bold text-gray-800 mb-2">
             Recuperar contraseña
           </h1>
-          <p className="text-gray-600">
+          <p className="text-gray-700">
             Ingresa tu email para recibir instrucciones
           </p>
         </div>
@@ -139,7 +139,7 @@ export default function ForgotPasswordPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lavender-500 focus:border-transparent transition-colors"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lavender-500 focus:border-transparent transition-colors text-gray-900 placeholder-gray-500"
                   placeholder="tu@email.com"
                   required
                 />
@@ -158,7 +158,7 @@ export default function ForgotPasswordPage() {
           <div className="mt-6 text-center">
             <Link
               href="/login"
-              className="inline-flex items-center text-gray-600 hover:text-gray-800 transition-colors"
+              className="inline-flex items-center text-gray-700 hover:text-gray-800 transition-colors"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Volver al login

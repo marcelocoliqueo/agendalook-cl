@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { createClient } from '@/lib/supabase';
 import { Booking } from '@/types';
 import { canCreateBooking, getCurrentPlan } from '@/lib/plans';
+import { CacheManager } from '@/lib/cache-manager';
 
 export function useBookings() {
   const [loading, setLoading] = useState(false);
@@ -11,16 +12,26 @@ export function useBookings() {
 
   const getBookingsByProfessionalId = async (professionalId: string) => {
     try {
+      // Intentar obtener del cache primero
+      const cachedData = CacheManager.getCachedBookings(professionalId);
+      
+      if (cachedData) {
+        console.log('📦 Bookings loaded from cache');
+        return cachedData;
+      }
+
       const { data, error } = await supabase
         .from('bookings')
-        .select(`
-          *,
-          services(name, duration, price)
-        `)
+        .select('*')
         .eq('professional_id', professionalId)
         .order('booking_date', { ascending: false });
 
       if (error) throw error;
+      
+      // Guardar en cache
+      CacheManager.cacheBookings(professionalId, data || []);
+      console.log('💾 Bookings saved to cache');
+      
       return data;
     } catch (error) {
       console.error('Error fetching bookings:', error);
@@ -73,6 +84,10 @@ export function useBookings() {
         .single();
 
       if (error) throw error;
+      
+      // Invalidar cache de reservas
+      CacheManager.delete(`bookings_${bookingData.professional_id}`);
+      
       return data;
     } catch (error) {
       console.error('Error creating booking:', error);

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase';
-import { verifyMercadoPagoSignature, validateWebhookPayload } from '@/lib/mercadopago';
+import { verifyMercadoPagoSignature, validateWebhookPayload, isMercadoPagoSandbox } from '@/lib/mercadopago';
 import { webhookRateLimiter, getClientIP } from '@/lib/rate-limit';
 import { securityLogger, getUserAgent } from '@/lib/security-logger';
 import { getSubscriptionStatus, formatMoney } from '@/lib/plans';
@@ -76,6 +76,19 @@ export async function POST(request: NextRequest) {
       case 'payment':
         // Procesar pago exitoso
         if (data.status === 'approved') {
+          // Idempotencia: evitar reprocesar el mismo payment_id
+          const paymentId = data.id;
+          const { data: existing } = await supabase
+            .from('mp_webhooks')
+            .select('id')
+            .eq('payment_id', paymentId)
+            .limit(1)
+            .maybeSingle();
+
+          if (existing) {
+            return NextResponse.json({ received: true, idempotent: true });
+          }
+
           // Buscar el profesional por external_reference
           const externalRef = data.external_reference;
           const planMatch = externalRef.match(/subscription_(pro|studio)_/);
@@ -117,6 +130,11 @@ export async function POST(request: NextRequest) {
                 plan_type: plan,
               });
 
+            // Guardar idempotencia
+            await supabase
+              .from('mp_webhooks')
+              .insert({ payment_id: paymentId, type: 'payment', processed_at: new Date().toISOString() });
+
             console.log(`Successfully updated professional subscription: ${data.payer.id} -> ${plan} (${formatMoney(amount)})`);
           }
         } else if (data.status === 'pending') {
@@ -152,6 +170,16 @@ export async function POST(request: NextRequest) {
       case 'subscription_authorized_payment':
         // Procesar suscripción autorizada
         if (data.status === 'authorized') {
+          const paymentId = data.id;
+          const { data: existing } = await supabase
+            .from('mp_webhooks')
+            .select('id')
+            .eq('payment_id', paymentId)
+            .limit(1)
+            .maybeSingle();
+          if (existing) {
+            return NextResponse.json({ received: true, idempotent: true });
+          }
           const externalRef = data.external_reference;
           const planMatch = externalRef.match(/subscription_(pro|studio)_/);
           
@@ -190,6 +218,10 @@ export async function POST(request: NextRequest) {
                 status: 'approved',
                 plan_type: plan,
               });
+
+            await supabase
+              .from('mp_webhooks')
+              .insert({ payment_id: paymentId, type: 'subscription_authorized_payment', processed_at: new Date().toISOString() });
 
             console.log(`Successfully authorized subscription: ${data.payer_id} -> ${plan} (${formatMoney(amount)})`);
           }

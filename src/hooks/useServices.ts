@@ -1,30 +1,44 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { createClient } from '@/lib/supabase';
 import { Service, ServiceFormData } from '@/types';
 import { canCreateService, getCurrentPlan } from '@/lib/plans';
+import { CacheManager } from '@/lib/cache-manager';
 
 export function useServices() {
   const [loading, setLoading] = useState(false);
   const supabase = createClient();
 
-  const getServicesByProfessionalId = async (professionalId: string) => {
+  const getServicesByProfessionalId = useCallback(async (professionalId: string) => {
     try {
-          const { data, error } = await supabase
-      .from('services')
-      .select('*')
-      .eq('professional_id', professionalId)
-      .eq('is_active', true)
-      .order('created_at', { ascending: false });
+      // Intentar obtener del cache primero
+      const cachedData = CacheManager.getCachedServices(professionalId);
+      
+      if (cachedData) {
+        console.log('📦 Services loaded from cache');
+        return cachedData;
+      }
+
+      const { data, error } = await supabase
+        .from('services')
+        .select('id, professional_id, name, description, duration, price, is_active, created_at, updated_at')
+        .eq('professional_id', professionalId)
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data;
+      
+      // Guardar en cache
+      CacheManager.cacheServices(professionalId, data || []);
+      console.log('💾 Services saved to cache');
+      
+      return data || [];
     } catch (error) {
       console.error('Error fetching services:', error);
       return [];
     }
-  };
+  }, [supabase]);
 
   const createService = async (professionalId: string, serviceData: ServiceFormData, professionalPlan?: string) => {
     try {
@@ -60,10 +74,15 @@ export function useServices() {
           price: serviceData.price * 100, // Convertir a centavos
           is_active: true,
         }])
-        .select()
+        .select('id, professional_id, name, description, duration, price, is_active, created_at, updated_at')
         .single();
 
       if (error) throw error;
+      
+      // Invalidar cache de servicios
+      CacheManager.delete(`services_${professionalId}`);
+      CacheManager.delete(`professional_${professionalId}`);
+      
       return data;
     } catch (error) {
       console.error('Error creating service:', error);
@@ -87,10 +106,14 @@ export function useServices() {
         .from('services')
         .update(updateData)
         .eq('id', serviceId)
-        .select()
+        .select('id, professional_id, name, description, duration, price, is_active, created_at, updated_at')
         .single();
 
       if (error) throw error;
+      // Invalidar cache del profesional relacionado
+      if (data?.professional_id) {
+        CacheManager.delete(`services_${data.professional_id}`);
+      }
       return data;
     } catch (error) {
       console.error('Error updating service:', error);
@@ -103,12 +126,19 @@ export function useServices() {
   const deleteService = async (serviceId: string) => {
     try {
       setLoading(true);
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('services')
         .update({ is_active: false })
-        .eq('id', serviceId);
+        .eq('id', serviceId)
+        .select('professional_id')
+        .single();
 
       if (error) throw error;
+      if (data?.professional_id) {
+        CacheManager.delete(`services_${data.professional_id}`);
+      } else {
+        CacheManager.deleteByPrefix('services_');
+      }
       return true;
     } catch (error) {
       console.error('Error deleting service:', error);
@@ -120,18 +150,34 @@ export function useServices() {
 
   const getServicesBySlug = async (businessSlug: string) => {
     try {
+      // Intentar cache de profesional por slug primero
+      let professional = CacheManager.getCachedProfessionalBySlug(businessSlug) as { id: string } | null;
+      if (!professional) {
+        const { data: profData, error: profError } = await supabase
+          .from('professionals')
+          .select('id, user_id, business_name, business_slug, phone, email, description, address, plan, role, subscription_status, created_at, updated_at')
+          .eq('business_slug', businessSlug)
+          .single();
+        if (profError) throw profError;
+        if (!profData) return [];
+        professional = profData;
+        CacheManager.cacheProfessionalBySlug(businessSlug, profData);
+      }
+
+      // Cache de servicios por professionalId
+      const cachedServices = CacheManager.getCachedServices(professional.id);
+      if (cachedServices) return cachedServices;
+
       const { data, error } = await supabase
         .from('services')
-        .select(`
-          *,
-          professionals!inner(business_slug)
-        `)
-        .eq('professionals.business_slug', businessSlug)
+        .select('id, professional_id, name, description, duration, price, is_active, created_at, updated_at')
+        .eq('professional_id', professional.id)
         .eq('is_active', true)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data;
+      CacheManager.cacheServices(professional.id, data || []);
+      return data || [];
     } catch (error) {
       console.error('Error fetching services by slug:', error);
       return [];

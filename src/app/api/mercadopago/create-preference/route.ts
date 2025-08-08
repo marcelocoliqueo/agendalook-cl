@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createSubscriptionPreference, createMPCustomer } from '@/lib/mercadopago';
+import { createSubscriptionPreference, createMPCustomer, isMercadoPagoSandbox } from '@/lib/mercadopago';
 import { createClient } from '@/lib/supabase';
 
 export async function POST(request: NextRequest) {
@@ -39,8 +39,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Verificar si tenemos credenciales de MercadoPago
+    const accessToken = process.env.MERCADOPAGO_ACCESS_TOKEN;
+    
+    if (!accessToken) {
+      // Modo simulado
+      const simulatedPreferenceId = `simulated_${plan}_${Date.now()}`;
+      const simulatedInitPoint = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard/test-mercadopago?preference_id=${simulatedPreferenceId}&plan=${plan}`;
+      
+      return NextResponse.json({ 
+        preferenceId: simulatedPreferenceId,
+        initPoint: simulatedInitPoint,
+        mode: 'simulated',
+        message: 'Modo simulado - Configura MERCADOPAGO_ACCESS_TOKEN para pagos reales'
+      });
+    }
+
     // Crear o obtener cliente de Mercado Pago
-    let mpCustomerId = professional.mp_customer_id;
+    let mpCustomerId = professional.mp_customer_id as string | undefined;
 
     if (!mpCustomerId) {
       const customer = await createMPCustomer({
@@ -69,14 +85,21 @@ export async function POST(request: NextRequest) {
       cancelUrl,
     });
 
+    // Preferencia: usar sandbox_init_point si sandbox
+    const initPoint = isMercadoPagoSandbox() && preference.sandbox_init_point
+      ? preference.sandbox_init_point
+      : preference.init_point;
+
     return NextResponse.json({ 
       preferenceId: preference.id,
-      initPoint: preference.init_point 
+      initPoint,
+      mode: isMercadoPagoSandbox() ? 'sandbox' : 'live'
     });
+
   } catch (error) {
-    console.error('Error creating Mercado Pago preference:', error);
+    console.error('Error creating preference:', error);
     return NextResponse.json(
-      { error: 'Error interno del servidor' },
+      { error: 'Error al crear preferencia de pago' },
       { status: 500 }
     );
   }

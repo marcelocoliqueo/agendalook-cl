@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { CreditCard, Loader2 } from 'lucide-react';
+import { isMercadoPagoSandbox } from '@/lib/mercadopago';
 
 interface SubscriptionButtonProps {
   plan: 'pro' | 'studio';
@@ -15,6 +16,7 @@ export default function SubscriptionButton({
   className = '' 
 }: SubscriptionButtonProps) {
   const [loading, setLoading] = useState(false);
+  const isSandbox = useMemo(() => isMercadoPagoSandbox(), []);
 
   const handleSubscribe = async () => {
     try {
@@ -39,7 +41,7 @@ export default function SubscriptionButton({
         throw new Error(error);
       }
 
-      // Redirigir a Mercado Pago
+      // Redirigir a Mercado Pago (initPoint ya es sandbox/live según el modo)
       window.location.href = initPoint;
     } catch (error) {
       console.error('Error creating Mercado Pago preference:', error);
@@ -53,7 +55,8 @@ export default function SubscriptionButton({
   const isUpgrade = currentPlan === 'free' || (currentPlan === 'pro' && plan === 'studio');
 
   return (
-    <button
+    <div className="inline-flex flex-col">
+      <button
       onClick={handleSubscribe}
       disabled={loading || isCurrentPlan}
       className={`flex items-center justify-center px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
@@ -80,6 +83,12 @@ export default function SubscriptionButton({
           {isUpgrade ? 'Suscribirse' : 'Cambiar Plan'}
         </>
       )}
-    </button>
+      </button>
+      {isSandbox && (
+        <div className="mt-2 inline-flex items-center px-2 py-1 text-xs rounded bg-yellow-100 text-yellow-800 border border-yellow-200 self-center">
+          Modo Prueba
+        </div>
+      )}
+    </div>
   );
 } 

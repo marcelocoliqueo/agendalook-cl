@@ -7,10 +7,11 @@ import { z } from 'zod';
 import { useAuth } from '@/hooks/useAuth';
 import { useServices } from '@/hooks/useServices';
 import { useProfessional } from '@/hooks/useProfessional';
-import { Service, ServiceFormData } from '@/types';
+import { Service, ServiceFormData, Professional } from '@/types';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Edit, Trash2, Plus, Check, X, Loader2 } from 'lucide-react';
+import { Edit, Trash2, Plus, Check, X } from 'lucide-react';
+import { LoadingSpinner, ButtonLoader } from '@/components/ui/LoadingSpinner';
 
 // Esquema de validación
 const serviceSchema = z.object({
@@ -28,7 +29,7 @@ type ServiceFormValues = z.infer<typeof serviceSchema>;
 
 export default function ServicesPage() {
   const { user } = useAuth();
-  const { professional } = useProfessional();
+  const { getProfessionalByUserId } = useProfessional();
   const { 
     loading, 
     getServicesByProfessionalId, 
@@ -36,6 +37,30 @@ export default function ServicesPage() {
     updateService, 
     deleteService 
   } = useServices();
+
+  const [professional, setProfessional] = useState<Professional | null>(null);
+  const [professionalLoading, setProfessionalLoading] = useState(true);
+
+  // Cargar profesional
+  useEffect(() => {
+    const loadProfessional = async () => {
+      if (!user?.id) {
+        setProfessionalLoading(false);
+        return;
+      }
+      
+      try {
+        const profData = await getProfessionalByUserId(user.id);
+        setProfessional(profData);
+      } catch (error) {
+        console.error('Error loading professional:', error);
+      } finally {
+        setProfessionalLoading(false);
+      }
+    };
+
+    loadProfessional();
+  }, [user?.id, getProfessionalByUserId]);
   
   const [services, setServices] = useState<Service[]>([]);
   const [editingService, setEditingService] = useState<Service | null>(null);
@@ -60,23 +85,29 @@ export default function ServicesPage() {
     },
   });
 
-  const loadServices = useCallback(async () => {
-    if (!professional?.id) return;
-    
-    try {
-      const data = await getServicesByProfessionalId(professional.id);
-      setServices(data || []);
-    } catch (error) {
-      showFeedback('error', 'Error al cargar los servicios');
-    }
-  }, [professional?.id]);
-
   // Cargar servicios al montar el componente
   useEffect(() => {
-    if (professional?.id) {
-      loadServices();
-    }
-  }, [loadServices]);
+    console.log('🔍 Debug - Services useEffect:', { professional, professionalId: professional?.id });
+    
+    const loadServices = async () => {
+      if (!professional?.id) {
+        console.log('🔍 Debug - No professional ID, returning');
+        return;
+      }
+      
+      try {
+        console.log('🔍 Debug - Loading services for professional:', professional.id);
+          const data = await getServicesByProfessionalId(professional!.id);
+        console.log('🔍 Debug - Services loaded:', data);
+        setServices(data || []);
+      } catch (error) {
+        console.error('🔍 Debug - Error loading services:', error);
+        showFeedback('error', 'Error al cargar los servicios');
+      }
+    };
+
+    loadServices();
+  }, [professional?.id]);
 
   const showFeedback = (type: 'success' | 'error', message: string) => {
     setFeedback({ type, message });
@@ -85,7 +116,7 @@ export default function ServicesPage() {
     }, 3000);
   };
 
-          const onSubmit = async (data: ServiceFormValues) => {
+  const onSubmit = async (data: ServiceFormValues) => {
           if (!professional?.id) return;
 
           try {
@@ -113,7 +144,9 @@ export default function ServicesPage() {
       reset();
       setEditingService(null);
       setIsFormOpen(false);
-      await loadServices();
+      // Recargar servicios
+      const refreshed = await getServicesByProfessionalId(professional!.id);
+      setServices(refreshed || []);
     } catch (error) {
       showFeedback('error', 'Error al guardar el servicio');
     }
@@ -133,7 +166,9 @@ export default function ServicesPage() {
     try {
       await deleteService(serviceId);
       showFeedback('success', 'Servicio eliminado correctamente');
-      await loadServices();
+      // Recargar servicios
+      const data = await getServicesByProfessionalId(professional!.id);
+      setServices(data || []);
     } catch (error) {
       showFeedback('error', 'Error al eliminar el servicio');
     }
@@ -158,19 +193,8 @@ export default function ServicesPage() {
     return hours > 0 ? `${hours}h ${mins}min` : `${mins}min`;
   };
 
-  if (!user || !professional) {
-    console.log('🔍 Debug - Services Page:', { user, professional });
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin text-lavender-500 mx-auto mb-4" />
-          <p className="text-gray-600">Cargando servicios...</p>
-          <p className="text-sm text-gray-500 mt-2">
-            {!user ? 'Usuario no autenticado' : 'Cargando datos del profesional...'}
-          </p>
-        </div>
-      </div>
-    );
+  if (!user || !professional || professionalLoading) {
+    return <LoadingSpinner size="lg" />;
   }
 
   return (
@@ -279,7 +303,7 @@ export default function ServicesPage() {
                 className="bg-gradient-to-r from-lavender-500 to-coral-500 text-white px-6 py-2 rounded-full hover:shadow-lg transition-all duration-300"
               >
                 {isSubmitting || loading ? (
-                  <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                  <ButtonLoader size="sm" />
                 ) : (
                   <Check className="w-5 h-5 mr-2" />
                 )}

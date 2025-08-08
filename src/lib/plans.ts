@@ -44,15 +44,15 @@ export const PLAN_LIMITS: Record<PlanType, PlanLimits> = {
     maxServices: null,
     maxBookingsPerMonth: null,
     whatsappReminders: false,
-    customSubdomain: true,
+    customSubdomain: false, // Temporalmente deshabilitado
     clientHistory: true,
     priceCLP: 9990,
   },
   studio: {
     maxServices: null,
     maxBookingsPerMonth: null,
-    whatsappReminders: true,
-    customSubdomain: true,
+    whatsappReminders: false, // Temporalmente deshabilitado
+    customSubdomain: false, // Temporalmente deshabilitado
     clientHistory: true,
     priceCLP: 19990,
   },
@@ -69,7 +69,8 @@ export const PLANS: Record<PlanType, PlanDetails> = {
       'Máximo 3 servicios',
       'Página pública personalizada',
       'Notificaciones por email',
-      'Soporte por email'
+      'Soporte por email',
+      'Dashboard básico'
     ],
     limits: PLAN_LIMITS.free,
   },
@@ -81,11 +82,11 @@ export const PLANS: Record<PlanType, PlanDetails> = {
     features: [
       'Reservas ilimitadas',
       'Servicios ilimitados',
-      'Subdominio personalizado',
       'Historial de clientes',
-      'Analytics avanzados',
+      'Estadísticas básicas',
       'Soporte prioritario',
-      'Sin marca de Agendalook'
+      'Sin marca de Agendalook',
+      'Filtros avanzados'
     ],
     limits: PLAN_LIMITS.pro,
   },
@@ -96,12 +97,11 @@ export const PLANS: Record<PlanType, PlanDetails> = {
     color: 'text-coral-600',
     features: [
       'Todo de Pro',
-      'Recordatorios WhatsApp',
-      'Múltiples usuarios',
-      'Gestión de equipo',
-      'Personalización completa',
-      'API personalizada',
-      'Soporte dedicado'
+      'Reportes detallados',
+      'Exportación de datos',
+      'Personalización avanzada',
+      'Soporte dedicado',
+      'Funciones premium'
     ],
     limits: PLAN_LIMITS.studio,
   },

@@ -8,6 +8,9 @@ import { Eye, EyeOff, Mail, Lock, User, Building } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfessional } from '@/hooks/useProfessional';
 import { RegisterFormData } from '@/types';
+import { NotificationService } from '@/lib/notifications';
+import { supabase } from '@/lib/supabase';
+// Removido import de ResendService - ahora usamos API route
 
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -19,7 +22,8 @@ export default function RegisterPage() {
     password: '',
     confirmPassword: '',
   });
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [error, setError] = useState('');
   const router = useRouter();
   const { signUp } = useAuth();
@@ -41,17 +45,19 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    setLoading(true);
     setError('');
 
     // Validar que las contraseñas coincidan
     if (formData.password !== formData.confirmPassword) {
       setError('Las contraseñas no coinciden');
-      setIsLoading(false);
+      setLoading(false);
       return;
     }
 
     try {
+      console.log('🚀 Iniciando proceso de registro...');
+      
       // Registrar usuario en Supabase Auth
       const { data: authData, error: authError } = await signUp(
         formData.email,
@@ -63,9 +69,12 @@ export default function RegisterPage() {
       );
 
       if (authError) {
+        console.error('❌ Error en autenticación:', authError);
         setError(authError.message);
         return;
       }
+
+      console.log('✅ Usuario autenticado:', authData.user?.id);
 
       if (authData.user) {
         // Crear perfil profesional
@@ -82,20 +91,101 @@ export default function RegisterPage() {
           plan: 'free',
         };
 
+        console.log('📝 Datos del profesional a crear:', professionalData);
+
         try {
-          await createProfessional(professionalData);
+          const newProfessional = await createProfessional(professionalData);
+          console.log('✅ Profesional creado:', newProfessional);
           
-          // Redirigir al dashboard
-          router.push('/dashboard');
+          // Enviar email de bienvenida elegante con Resend
+          if (newProfessional?.id) {
+            try {
+              // Crear URL de confirmación (Supabase maneja esto automáticamente)
+              const confirmationUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard`;
+
+              // Enviar email elegante de bienvenida usando API route
+              const emailResponse = await fetch('/api/send-welcome-email', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  email: formData.email,
+                  confirmationUrl,
+                  businessName: formData.businessName
+                })
+              });
+
+              if (emailResponse.ok) {
+                console.log('✅ Email de bienvenida elegante enviado');
+                // Mostrar mensaje de éxito con información del email
+                setMessage({
+                  type: 'success',
+                  text: `¡Registro exitoso! Se ha enviado un email elegante a ${formData.email} con las instrucciones para confirmar tu cuenta.`
+                });
+              } else {
+                console.error('⚠️ Error sending welcome email:', await emailResponse.text());
+                // Mostrar mensaje de éxito pero con advertencia sobre el email
+                setMessage({
+                  type: 'success',
+                  text: `¡Registro exitoso! Tu cuenta ha sido creada. Revisa tu email (${formData.email}) para confirmar tu cuenta.`
+                });
+              }
+            } catch (emailError) {
+              console.error('⚠️ Error sending welcome email:', emailError);
+              // Mostrar mensaje de éxito pero con advertencia sobre el email
+              setMessage({
+                type: 'success',
+                text: `¡Registro exitoso! Tu cuenta ha sido creada. Revisa tu email (${formData.email}) para confirmar tu cuenta.`
+              });
+            }
+            
+            // Crear notificación de bienvenida (mantener para compatibilidad)
+            try {
+              await NotificationService.notifyWelcome(newProfessional.id, {
+                businessName: formData.businessName,
+                plan: 'free'
+              });
+              console.log('✅ Notificación de bienvenida creada');
+            } catch (notificationError) {
+              console.error('⚠️ Error creating welcome notification:', notificationError);
+              // No fallar el registro si la notificación falla
+            }
+          }
+          
+          // Redirigir a la página de bienvenida
+          console.log('🎉 Registro completado, redirigiendo a bienvenida...');
+          router.push('/welcome');
         } catch (error) {
-          console.error('Error creating professional profile:', error);
-          setError('Error al crear el perfil profesional. Inténtalo de nuevo.');
+          console.error('❌ Error creating professional profile:', error);
+          
+          // Verificar si el registro fue exitoso a pesar del error
+          if (authData.user) {
+            try {
+              const { data: checkProfessional } = await supabase
+                .from('professionals')
+                .select('*')
+                .eq('user_id', authData.user.id)
+                .single();
+              
+              if (checkProfessional) {
+                console.log('✅ Registro encontrado a pesar del error, continuando...');
+                router.push('/welcome');
+                return;
+              }
+            } catch (checkError) {
+              console.error('Error verificando registro:', checkError);
+            }
+          }
+          
+          setError(`Error al crear el perfil profesional: ${error instanceof Error ? error.message : 'Error desconocido'}`);
         }
       }
     } catch (error) {
-      setError('Error al crear la cuenta. Inténtalo de nuevo.');
+      console.error('❌ Error general en registro:', error);
+      setError(`Error al crear la cuenta: ${error instanceof Error ? error.message : 'Error desconocido'}`);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
@@ -118,20 +208,30 @@ export default function RegisterPage() {
           <h1 className="text-3xl font-playfair font-bold text-gray-800 mb-2">
             Únete a Agendalook
           </h1>
-          <p className="text-gray-600">
+          <p className="text-gray-700">
             Crea tu cuenta y comienza a gestionar tu agenda
           </p>
         </div>
 
         {/* Register Form */}
         <div className="bg-white rounded-2xl shadow-xl p-8">
-          {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-red-600 text-sm">{error}</p>
-            </div>
-          )}
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
+                {error}
+              </div>
+            )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+            {message && (
+              <div className={`border px-4 py-3 rounded-lg mb-4 ${
+                message.type === 'success' 
+                  ? 'bg-green-50 border-green-200 text-green-700' 
+                  : 'bg-red-50 border-red-200 text-red-700'
+              }`}>
+                {message.text}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
                 Nombre completo
@@ -144,7 +244,7 @@ export default function RegisterPage() {
                   type="text"
                   value={formData.name}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors text-gray-900 placeholder-gray-500"
                   placeholder="Tu nombre completo"
                   required
                 />
@@ -163,7 +263,7 @@ export default function RegisterPage() {
                   type="text"
                   value={formData.businessName}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors text-gray-900 placeholder-gray-500"
                   placeholder="Ej: Nails by Carla"
                   required
                 />
@@ -182,7 +282,7 @@ export default function RegisterPage() {
                   type="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors text-gray-900 placeholder-gray-500"
                   placeholder="tu@email.com"
                   required
                 />
@@ -201,7 +301,7 @@ export default function RegisterPage() {
                   type={showPassword ? 'text' : 'password'}
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
+                  className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors text-gray-900 placeholder-gray-500"
                   placeholder="••••••••"
                   required
                 />
@@ -227,7 +327,7 @@ export default function RegisterPage() {
                   type={showConfirmPassword ? 'text' : 'password'}
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
+                  className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors text-gray-900 placeholder-gray-500"
                   placeholder="••••••••"
                   required
                 />
@@ -247,7 +347,7 @@ export default function RegisterPage() {
                 className="mt-1 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                 required
               />
-              <label className="ml-2 text-sm text-gray-600">
+              <label className="ml-2 text-sm text-gray-700">
                 Acepto los{' '}
                 <Link href="/terms" className="text-primary-600 hover:text-primary-700">
                   términos y condiciones
@@ -261,10 +361,10 @@ export default function RegisterPage() {
 
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={loading}
               className="w-full bg-gradient-to-r from-primary-500 to-coral-500 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? 'Creando cuenta...' : 'Crear cuenta'}
+              {loading ? 'Creando cuenta...' : 'Crear cuenta'}
             </button>
           </form>
 

@@ -7,10 +7,11 @@ import { z } from 'zod';
 import { useAuth } from '@/hooks/useAuth';
 import { useAvailability } from '@/hooks/useAvailability';
 import { useProfessional } from '@/hooks/useProfessional';
-import { Availability, AvailabilityFormData } from '@/types';
+import { Availability, AvailabilityFormData, Professional } from '@/types';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Edit, Trash2, Plus, Check, X, Loader2, Clock } from 'lucide-react';
+import { Edit, Trash2, Plus, Check, X, Clock } from 'lucide-react';
+import { LoadingSpinner, ButtonLoader } from '@/components/ui/LoadingSpinner';
 
 // Esquema de validación para una franja horaria
 const timeSlotSchema = z.object({
@@ -72,7 +73,7 @@ const DAYS_OF_WEEK = [
 
 export default function AvailabilityPage() {
   const { user } = useAuth();
-  const { professional } = useProfessional();
+  const { getProfessionalByUserId } = useProfessional();
   const { 
     loading, 
     getAvailabilityByProfessionalId, 
@@ -80,12 +81,36 @@ export default function AvailabilityPage() {
     updateAvailability, 
     deleteAvailability 
   } = useAvailability();
+
+  const [professional, setProfessional] = useState<Professional | null>(null);
+  const [professionalLoading, setProfessionalLoading] = useState(true);
   
   const [availability, setAvailability] = useState<Availability[]>([]);
   const [feedback, setFeedback] = useState<{
     type: 'success' | 'error' | null;
     message: string;
   }>({ type: null, message: '' });
+
+  // Cargar profesional
+  useEffect(() => {
+    const loadProfessional = async () => {
+      if (!user?.id) {
+        setProfessionalLoading(false);
+        return;
+      }
+      
+      try {
+        const profData = await getProfessionalByUserId(user.id);
+        setProfessional(profData);
+      } catch (error) {
+        console.error('Error loading professional:', error);
+      } finally {
+        setProfessionalLoading(false);
+      }
+    };
+
+    loadProfessional();
+  }, [user?.id, getProfessionalByUserId]);
 
   const {
     control,
@@ -114,7 +139,7 @@ export default function AvailabilityPage() {
     if (professional?.id) {
       loadAvailability();
     }
-  }, [professional?.id, getAvailabilityByProfessionalId]);
+  }, [professional?.id]);
 
   const loadAvailability = async () => {
     if (!professional?.id) return;
@@ -125,12 +150,12 @@ export default function AvailabilityPage() {
       
       // Convertir datos de BD al formato del formulario
       const daysData = DAYS_OF_WEEK.map(day => {
-        const dayAvailability = data?.filter(a => a.day_of_week === day.value) || [];
+        const dayAvailability = data?.filter((a: Availability) => a.day_of_week === day.value) || [];
         return {
           day_of_week: day.value,
           is_available: dayAvailability.length > 0,
           time_slots: dayAvailability.length > 0 
-            ? dayAvailability.map(a => ({
+            ? dayAvailability.map((a: Availability) => ({
                 start_time: a.start_time,
                 end_time: a.end_time,
               }))
@@ -230,12 +255,8 @@ export default function AvailabilityPage() {
     });
   };
 
-  if (!user || !professional) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="w-8 h-8 animate-spin text-lavender-500" />
-      </div>
-    );
+  if (!user || !professional || professionalLoading) {
+    return <LoadingSpinner size="lg" />;
   }
 
   return (
@@ -402,7 +423,7 @@ export default function AvailabilityPage() {
             className="bg-gradient-to-r from-lavender-500 to-coral-500 text-white px-6 py-2 rounded-full hover:shadow-lg transition-all duration-300"
           >
             {isSubmitting || loading ? (
-              <Loader2 className="w-5 h-5 animate-spin mr-2" />
+              <ButtonLoader size="sm" />
             ) : (
               <Check className="w-5 h-5 mr-2" />
             )}

@@ -1,8 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { testMercadoPagoConnection } from '@/lib/mercadopago';
+import { testMercadoPagoConnection, verifyMercadoPagoSignature, isMercadoPagoSandbox } from '@/lib/mercadopago';
 
 export async function GET(request: NextRequest) {
   try {
+    // Validación de firma opcional si MP envía callback (defensivo)
+    const sig = request.headers.get('x-signature') || '';
+    const ts = request.headers.get('x-timestamp') || '';
+    const body = '';
+    if (sig && ts && !verifyMercadoPagoSignature(body, sig, ts)) {
+      return NextResponse.json({ status: 'error', message: 'Invalid signature' }, { status: 401 });
+    }
+
     // Verificar que la conexión con Mercado Pago funciona
     const result = await testMercadoPagoConnection();
 
@@ -32,6 +40,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       status: 'success',
       message: 'Verificación de productos completada',
+      mode: isMercadoPagoSandbox() ? 'sandbox' : 'live',
       products: {
         pro: {
           id: 'plan-pro',
