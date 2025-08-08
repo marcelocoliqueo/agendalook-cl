@@ -13,7 +13,10 @@ export default function WelcomePage() {
   const [professional, setProfessional] = useState<any>(null);
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
-  const { getProfessionalByUserId } = useProfessional();
+  const { getProfessionalByUserId, createProfessional } = useProfessional();
+
+  const slugify = (name: string) =>
+    name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
   useEffect(() => {
     const checkUser = async () => {
@@ -26,7 +29,23 @@ export default function WelcomePage() {
       }
 
       try {
-        const prof = await getProfessionalByUserId(user.id);
+        let prof = await getProfessionalByUserId(user.id);
+        if (!prof) {
+          const businessName = (user as any)?.user_metadata?.business_name || user.email?.split('@')[0] || 'Mi negocio';
+          const business_slug = slugify(businessName);
+          prof = await createProfessional({
+            user_id: user.id,
+            business_name: businessName,
+            business_slug,
+            phone: '',
+            email: user.email || '',
+            description: '',
+            address: '',
+            plan: 'free',
+            role: 'owner',
+            subscription_status: 'none',
+          } as any);
+        }
         setProfessional(prof);
       } catch (error) {
         console.error('Error fetching professional:', error);
