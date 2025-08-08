@@ -80,8 +80,11 @@ export default function RegisterPage() {
         text: `¡Registro exitoso! Te enviamos un email a ${formData.email} para confirmar tu cuenta.`,
       });
 
-      // Redirigir a verificación por código (OTP)
-      router.push('/verify-code');
+      // Guardar email pendiente y redirigir a verificación por código (OTP)
+      try {
+        localStorage.setItem('pendingEmail', formData.email);
+      } catch {}
+      router.push(`/verify-code?email=${encodeURIComponent(formData.email)}`);
     } catch (error) {
       console.error('❌ Error general en registro:', error);
       setError(`Error al crear la cuenta: ${error instanceof Error ? error.message : 'Error desconocido'}`);
