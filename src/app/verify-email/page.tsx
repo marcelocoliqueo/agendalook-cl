@@ -96,6 +96,22 @@ export default function VerifyEmailPage() {
     })();
   }, [processAuthCallback, check, router]);
 
+  const serverConfirmCheck = useCallback(async () => {
+    try {
+      setChecking(true);
+      const resp = await fetch('/api/auth/check-verified');
+      if (!resp.ok) return;
+      const data = await resp.json();
+      if (data.verified) {
+        router.push('/welcome');
+      } else {
+        setMessage('Tu email aún no está verificado. Revisa tu bandeja o espera unos segundos.');
+      }
+    } finally {
+      setChecking(false);
+    }
+  }, [router]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-lavender-50 via-white to-coral-50 flex items-center justify-center p-6">
       <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
@@ -103,7 +119,7 @@ export default function VerifyEmailPage() {
         <p className="text-gray-600 mb-6">Te enviamos un email con un enlace de verificación. Debes confirmarlo para continuar.</p>
         {message && <div className="mb-4 text-sm text-gray-700">{message}</div>}
         <div className="flex gap-3 justify-center">
-          <button onClick={check} disabled={checking} className="px-4 py-2 rounded-lg bg-primary-500 text-white disabled:opacity-50">Ya verifiqué</button>
+          <button onClick={serverConfirmCheck} disabled={checking} className="px-4 py-2 rounded-lg bg-primary-500 text-white disabled:opacity-50">Ya verifiqué</button>
           <button onClick={resend} disabled={checking} className="px-4 py-2 rounded-lg bg-gray-100 text-gray-800 disabled:opacity-50">Reenviar correo</button>
         </div>
         <div className="mt-6 text-sm">
