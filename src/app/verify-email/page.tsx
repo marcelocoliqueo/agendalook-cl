@@ -11,6 +11,37 @@ export default function VerifyEmailPage() {
   const router = useRouter();
   const supabase = createClient();
 
+  const processAuthCallback = useCallback(async () => {
+    // Maneja dos formatos posibles del callback de Supabase:
+    // 1) Fragment hash: #access_token=...&refresh_token=...&type=signup
+    // 2) Query param:   ?code=...
+    try {
+      if (typeof window === 'undefined') return false;
+
+      const hash = window.location.hash;
+      if (hash && hash.startsWith('#')) {
+        const params = new URLSearchParams(hash.substring(1));
+        const access_token = params.get('access_token');
+        const refresh_token = params.get('refresh_token');
+        if (access_token && refresh_token) {
+          const { error } = await supabase.auth.setSession({ access_token, refresh_token });
+          if (!error) return true;
+        }
+      }
+
+      const searchParams = new URLSearchParams(window.location.search);
+      const code = searchParams.get('code');
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
+        if (!error) return true;
+      }
+
+      return false;
+    } catch {
+      return false;
+    }
+  }, [supabase]);
+
   const check = useCallback(async () => {
     try {
       setChecking(true);
@@ -45,8 +76,15 @@ export default function VerifyEmailPage() {
   }, [supabase]);
 
   useEffect(() => {
-    check();
-  }, [check]);
+    (async () => {
+      const processed = await processAuthCallback();
+      if (processed) {
+        router.replace('/welcome');
+        return;
+      }
+      await check();
+    })();
+  }, [processAuthCallback, check, router]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-lavender-50 via-white to-coral-50 flex items-center justify-center p-6">
