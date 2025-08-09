@@ -1,5 +1,4 @@
 import { createClient as createSupabaseClient, type SupabaseClient } from '@supabase/supabase-js';
-import { createBrowserClient } from '@supabase/ssr';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key';
@@ -11,7 +10,14 @@ export const supabase = createSupabaseClient(supabaseUrl, supabaseAnonKey);
 let browserClient: SupabaseClient | null = null;
 export const createClient = () => {
   if (!browserClient) {
-    browserClient = createBrowserClient(supabaseUrl, supabaseAnonKey);
+    browserClient = createSupabaseClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        storageKey: 'agendalook-auth',
+        flowType: 'pkce',
+        persistSession: true,
+        autoRefreshToken: true,
+      },
+    });
   }
   return browserClient;
 };
