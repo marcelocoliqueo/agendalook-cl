@@ -52,6 +52,10 @@ export default function VerifyCodeClient() {
         setMessage(data.error || 'Código inválido');
         return;
       }
+      if (data.loginUrl) {
+        window.location.href = data.loginUrl;
+        return;
+      }
       router.push('/welcome');
     } finally {
       setLoading(false);

@@ -14,6 +14,7 @@ export async function POST(request: NextRequest) {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
     const service = createServiceClient(supabaseUrl, serviceKey);
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
     // Marcar verified=true en metadata (y opcionalmente email_confirm)
     const { data: userResp } = await (service as any).auth.admin.listUsers({ email });
@@ -22,10 +23,19 @@ export async function POST(request: NextRequest) {
       await (service as any).auth.admin.updateUserById(user.id, { email_confirm: true, user_metadata: { ...(user.user_metadata || {}), verified: true } });
     }
 
-    // Enviar bienvenida post-verificación (si se desea mantener bienvenida)
-    // await ResendService.sendWelcomeEmail(email, `${process.env.NEXT_PUBLIC_APP_URL}/welcome`, '');
+    // Generar magic link de login para establecer sesión automáticamente y redirigir a /welcome
+    const { data: linkData, error: linkError } = await (service as any).auth.admin.generateLink({
+      type: 'magiclink',
+      email,
+      options: { redirectTo: `${appUrl}/welcome` }
+    });
+    const actionLink = (linkData as any)?.properties?.action_link || (linkData as any)?.action_link || `${appUrl}/login`;
+    if (linkError) {
+      // Si falla, continuamos sin magiclink y la app redirigirá a /welcome, pero sin sesión
+      return NextResponse.json({ ok: true, loginUrl: `${appUrl}/welcome` });
+    }
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, loginUrl: actionLink });
   } catch (e: any) {
     return NextResponse.json({ error: e?.message || 'Error' }, { status: 500 });
   }
