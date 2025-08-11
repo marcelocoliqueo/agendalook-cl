@@ -106,10 +106,12 @@ export async function POST(request: NextRequest) {
       mode: isMercadoPagoSandbox() ? 'sandbox' : 'live'
     });
 
-  } catch (error) {
-    console.error('Error creating preference:', error);
+  } catch (error: any) {
+    const message = error?.message || 'Error desconocido';
+    console.error('Error creating preference:', message, error);
+    const mode = process.env.MERCADOPAGO_ACCESS_TOKEN ? 'real' : 'simulated';
     return NextResponse.json(
-      { error: 'Error al crear preferencia de pago' },
+      { error: 'Error al crear preferencia de pago', detail: message, mode },
       { status: 500 }
     );
   }

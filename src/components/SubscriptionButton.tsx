@@ -34,14 +34,14 @@ export default function SubscriptionButton({
           cancelUrl: `${window.location.origin}/dashboard/settings?canceled=true`,
         }),
       });
-
-      const { initPoint, error } = await response.json();
-
-      if (error) {
-        throw new Error(error);
+      const payload = await response.json();
+      if (!response.ok) {
+        console.error('Create preference error payload:', payload);
+        const mode = payload?.mode || (isSandbox ? 'sandbox' : 'real');
+        alert(`No se pudo crear la preferencia (${mode}). ${payload?.detail || payload?.error || 'Inténtalo de nuevo.'}`);
+        return;
       }
-
-      // Redirigir a Mercado Pago (initPoint ya es sandbox/live según el modo)
+      const { initPoint } = payload;
       window.location.href = initPoint;
     } catch (error) {
       console.error('Error creating Mercado Pago preference:', error);
