@@ -27,6 +27,21 @@ export async function POST(request: NextRequest) {
 
     const service = createServiceClient(supabaseUrl, serviceKey);
 
+    // 0) Verificar si el email ya existe
+    const { data: existingUsers } = await (service as any).auth.admin.listUsers({ email });
+    const existing = existingUsers?.users?.[0];
+    if (existing) {
+      // Si existe y NO está verificado, reenviar OTP y guiar al usuario
+      const isVerified = Boolean(existing.email_confirmed_at || existing.user_metadata?.verified);
+      if (!isVerified) {
+        const { code } = await issueCode({ request, email, purpose: 'signup', ttlMinutes: 15 });
+        await ResendService.sendVerificationCode(email, code);
+        return NextResponse.json({ success: true, method: 'otp', message: 'Cuenta existente sin verificar. Reenviamos el código.' });
+      }
+      // Si ya está verificado, informar conflicto
+      return NextResponse.json({ error: 'A user with this email address has already been registered' }, { status: 409 });
+    }
+
     // 1) Crear usuario sin enviar email de Supabase
     const { data: userData, error: createUserError } = await (service as any).auth.admin.createUser({
       email,
@@ -63,7 +78,6 @@ export async function POST(request: NextRequest) {
     // 3) Flujo OTP: emitir código y enviarlo por correo (sin abrir pestañas)
     const { code } = await issueCode({ request, email, purpose: 'signup', ttlMinutes: 15 });
     await ResendService.sendVerificationCode(email, code);
-
     return NextResponse.json({ success: true, method: 'otp' });
   } catch (error: any) {
     console.error('Error en registro server-side:', error);
