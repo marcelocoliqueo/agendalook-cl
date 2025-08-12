@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { CheckCircle, ArrowRight, Sparkles, Calendar, Users, Zap } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { createClient } from '@/lib/supabase';
 import { useProfessional } from '@/hooks/useProfessional';
 
 export default function WelcomePage() {
@@ -14,11 +15,40 @@ export default function WelcomePage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
   const { getProfessionalByUserId, createProfessional } = useProfessional();
+  const supabase = createClient();
 
   const slugify = (name: string) =>
     name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
   useEffect(() => {
+    // Establecer sesión si venimos de magic link (#access_token) o ?code (PKCE)
+    (async () => {
+      try {
+        if (typeof window === 'undefined') return;
+        const url = new URL(window.location.href);
+        // Hash tokens
+        if (url.hash && url.hash.includes('access_token')) {
+          const params = new URLSearchParams(url.hash.replace(/^#/, ''));
+          const access_token = params.get('access_token') || '';
+          const refresh_token = params.get('refresh_token') || '';
+          if (access_token && refresh_token) {
+            await supabase.auth.setSession({ access_token, refresh_token });
+            history.replaceState({}, '', url.pathname + url.search);
+          }
+        }
+        // PKCE code
+        const code = url.searchParams.get('code');
+        if (code) {
+          await supabase.auth.exchangeCodeForSession(code);
+          url.searchParams.delete('code');
+          url.searchParams.delete('type');
+          history.replaceState({}, '', url.toString());
+        }
+      } catch (e) {
+        console.warn('No se pudo establecer sesión desde la URL:', e);
+      }
+    })();
+
     const checkUser = async () => {
       // Esperar a que se resuelva la sesión para evitar redirección temprana
       if (authLoading) return;
