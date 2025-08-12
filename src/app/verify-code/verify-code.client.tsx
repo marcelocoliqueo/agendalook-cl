@@ -13,6 +13,7 @@ export default function VerifyCodeClient() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [countdown, setCountdown] = useState(0);
+  const countdownStartedRef = useRef(false);
   const inputsRef = useRef<Array<HTMLInputElement | null>>([]);
 
   const code = digits.join('');
@@ -71,6 +72,11 @@ export default function VerifyCodeClient() {
       return;
     }
     if (chosen) setEmail(chosen);
+    // Arrancar contador inicial (20s) tras el registro/envío automático
+    if (!countdownStartedRef.current && chosen) {
+      setCountdown(20);
+      countdownStartedRef.current = true;
+    }
   }, [search, user?.email, authLoading, router]);
 
   useEffect(() => {
