@@ -93,6 +93,22 @@ export default function VerifyCodeClient() {
     }
   };
 
+  const handlePaste = (idx: number, e: React.ClipboardEvent<HTMLInputElement>) => {
+    try {
+      const raw = e.clipboardData.getData('text');
+      const pasted = (raw.match(/\d/g) || []).join('').slice(0, 6);
+      if (!pasted) return;
+      e.preventDefault();
+      const next = [...digits];
+      for (let i = 0; i < pasted.length && idx + i < 6; i++) {
+        next[idx + i] = pasted[i];
+      }
+      setDigits(next);
+      const focusIndex = Math.min(idx + pasted.length, 5);
+      inputsRef.current[focusIndex]?.focus();
+    } catch {}
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-lavender-50 via-white to-coral-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
@@ -111,12 +127,14 @@ export default function VerifyCodeClient() {
               ref={(el) => {
                 inputsRef.current[i] = el;
               }}
-              className="w-12 h-12 text-center text-xl border rounded-lg"
+              className="w-12 h-12 text-center text-xl border rounded-lg text-gray-900 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               value={d}
               onChange={(e) => handleDigitChange(i, e.target.value)}
               onKeyDown={(e) => handleKeyDown(i, e)}
+              onPaste={(e) => handlePaste(i, e)}
               maxLength={1}
               inputMode="numeric"
+              autoComplete="one-time-code"
             />
           ))}
         </div>
