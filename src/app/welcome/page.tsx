@@ -11,6 +11,7 @@ import { useProfessional } from '@/hooks/useProfessional';
 
 export default function WelcomePage() {
   const [loading, setLoading] = useState(true);
+  const [bootstrapping, setBootstrapping] = useState(true);
   const [professional, setProfessional] = useState<any>(null);
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
@@ -20,13 +21,13 @@ export default function WelcomePage() {
   const slugify = (name: string) =>
     name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
+  // 1) En el primer montaje, intenta establecer sesión desde la URL
   useEffect(() => {
-    // Establecer sesión si venimos de magic link (#access_token) o ?code (PKCE)
     (async () => {
       try {
         if (typeof window === 'undefined') return;
         const url = new URL(window.location.href);
-        // Hash tokens
+        // Hash tokens (magic link)
         if (url.hash && url.hash.includes('access_token')) {
           const params = new URLSearchParams(url.hash.replace(/^#/, ''));
           const access_token = params.get('access_token') || '';
@@ -46,18 +47,20 @@ export default function WelcomePage() {
         }
       } catch (e) {
         console.warn('No se pudo establecer sesión desde la URL:', e);
+      } finally {
+        setBootstrapping(false);
       }
     })();
+  }, [supabase]);
 
-    const checkUser = async () => {
-      // Esperar a que se resuelva la sesión para evitar redirección temprana
-      if (authLoading) return;
-
+  // 2) Cuando termine el bootstrapping y la sesión esté resuelta, continuar
+  useEffect(() => {
+    const proceed = async () => {
+      if (bootstrapping || authLoading) return;
       if (!user) {
         router.push('/login');
         return;
       }
-
       try {
         let prof = await getProfessionalByUserId(user.id);
         if (!prof) {
@@ -75,10 +78,9 @@ export default function WelcomePage() {
             role: 'owner',
             subscription_status: 'none',
           } as any);
-          // Marcar onboarding completado en metadata
           try {
-            const supabase = (await import('@/lib/supabase')).createClient();
-            await supabase.auth.updateUser({ data: { ...(user as any)?.user_metadata, onboarded: true } });
+            const supa = (await import('@/lib/supabase')).createClient();
+            await supa.auth.updateUser({ data: { ...(user as any)?.user_metadata, onboarded: true } });
           } catch {}
         }
         setProfessional(prof);
@@ -90,9 +92,8 @@ export default function WelcomePage() {
         setLoading(false);
       }
     };
-
-    checkUser();
-  }, [user, authLoading, router, getProfessionalByUserId]);
+    proceed();
+  }, [bootstrapping, authLoading, user, router, getProfessionalByUserId, createProfessional]);
 
   const handleContinue = () => {
     router.push('/plans');
