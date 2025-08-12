@@ -17,6 +17,7 @@ export default function VerifyCodeClient() {
   const inputsRef = useRef<Array<HTMLInputElement | null>>([]);
 
   const code = digits.join('');
+  const canResend = !loading && !!email && countdown === 0;
 
   const requestCode = async () => {
     try {
@@ -148,10 +149,30 @@ export default function VerifyCodeClient() {
         {message && <div className="text-sm text-gray-700 mb-3">{message}</div>}
 
         <div className="flex gap-3 justify-center">
-          <button onClick={requestCode} disabled={loading || !email || countdown > 0} className="px-4 py-2 rounded-lg bg-gray-100">
+          <button
+            onClick={requestCode}
+            disabled={!canResend}
+            aria-disabled={!canResend}
+            className={`px-4 py-2 rounded-lg transition-colors ${
+              canResend
+                ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                : 'bg-gray-100 text-gray-400 cursor-not-allowed opacity-60'
+            }`}
+          >
             {countdown > 0 ? `Reenviar código (${countdown}s)` : 'Reenviar código'}
           </button>
-          <button onClick={verifyCode} disabled={loading || code.length !== 6 || !email} className="px-4 py-2 rounded-lg bg-primary-500 text-white">Confirmar</button>
+          <button
+            onClick={verifyCode}
+            disabled={loading || code.length !== 6 || !email}
+            aria-disabled={loading || code.length !== 6 || !email}
+            className={`px-4 py-2 rounded-lg text-white ${
+              loading || code.length !== 6 || !email
+                ? 'bg-primary-400 cursor-not-allowed opacity-70'
+                : 'bg-primary-500 hover:bg-primary-600'
+            }`}
+          >
+            Confirmar
+          </button>
         </div>
       </div>
     </div>
