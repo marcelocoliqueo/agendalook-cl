@@ -44,7 +44,19 @@ export default function LoginPage() {
       if (data?.user) {
         // Login exitoso, redirigir al dashboard
         console.log('Login exitoso, redirigiendo a dashboard...');
-        router.push('/dashboard');
+        console.log('Usuario autenticado:', data.user);
+        console.log('Intentando redirección a /dashboard...');
+        
+        try {
+          // Intentar redirección con router.push
+          await router.push('/dashboard');
+          console.log('Redirección con router.push completada');
+        } catch (error) {
+          console.error('Error con router.push:', error);
+          // Fallback: redirección manual
+          console.log('Usando fallback de redirección manual...');
+          window.location.href = '/dashboard';
+        }
       }
     } catch (error) {
       console.error('Error en login:', error);
