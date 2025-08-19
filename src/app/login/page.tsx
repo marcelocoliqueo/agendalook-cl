@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+import { useSupabaseClient } from '@/contexts/SupabaseContext';
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -15,7 +15,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
-  const { signIn } = useAuth();
+  const supabase = useSupabaseClient();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,11 +23,15 @@ export default function LoginPage() {
     setError('');
     
     try {
-      const { data, error } = await signIn(email, password, rememberMe);
+      // Usar directamente supabase.auth.signInWithPassword
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
       if (error) {
         // Si el error es de email no confirmado, redirigir a verify-code
-        const msg = (error as any)?.message || '';
+        const msg = error.message || '';
         if (/email\s*not\s*confirmed/i.test(msg)) {
           try { localStorage.setItem('pendingEmail', email); } catch {}
           router.push(`/verify-code?email=${encodeURIComponent(email)}`);
@@ -38,9 +42,12 @@ export default function LoginPage() {
       }
 
       if (data?.user) {
+        // Login exitoso, redirigir al dashboard
+        console.log('Login exitoso, redirigiendo a dashboard...');
         router.push('/dashboard');
       }
     } catch (error) {
+      console.error('Error en login:', error);
       setError('Error al iniciar sesión. Inténtalo de nuevo.');
     } finally {
       setIsLoading(false);
