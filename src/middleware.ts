@@ -62,10 +62,19 @@ export async function middleware(request: NextRequest) {
 
   try {
     // Verificar sesión de forma más permisiva
-    const { data: { session } } = await supabase.auth.getSession();
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    
+    if (sessionError) {
+      console.error('Middleware session error:', sessionError);
+      // En caso de error de sesión, permitir acceso (más permisivo)
+      const response = NextResponse.next();
+      setSecurityHeaders(response);
+      return response;
+    }
     
     // Si no hay sesión, redirigir al login
     if (!session) {
+      console.log('Middleware: No session found, redirecting to login');
       const url = request.nextUrl.clone();
       url.pathname = '/login';
       url.searchParams.set('redirect', request.nextUrl.pathname);
@@ -73,9 +82,18 @@ export async function middleware(request: NextRequest) {
     }
 
     // Verificar usuario
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    
+    if (userError) {
+      console.error('Middleware user error:', userError);
+      // En caso de error de usuario, permitir acceso (más permisivo)
+      const response = NextResponse.next();
+      setSecurityHeaders(response);
+      return response;
+    }
     
     if (!user) {
+      console.log('Middleware: No user found, redirecting to login');
       const url = request.nextUrl.clone();
       url.pathname = '/login';
       url.searchParams.set('redirect', request.nextUrl.pathname);
@@ -86,14 +104,15 @@ export async function middleware(request: NextRequest) {
     const isVerified = Boolean(user?.email_confirmed_at);
     
     if (!isVerified) {
+      console.log('Middleware: User not verified, redirecting to verify-code');
       const url = request.nextUrl.clone();
       url.pathname = '/verify-code';
       if (user?.email) url.searchParams.set('email', user.email);
       return NextResponse.redirect(url);
     }
 
-    // Permitir acceso al dashboard sin verificar onboarding
-    // El onboarding se manejará en el componente, no en el middleware
+    // Usuario autenticado y verificado, permitir acceso
+    console.log('Middleware: User authenticated and verified, allowing access to:', request.nextUrl.pathname);
 
   } catch (error) {
     console.error('Middleware error:', error);
@@ -101,8 +120,12 @@ export async function middleware(request: NextRequest) {
   }
 
   const response = NextResponse.next();
-  
-  // Headers de seguridad para rutas protegidas
+  setSecurityHeaders(response);
+  return response;
+}
+
+// Función auxiliar para establecer headers de seguridad
+function setSecurityHeaders(response: NextResponse) {
   response.headers.set('X-Frame-Options', 'DENY');
   response.headers.set('X-Content-Type-Options', 'nosniff');
   response.headers.set('X-XSS-Protection', '1; mode=block');
@@ -119,8 +142,6 @@ export async function middleware(request: NextRequest) {
     "connect-src 'self' https://api.mercadopago.com https://*.supabase.co; " +
     "frame-src https://www.mercadopago.com;"
   );
-
-  return response;
 }
 
 export const config = {
@@ -131,7 +152,8 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - public folder
+     * - api routes (para evitar conflictos)
      */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|api|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }; 
