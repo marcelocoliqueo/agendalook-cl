@@ -1,13 +1,14 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { createClient } from '@/lib/supabase';
+import { useSupabaseClient } from '@/contexts/SupabaseContext';
 import { Availability, AvailabilityFormData } from '@/types';
 import { CacheManager } from '@/lib/cache-manager';
 
-export function useAvailability() {
+export function useAvailability(professionalId: string | null) {
+  const [availability, setAvailability] = useState<Availability[]>([]);
   const [loading, setLoading] = useState(false);
-  const supabase = createClient();
+  const supabase = useSupabaseClient();
 
   const getAvailabilityByProfessionalId = useCallback(async (professionalId: string) => {
     try {

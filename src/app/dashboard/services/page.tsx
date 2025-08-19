@@ -30,17 +30,18 @@ type ServiceFormValues = z.infer<typeof serviceSchema>;
 export default function ServicesPage() {
   const { user } = useAuth();
   const { getProfessionalByUserId } = useProfessional();
-  const { 
+  
+  const [professional, setProfessional] = useState<Professional | null>(null);
+  const [professionalLoading, setProfessionalLoading] = useState(true);
+
+  const {
     loading, 
     getServicesByProfessionalId, 
     createService, 
     updateService, 
     deleteService 
-  } = useServices();
-
-  const [professional, setProfessional] = useState<Professional | null>(null);
-  const [professionalLoading, setProfessionalLoading] = useState(true);
-
+  } = useServices(professional?.id || null);
+  
   // Cargar profesional
   useEffect(() => {
     const loadProfessional = async () => {

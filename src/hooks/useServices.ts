@@ -1,14 +1,15 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { createClient } from '@/lib/supabase';
+import { useSupabaseClient } from '@/contexts/SupabaseContext';
 import { Service, ServiceFormData } from '@/types';
 import { canCreateService, getCurrentPlan } from '@/lib/plans';
 import { CacheManager } from '@/lib/cache-manager';
 
-export function useServices() {
+export function useServices(professionalId: string | null) {
+  const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(false);
-  const supabase = createClient();
+  const supabase = useSupabaseClient();
 
   const getServicesByProfessionalId = useCallback(async (professionalId: string) => {
     try {

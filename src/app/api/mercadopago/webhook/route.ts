@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase';
+import { createServerSupabaseClient } from '@/lib/supabase';
+import mercadopago from 'mercadopago';
 import { verifyMercadoPagoSignature, validateWebhookPayload, isMercadoPagoSandbox } from '@/lib/mercadopago';
 import { webhookRateLimiter, getClientIP } from '@/lib/rate-limit';
 import { securityLogger, getUserAgent } from '@/lib/security-logger';
@@ -22,7 +23,14 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const supabase = createClient();
+    console.log('Webhook recibido:', body);
+
+    // Verificar que sea un webhook válido de MercadoPago
+    if (!body.data || !body.type) {
+      return NextResponse.json({ error: 'Webhook inválido' }, { status: 400 });
+    }
+
+    const supabase = createServerSupabaseClient();
 
     // Verificar firma de MercadoPago
     const signature = request.headers.get('x-signature');

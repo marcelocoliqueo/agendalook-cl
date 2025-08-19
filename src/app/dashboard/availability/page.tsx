@@ -74,17 +74,18 @@ const DAYS_OF_WEEK = [
 export default function AvailabilityPage() {
   const { user } = useAuth();
   const { getProfessionalByUserId } = useProfessional();
-  const { 
-    loading, 
-    getAvailabilityByProfessionalId, 
-    createAvailability, 
-    updateAvailability, 
-    deleteAvailability 
-  } = useAvailability();
-
+  
   const [professional, setProfessional] = useState<Professional | null>(null);
   const [professionalLoading, setProfessionalLoading] = useState(true);
   
+  const {
+    loading,
+    getAvailabilityByProfessionalId,
+    createAvailability,
+    updateAvailability, 
+    deleteAvailability 
+  } = useAvailability(professional?.id || null);
+
   const [availability, setAvailability] = useState<Availability[]>([]);
   const [feedback, setFeedback] = useState<{
     type: 'success' | 'error' | null;

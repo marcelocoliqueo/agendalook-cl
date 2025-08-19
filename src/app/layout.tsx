@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Poppins, Playfair_Display } from "next/font/google";
 import "./globals.css";
+import { SupabaseProvider } from "@/contexts/SupabaseContext";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -31,7 +32,9 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={`${poppins.variable} ${playfair.variable} font-poppins`}>
-        {children}
+        <SupabaseProvider>
+          {children}
+        </SupabaseProvider>
       </body>
     </html>
   );

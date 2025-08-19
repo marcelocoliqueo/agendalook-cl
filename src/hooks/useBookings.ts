@@ -1,14 +1,15 @@
 'use client';
 
-import { useState } from 'react';
-import { createClient } from '@/lib/supabase';
+import { useState, useCallback } from 'react';
+import { useSupabaseClient } from '@/contexts/SupabaseContext';
 import { Booking } from '@/types';
 import { canCreateBooking, getCurrentPlan } from '@/lib/plans';
 import { CacheManager } from '@/lib/cache-manager';
 
-export function useBookings() {
+export function useBookings(professionalId: string | null) {
+  const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(false);
-  const supabase = createClient();
+  const supabase = useSupabaseClient();
 
   const getBookingsByProfessionalId = async (professionalId: string) => {
     try {

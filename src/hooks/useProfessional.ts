@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState, useCallback, useMemo } from 'react';
-import { createClient } from '@/lib/supabase';
+import { useState, useCallback, useEffect } from 'react';
+import { useSupabaseClient } from '@/contexts/SupabaseContext';
 import { Professional } from '@/types';
 import { CacheManager } from '@/lib/cache-manager';
 
@@ -10,8 +10,8 @@ const professionalCache = new Map<string, Professional>();
 
 export function useProfessional() {
   const [professional, setProfessional] = useState<Professional | null>(null);
-  const [loading, setLoading] = useState(true);
-  const supabase = createClient();
+  const [loading, setLoading] = useState(false);
+  const supabase = useSupabaseClient();
 
   const getProfessionalByUserId = useCallback(async (userId: string) => {
     // Verificar cache global primero

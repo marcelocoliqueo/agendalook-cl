@@ -27,10 +27,12 @@ interface Booking {
 export default function BookingsPage() {
   const { user } = useAuth();
   const { getProfessionalByUserId } = useProfessional();
-  const { getBookings, updateBookingStatus } = useBookings();
   
   const [professional, setProfessional] = useState<Professional | null>(null);
   const [professionalLoading, setProfessionalLoading] = useState(true);
+  
+  const { getBookings, updateBookingStatus } = useBookings(professional?.id || null);
+
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'pending' | 'confirmed' | 'cancelled' | 'completed'>('all');

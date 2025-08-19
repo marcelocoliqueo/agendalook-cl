@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Bell, X, Check, AlertCircle, Info, Clock, Calendar, DollarSign, Shield } from 'lucide-react';
-import { useNotifications, Notification } from '@/hooks/useNotifications';
+import { useNotifications } from '@/hooks/useNotifications';
+import { Notification } from '@/types';
 import { Button } from './Button';
 
 interface NotificationBellProps {
@@ -85,7 +86,7 @@ const formatTimeAgo = (dateString: string) => {
 export function NotificationBell({ professionalId }: NotificationBellProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const { notifications, counts, markAsRead, markAllAsRead } = useNotifications(professionalId);
+  const { notifications, counts, markAsRead, markAllAsRead } = useNotifications(professionalId || null);
 
   // Cerrar dropdown al hacer clic fuera
   useEffect(() => {

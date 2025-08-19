@@ -3,13 +3,13 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { createClient } from '@/lib/supabase';
+import { useSupabaseClient } from '@/contexts/SupabaseContext';
 
 export default function VerifyEmailPage() {
   const [checking, setChecking] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const router = useRouter();
-  const supabase = createClient();
+  const supabase = useSupabaseClient();
 
   const processAuthCallback = useCallback(async () => {
     // Maneja dos formatos posibles del callback de Supabase:

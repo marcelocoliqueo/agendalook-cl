@@ -33,7 +33,7 @@ export async function middleware(request: NextRequest) {
     return response;
   }
 
-  // Crear cliente de Supabase para el servidor
+  // Crear cliente de Supabase para el servidor (middleware)
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,

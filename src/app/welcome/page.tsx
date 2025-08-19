@@ -6,7 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { CheckCircle, ArrowRight, Sparkles, Calendar, Users, Zap } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { createClient } from '@/lib/supabase';
+import { useSupabaseClient } from '@/contexts/SupabaseContext';
 import { useProfessional } from '@/hooks/useProfessional';
 
 export default function WelcomePage() {
@@ -16,7 +16,7 @@ export default function WelcomePage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
   const { getProfessionalByUserId, createProfessional } = useProfessional();
-  const supabase = createClient();
+  const supabase = useSupabaseClient();
 
   const slugify = (name: string) =>
     name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
@@ -79,7 +79,7 @@ export default function WelcomePage() {
             subscription_status: 'none',
           } as any);
           try {
-            const supa = (await import('@/lib/supabase')).createClient();
+            const supa = useSupabaseClient();
             await supa.auth.updateUser({ data: { ...(user as any)?.user_metadata, onboarded: true } });
           } catch {}
         }

@@ -21,8 +21,23 @@ import { FullPageLoader } from '@/components/ui/LoadingSpinner';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfessional } from '@/hooks/useProfessional';
 import { Professional } from '@/types';
+import { AuthProvider } from '@/contexts/AuthContext';
 
 export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <AuthProvider>
+      <DashboardLayoutContent>
+        {children}
+      </DashboardLayoutContent>
+    </AuthProvider>
+  );
+}
+
+function DashboardLayoutContent({
   children,
 }: {
   children: React.ReactNode;

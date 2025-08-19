@@ -1,37 +1,13 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { createClient } from '@/lib/supabase';
+import { useState, useCallback, useEffect } from 'react';
 import { RealtimeChannel } from '@supabase/supabase-js';
+import { useSupabaseClient } from '@/contexts/SupabaseContext';
+import { Notification } from '@/types';
 
-export interface Notification {
-  id: string;
-  professional_id: string;
-  user_id: string;
-  type: 'new_booking' | 'booking_confirmed' | 'booking_cancelled' | 'payment_reminder' | 'subscription_grace_period' | 'subscription_suspended' | 'subscription_expired' | 'system_maintenance' | 'welcome_message' | 'service_created' | 'availability_updated';
-  title: string;
-  message: string;
-  data: Record<string, any>;
-  is_read: boolean;
-  is_archived: boolean;
-  priority: 'low' | 'normal' | 'high' | 'urgent';
-  expires_at: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface NotificationCounts {
-  total: number;
-  unread: number;
-  urgent: number;
-  high: number;
-  normal: number;
-  low: number;
-}
-
-export function useNotifications(professionalId?: string) {
+export function useNotifications(professionalId: string | null) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [counts, setCounts] = useState<NotificationCounts>({
+  const [counts, setCounts] = useState({
     total: 0,
     unread: 0,
     urgent: 0,
@@ -42,7 +18,7 @@ export function useNotifications(professionalId?: string) {
   const [loading, setLoading] = useState(true);
   const [realtimeChannel, setRealtimeChannel] = useState<RealtimeChannel | null>(null);
   
-  const supabase = createClient();
+  const supabase = useSupabaseClient();
 
   // Cargar notificaciones
   const loadNotifications = useCallback(async () => {

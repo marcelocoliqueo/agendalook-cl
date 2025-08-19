@@ -55,9 +55,9 @@ export default function BusinessPage({ params }: PageProps) {
   const [bookingConfirmation, setBookingConfirmation] = useState<BookingConfirmation | null>(null);
 
   const { getProfessionalBySlug } = useProfessional();
-  const { getServicesBySlug } = useServices();
-  const { createBooking, checkAvailability } = useBookings();
-  const { getAvailabilityBySlug } = useAvailability();
+  const { getServicesBySlug } = useServices(professional?.id || null);
+  const { createBooking, checkAvailability } = useBookings(professional?.id || null);
+  const { getAvailabilityBySlug } = useAvailability(professional?.id || null);
 
   // Resolver los parámetros cuando el componente se monta
   useEffect(() => {

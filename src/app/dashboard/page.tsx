@@ -30,8 +30,8 @@ export default function DashboardPage() {
   
   const { user } = useAuth();
   const { getProfessionalByUserId } = useProfessional();
-  const { getBookingsByProfessionalId } = useBookings();
-  const { getServicesByProfessionalId } = useServices();
+  const { getBookingsByProfessionalId } = useBookings(professional?.id || null);
+  const { getServicesByProfessionalId } = useServices(professional?.id || null);
 
   // Detectar si es el usuario admin
   const isAdmin = user?.email === 'admin@agendalook.cl';

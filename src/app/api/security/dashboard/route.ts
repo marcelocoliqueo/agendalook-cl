@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase';
+import { createServerSupabaseClient } from '@/lib/supabase';
 import { securityLogger } from '@/lib/security-logger';
 import { securityAlertSystem } from '@/lib/security-alerts';
 import { runSecurityAudit, generateSecurityReport } from '@/lib/code-auditor';
@@ -8,8 +8,17 @@ import { getSubscriptionStats, calculateMonthlyRevenue, calculateChurnRate } fro
 
 export async function GET(request: NextRequest) {
   try {
-    // Verificar autenticación (solo administradores)
-    const supabase = createClient();
+    // Obtener IP del cliente desde headers
+    const forwarded = request.headers.get('x-forwarded-for');
+    const ip = forwarded ? forwarded.split(',')[0] : 'unknown';
+    
+    // Obtener User-Agent
+    const userAgent = request.headers.get('user-agent') || 'unknown';
+    
+    // Log de acceso al dashboard de seguridad (comentado hasta implementar)
+    // securityLogger.logSecurityAccess(ip, '/api/security/dashboard', userAgent);
+
+    const supabase = createServerSupabaseClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {

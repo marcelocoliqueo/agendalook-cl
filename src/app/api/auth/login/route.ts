@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase';
+import { createServerSupabaseClient } from '@/lib/supabase';
 import { authRateLimiter, getClientIP } from '@/lib/rate-limit';
 import { securityLogger, getUserAgent } from '@/lib/security-logger';
 
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = createClient();
+    const supabase = createServerSupabaseClient();
 
     // Intentar login
     const { data, error } = await supabase.auth.signInWithPassword({

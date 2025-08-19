@@ -14,6 +14,22 @@ export interface Professional {
   updated_at: string;
 }
 
+export interface Notification {
+  id: string;
+  professional_id: string;
+  user_id: string;
+  type: 'new_booking' | 'booking_confirmed' | 'booking_cancelled' | 'payment_reminder' | 'subscription_grace_period' | 'subscription_suspended' | 'subscription_expired' | 'system_maintenance' | 'welcome_message' | 'service_created' | 'availability_updated';
+  title: string;
+  message: string;
+  data: Record<string, any>;
+  is_read: boolean;
+  is_archived: boolean;
+  priority: 'low' | 'normal' | 'high' | 'urgent';
+  expires_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Service {
   id: string;
   professional_id: string;
