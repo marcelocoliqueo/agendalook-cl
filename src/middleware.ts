@@ -26,7 +26,7 @@ export async function middleware(request: NextRequest) {
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
       "font-src 'self' https://fonts.gstatic.com; " +
       "img-src 'self' data: https:; " +
-      "connect-src 'self' https://api.mercadopago.com https://*.supabase.co; " +
+      "connect-src 'self' https://api.mercadopago.com https://*.supabase.co wss://*.supabase.co; " +
       "frame-src https://www.mercadopago.com;"
     );
     
@@ -139,7 +139,7 @@ function setSecurityHeaders(response: NextResponse) {
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
     "font-src 'self' https://fonts.gstatic.com; " +
     "img-src 'self' data: https:; " +
-    "connect-src 'self' https://api.mercadopago.com https://*.supabase.co; " +
+    "connect-src 'self' https://api.mercadopago.com https://*.supabase.co wss://*.supabase.co; " +
     "frame-src https://www.mercadopago.com;"
   );
 }
