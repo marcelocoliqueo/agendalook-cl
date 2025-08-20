@@ -79,8 +79,8 @@ export default function WelcomePage() {
             subscription_status: 'none',
           } as any);
           try {
-            const supa = useSupabaseClient();
-            await supa.auth.updateUser({ data: { ...(user as any)?.user_metadata, onboarded: true } });
+            // Usar la variable supabase que ya está disponible en el scope del componente
+            await supabase.auth.updateUser({ data: { ...(user as any)?.user_metadata, onboarded: true } });
           } catch {}
         }
         setProfessional(prof);
@@ -93,7 +93,7 @@ export default function WelcomePage() {
       }
     };
     proceed();
-  }, [bootstrapping, authLoading, user, router, getProfessionalByUserId, createProfessional]);
+  }, [bootstrapping, authLoading, user, router, getProfessionalByUserId, createProfessional, supabase]);
 
   const handleContinue = () => {
     router.push('/plans');
