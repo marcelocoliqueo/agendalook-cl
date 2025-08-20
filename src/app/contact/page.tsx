@@ -58,6 +58,7 @@ export default function Contact() {
                     name="firstName"
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-lavender-500 focus:border-transparent font-poppins"
                     placeholder="Tu nombre"
+                    autoComplete="given-name"
                     required
                   />
                 </div>
@@ -71,6 +72,7 @@ export default function Contact() {
                     name="lastName"
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-lavender-500 focus:border-transparent font-poppins"
                     placeholder="Tu apellido"
+                    autoComplete="family-name"
                     required
                   />
                 </div>
@@ -86,6 +88,7 @@ export default function Contact() {
                   name="email"
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-lavender-500 focus:border-transparent font-poppins"
                   placeholder="tu@email.com"
+                  autoComplete="email"
                   required
                 />
               </div>

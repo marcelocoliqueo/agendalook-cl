@@ -52,6 +52,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           required={required}
           min={min}
           max={max}
+          autoComplete={type === 'email' ? 'email' : type === 'password' ? 'current-password' : type === 'tel' ? 'tel' : 'off'}
           className={cn(
             'w-full border border-gray-300 rounded-lg transition-colors focus:ring-2 focus:ring-primary-500 focus:border-transparent',
             'text-gray-900 placeholder-gray-500',

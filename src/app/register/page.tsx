@@ -150,6 +150,7 @@ export default function RegisterPage() {
                   onChange={handleChange}
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors text-gray-900 placeholder-gray-500"
                   placeholder="Tu nombre completo"
+                  autoComplete="name"
                   required
                 />
               </div>
@@ -169,6 +170,7 @@ export default function RegisterPage() {
                   onChange={handleChange}
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors text-gray-900 placeholder-gray-500"
                   placeholder="Ej: Nails by Carla"
+                  autoComplete="organization"
                   required
                 />
               </div>
@@ -188,6 +190,7 @@ export default function RegisterPage() {
                   onChange={handleChange}
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors text-gray-900 placeholder-gray-500"
                   placeholder="tu@email.com"
+                  autoComplete="email"
                   required
                 />
               </div>
@@ -207,6 +210,7 @@ export default function RegisterPage() {
                   onChange={handleChange}
                   className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors text-gray-900 placeholder-gray-500"
                   placeholder="••••••••"
+                  autoComplete="new-password"
                   required
                 />
                 <button
@@ -233,6 +237,7 @@ export default function RegisterPage() {
                   onChange={handleChange}
                   className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors text-gray-900 placeholder-gray-500"
                   placeholder="••••••••"
+                  autoComplete="new-password"
                   required
                 />
                 <button

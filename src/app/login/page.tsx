@@ -107,11 +107,13 @@ export default function LoginPage() {
                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
                   id="email"
+                  name="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors text-gray-900 placeholder-gray-500"
                   placeholder="tu@email.com"
+                  autoComplete="email"
                   required
                 />
               </div>
@@ -130,6 +132,7 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors text-gray-900 placeholder-gray-500"
                   placeholder="••••••••"
+                  autoComplete="current-password"
                   required
                 />
                 <button
@@ -149,6 +152,7 @@ export default function LoginPage() {
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
                   className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                  name="rememberMe"
                 />
                 <span className="ml-2 text-sm text-gray-700">Recordarme</span>
               </label>
