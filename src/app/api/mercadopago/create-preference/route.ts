@@ -4,28 +4,49 @@ import { createServerClient } from '@supabase/ssr';
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('🔍 MercadoPago API: Iniciando request...');
+    
     const { plan, successUrl, cancelUrl } = await request.json();
+    console.log('🔍 MercadoPago API: Plan recibido:', plan);
 
     // Verificar autenticación con cookies del request (server-side)
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
     const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+    
+    console.log('🔍 MercadoPago API: Config Supabase:', { 
+      url: supabaseUrl ? 'Configurado' : 'NO configurado',
+      anonKey: anonKey ? 'Configurado' : 'NO configurado'
+    });
+    
     const supabase = createServerClient(supabaseUrl, anonKey, {
       cookies: {
         get(name: string) {
-          return request.cookies.get(name)?.value;
+          const cookie = request.cookies.get(name);
+          console.log(`🔍 MercadoPago API: Cookie ${name}:`, cookie ? 'Presente' : 'Ausente');
+          return cookie?.value;
         },
         set() {},
         remove() {},
       },
     });
+    
+    console.log('🔍 MercadoPago API: Intentando obtener usuario...');
     const { data: { user }, error: authError } = await supabase.auth.getUser();
+    
+    console.log('🔍 MercadoPago API: Resultado auth:', { 
+      user: user ? `ID: ${user.id}` : 'null',
+      error: authError ? authError.message : 'null'
+    });
 
     if (authError || !user) {
+      console.log('❌ MercadoPago API: Autenticación falló:', { authError, user });
       return NextResponse.json(
         { error: 'No autorizado' },
         { status: 401 }
       );
     }
+
+    console.log('✅ MercadoPago API: Usuario autenticado:', user.id);
 
     // Obtener datos del profesional
     const { data: professional, error: profError } = await supabase
