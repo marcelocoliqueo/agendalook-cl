@@ -108,7 +108,7 @@ export default function ServicesPage() {
     };
 
     loadServices();
-  }, [professional?.id]);
+  }, [professional?.id, getServicesByProfessionalId, professional]);
 
   const showFeedback = (type: 'success' | 'error', message: string) => {
     setFeedback({ type, message });

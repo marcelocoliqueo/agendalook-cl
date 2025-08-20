@@ -20,6 +20,24 @@ export function useNotifications(professionalId: string | null) {
   
   const supabase = useSupabaseClient();
 
+  // Actualizar contadores
+  const updateCounts = useCallback((notifications: Notification[]) => {
+    const unread = notifications.filter(n => !n.is_read).length;
+    const urgent = notifications.filter(n => n.priority === 'urgent' && !n.is_read).length;
+    const high = notifications.filter(n => n.priority === 'high' && !n.is_read).length;
+    const normal = notifications.filter(n => n.priority === 'normal' && !n.is_read).length;
+    const low = notifications.filter(n => n.priority === 'low' && !n.is_read).length;
+
+    setCounts({
+      total: notifications.length,
+      unread,
+      urgent,
+      high,
+      normal,
+      low
+    });
+  }, []);
+
   // Cargar notificaciones
   const loadNotifications = useCallback(async () => {
     if (!professionalId) return;
@@ -44,25 +62,7 @@ export function useNotifications(professionalId: string | null) {
     } finally {
       setLoading(false);
     }
-  }, [professionalId]);
-
-  // Actualizar contadores
-  const updateCounts = useCallback((notifications: Notification[]) => {
-    const unread = notifications.filter(n => !n.is_read).length;
-    const urgent = notifications.filter(n => n.priority === 'urgent' && !n.is_read).length;
-    const high = notifications.filter(n => n.priority === 'high' && !n.is_read).length;
-    const normal = notifications.filter(n => n.priority === 'normal' && !n.is_read).length;
-    const low = notifications.filter(n => n.priority === 'low' && !n.is_read).length;
-
-    setCounts({
-      total: notifications.length,
-      unread,
-      urgent,
-      high,
-      normal,
-      low
-    });
-  }, []);
+  }, [professionalId, supabase, updateCounts]);
 
   // Marcar notificación como leída y eliminarla
   const markAsRead = useCallback(async (notificationId: string) => {
@@ -83,7 +83,7 @@ export function useNotifications(professionalId: string | null) {
     } catch (error) {
       console.error('Error marking notification as read:', error);
     }
-  }, [updateCounts]);
+  }, [supabase, updateCounts]);
 
   // Marcar todas como leídas y eliminarlas
   const markAllAsRead = useCallback(async () => {
@@ -111,7 +111,7 @@ export function useNotifications(professionalId: string | null) {
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
     }
-  }, [professionalId]);
+  }, [professionalId, supabase]);
 
   // Archivar notificación
   const archiveNotification = useCallback(async (notificationId: string) => {
@@ -131,7 +131,7 @@ export function useNotifications(professionalId: string | null) {
     } catch (error) {
       console.error('Error archiving notification:', error);
     }
-  }, [loadNotifications]);
+  }, [supabase, loadNotifications]);
 
   // Configurar tiempo real
   useEffect(() => {
@@ -188,7 +188,7 @@ export function useNotifications(professionalId: string | null) {
     return () => {
       channel.unsubscribe();
     };
-  }, [professionalId, updateCounts]);
+  }, [professionalId, updateCounts, supabase]);
 
   // Cargar notificaciones al montar
   useEffect(() => {

@@ -17,7 +17,7 @@ const js = () => [
   ...compat.extends("next/core-web-vitals"),
 ];
 
-export default [
+const eslintConfig = [
   {
     ignores: ["node_modules/", ".next/", "out/", "dist/"],
   },
@@ -33,3 +33,5 @@ export default [
     },
   },
 ];
+
+export default eslintConfig;

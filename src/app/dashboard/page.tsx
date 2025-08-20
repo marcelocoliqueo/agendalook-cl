@@ -105,7 +105,7 @@ export default function DashboardPage() {
     };
 
     loadProfessional();
-  }, [user?.id, isAdmin]); // Remover las dependencias que causan recursión
+  }, [user?.id, isAdmin, getProfessionalByUserId, getBookingsByProfessionalId, getServicesByProfessionalId]); // Agregar todas las dependencias
 
   // Filtrar reservas por período
   useEffect(() => {

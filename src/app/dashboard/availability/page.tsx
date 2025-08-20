@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -92,27 +92,7 @@ export default function AvailabilityPage() {
     message: string;
   }>({ type: null, message: '' });
 
-  // Cargar profesional
-  useEffect(() => {
-    const loadProfessional = async () => {
-      if (!user?.id) {
-        setProfessionalLoading(false);
-        return;
-      }
-      
-      try {
-        const profData = await getProfessionalByUserId(user.id);
-        setProfessional(profData);
-      } catch (error) {
-        console.error('Error loading professional:', error);
-      } finally {
-        setProfessionalLoading(false);
-      }
-    };
-
-    loadProfessional();
-  }, [user?.id, getProfessionalByUserId]);
-
+  // Declarar useForm antes de usarlo en useCallback
   const {
     control,
     handleSubmit,
@@ -135,14 +115,14 @@ export default function AvailabilityPage() {
     name: 'days',
   });
 
-  // Cargar disponibilidad al montar el componente
-  useEffect(() => {
-    if (professional?.id) {
-      loadAvailability();
-    }
-  }, [professional?.id]);
+  const showFeedback = useCallback((type: 'success' | 'error', message: string) => {
+    setFeedback({ type, message });
+    setTimeout(() => {
+      setFeedback({ type: null, message: '' });
+    }, 3000);
+  }, []);
 
-  const loadAvailability = async () => {
+  const loadAvailability = useCallback(async () => {
     if (!professional?.id) return;
     
     try {
@@ -168,14 +148,35 @@ export default function AvailabilityPage() {
     } catch (error) {
       showFeedback('error', 'Error al cargar la disponibilidad');
     }
-  };
+  }, [professional?.id, getAvailabilityByProfessionalId, reset, showFeedback]);
 
-  const showFeedback = (type: 'success' | 'error', message: string) => {
-    setFeedback({ type, message });
-    setTimeout(() => {
-      setFeedback({ type: null, message: '' });
-    }, 3000);
-  };
+  // Cargar profesional
+  useEffect(() => {
+    const loadProfessional = async () => {
+      if (!user?.id) {
+        setProfessionalLoading(false);
+        return;
+      }
+      
+      try {
+        const profData = await getProfessionalByUserId(user.id);
+        setProfessional(profData);
+      } catch (error) {
+        console.error('Error loading professional:', error);
+      } finally {
+        setProfessionalLoading(false);
+      }
+    };
+
+    loadProfessional();
+  }, [user?.id, getProfessionalByUserId]);
+
+  // Cargar disponibilidad al montar el componente
+  useEffect(() => {
+    if (professional?.id) {
+      loadAvailability();
+    }
+  }, [professional?.id, loadAvailability]);
 
   const onSubmit = async (data: WeekFormValues) => {
     if (!professional?.id) return;

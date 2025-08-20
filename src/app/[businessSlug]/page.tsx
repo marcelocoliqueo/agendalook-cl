@@ -99,7 +99,7 @@ export default function BusinessPage({ params }: PageProps) {
     };
 
     loadData();
-  }, [businessSlug]); // Solo businessSlug como dependencia
+  }, [businessSlug, getProfessionalBySlug, getServicesBySlug, getAvailabilityBySlug]); // Agregar todas las dependencias
 
   const handleServiceSelect = (service: Service) => {
     setSelectedService(service);

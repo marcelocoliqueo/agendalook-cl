@@ -1,28 +1,13 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useBookings } from '@/hooks/useBookings';
 import { useProfessional } from '@/hooks/useProfessional';
-import { Professional } from '@/types';
-import { Calendar, Clock, User, Phone, Mail, CheckCircle, XCircle, Clock as ClockIcon } from 'lucide-react';
+import { Booking, Professional } from '@/types';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
-
-interface Booking {
-  id: string;
-  client_name: string;
-  client_phone: string;
-  client_email?: string;
-  booking_date: string;
-  booking_time: string;
-  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
-  service: {
-    name: string;
-    duration: number;
-    price: number;
-  };
-  created_at: string;
-}
+import { ClockIcon, CheckCircle, XCircle, CalendarIcon, UserIcon, PhoneIcon, MapPinIcon } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
 
 export default function BookingsPage() {
   const { user } = useAuth();
@@ -58,13 +43,7 @@ export default function BookingsPage() {
     loadProfessional();
   }, [user?.id, getProfessionalByUserId]);
 
-  useEffect(() => {
-    if (professional?.id) {
-      loadBookings();
-    }
-  }, [professional?.id]);
-
-  const loadBookings = async () => {
+  const loadBookings = useCallback(async () => {
     try {
       const data = await getBookings();
       setBookings(data || []);
@@ -73,7 +52,13 @@ export default function BookingsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [getBookings]);
+
+  useEffect(() => {
+    if (professional?.id) {
+      loadBookings();
+    }
+  }, [professional?.id, loadBookings]);
 
   const handleStatusUpdate = async (bookingId: string, newStatus: 'pending' | 'confirmed' | 'cancelled' | 'completed') => {
     try {
@@ -167,7 +152,7 @@ export default function BookingsPage() {
         <div className="bg-white p-4 rounded-lg shadow-sm border">
           <div className="flex items-center">
             <div className="p-2 bg-blue-100 rounded-lg">
-              <Calendar className="w-5 h-5 text-blue-600" />
+              <CalendarIcon className="w-5 h-5 text-blue-600" />
             </div>
             <div className="ml-3">
               <p className="text-sm text-gray-600">Total</p>
@@ -178,7 +163,7 @@ export default function BookingsPage() {
         <div className="bg-white p-4 rounded-lg shadow-sm border">
           <div className="flex items-center">
             <div className="p-2 bg-yellow-100 rounded-lg">
-              <Clock className="w-5 h-5 text-yellow-600" />
+              <ClockIcon className="w-5 h-5 text-yellow-600" />
             </div>
             <div className="ml-3">
               <p className="text-sm text-gray-600">Pendientes</p>
@@ -220,7 +205,7 @@ export default function BookingsPage() {
       <div className="bg-white rounded-lg shadow-sm border">
         {filteredBookings.length === 0 ? (
           <div className="p-8 text-center">
-            <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <CalendarIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">
               No hay reservas {filter !== 'all' ? `con estado "${filter}"` : ''}
             </h3>
@@ -260,30 +245,35 @@ export default function BookingsPage() {
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10">
                           <div className="h-10 w-10 rounded-full bg-lavender-100 flex items-center justify-center">
-                            <User className="w-5 h-5 text-lavender-600" />
+                            <UserIcon className="w-5 h-5 text-lavender-600" />
                           </div>
                         </div>
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">
-                            {booking.client_name}
+                            {booking.customer_name}
                           </div>
                           <div className="text-sm text-gray-500 flex items-center">
-                            <Phone className="w-3 h-3 mr-1" />
-                            {booking.client_phone}
+                            <UserIcon className="w-3 h-3 mr-1" />
+                            {booking.customer_name}
                           </div>
-                          {booking.client_email && (
+                          <div className="text-sm text-gray-500 flex items-center">
+                            <PhoneIcon className="w-3 h-3 mr-1" />
+                            {booking.customer_phone}
+                          </div>
+                          {booking.customer_email && (
                             <div className="text-sm text-gray-500 flex items-center">
-                              <Mail className="w-3 h-3 mr-1" />
-                              {booking.client_email}
+                              <MapPinIcon className="w-3 h-3 mr-1" />
+                              {booking.customer_email}
                             </div>
                           )}
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{booking.service.name}</div>
+                      <div className="text-sm text-gray-900">Servicio ID: {booking.service_id}</div>
                       <div className="text-sm text-gray-500">
-                        {booking.service.duration} min • ${booking.service.price.toLocaleString()}
+                        {/* Información del servicio se puede cargar por separado si es necesario */}
+                        Fecha: {formatDate(booking.booking_date)}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">

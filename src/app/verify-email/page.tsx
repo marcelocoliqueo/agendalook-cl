@@ -83,7 +83,7 @@ export default function VerifyEmailPage() {
     } finally {
       setChecking(false);
     }
-  }, [supabase]);
+  }, []); // Remover supabase ya que no se usa
 
   useEffect(() => {
     (async () => {
