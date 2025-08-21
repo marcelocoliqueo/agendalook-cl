@@ -1,9 +1,9 @@
 "use client";
 
 import Link from 'next/link';
-import Image from 'next/image';
-import { ArrowLeft, ChevronDown, ChevronUp, Search } from 'lucide-react';
+import { ChevronDown, ChevronUp, Search } from 'lucide-react';
 import { useState } from 'react';
+import { MarketingLayout } from '@/components/layout/MarketingLayout';
 
 export default function FAQ() {
   const [openItems, setOpenItems] = useState<number[]>([]);
@@ -139,121 +139,102 @@ export default function FAQ() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-lavender-50 via-white to-coral-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-lavender-100">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center space-x-2">
-              <ArrowLeft className="w-5 h-5 text-gray-600" />
-              <span className="text-gray-600 font-poppins">Volver al inicio</span>
-            </Link>
-            <div className="w-28 h-8 flex items-center justify-center">
-              <Image
-                src="/logo.png"
-                alt="Agendalook"
-                width={112}
-                height={31}
-                className="w-28 h-8 object-contain"
+    <MarketingLayout>
+      <div className="py-20 bg-gradient-to-b from-white to-slate-50">
+        <div className="max-w-7xl mx-auto px-6">
+          {/* Hero Section */}
+          <div className="text-center mb-16">
+            <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-6">
+              Preguntas Frecuentes
+            </h1>
+            <p className="text-xl text-slate-600 max-w-2xl mx-auto">
+              Encuentra respuestas rápidas a las preguntas más comunes sobre Agendalook
+            </p>
+          </div>
+
+          {/* Search Bar */}
+          <div className="max-w-2xl mx-auto mb-16">
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+              <input
+                type="text"
+                placeholder="Busca en las preguntas frecuentes..."
+                className="w-full pl-12 pr-4 py-4 border border-slate-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
               />
             </div>
           </div>
-        </div>
-      </header>
 
-      <main className="container mx-auto px-4 py-12">
-        {/* Hero Section */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-playfair font-bold text-gray-800 mb-4">
-            Preguntas Frecuentes
-          </h1>
-          <p className="text-xl text-gray-600 font-poppins max-w-2xl mx-auto">
-            Encuentra respuestas rápidas a las preguntas más comunes sobre Agendalook
-          </p>
-        </div>
-
-        {/* Search Bar */}
-        <div className="max-w-2xl mx-auto mb-12">
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-            <input
-              type="text"
-              placeholder="Busca en las preguntas frecuentes..."
-              className="w-full pl-12 pr-4 py-4 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-lavender-500 focus:border-transparent font-poppins"
-            />
-          </div>
-        </div>
-
-        {/* FAQ Categories */}
-        <div className="max-w-4xl mx-auto">
-          {faqData.map((category, categoryIndex) => (
-            <div key={categoryIndex} className="mb-8">
-              <h2 className="text-2xl font-playfair font-bold text-gray-800 mb-6">
-                {category.category}
-              </h2>
-              
-              <div className="space-y-4">
-                {category.items.map((item, itemIndex) => {
-                  const globalIndex = categoryIndex * 100 + itemIndex;
-                  const isOpen = openItems.includes(globalIndex);
-                  
-                  return (
-                    <div key={itemIndex} className="bg-white rounded-2xl shadow-lg overflow-hidden">
-                      <button
-                        onClick={() => toggleItem(globalIndex)}
-                        className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors"
-                      >
-                        <h3 className="font-semibold text-gray-800 font-poppins pr-4">
-                          {item.question}
-                        </h3>
-                        {isOpen ? (
-                          <ChevronUp className="w-5 h-5 text-gray-500 flex-shrink-0" />
-                        ) : (
-                          <ChevronDown className="w-5 h-5 text-gray-500 flex-shrink-0" />
+          {/* FAQ Categories */}
+          <div className="max-w-4xl mx-auto">
+            {faqData.map((category, categoryIndex) => (
+              <div key={categoryIndex} className="mb-8">
+                <h2 className="text-2xl font-bold text-slate-900 mb-6">
+                  {category.category}
+                </h2>
+                
+                <div className="space-y-4">
+                  {category.items.map((item, itemIndex) => {
+                    const globalIndex = categoryIndex * 100 + itemIndex;
+                    const isOpen = openItems.includes(globalIndex);
+                    
+                    return (
+                      <div key={itemIndex} className="bg-white rounded-2xl shadow-lg overflow-hidden border border-slate-200">
+                        <button
+                          onClick={() => toggleItem(globalIndex)}
+                          className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-slate-50 transition-colors focus-ring"
+                        >
+                          <h3 className="font-semibold text-slate-800 pr-4">
+                            {item.question}
+                          </h3>
+                          {isOpen ? (
+                            <ChevronUp className="w-5 h-5 text-slate-500 flex-shrink-0" />
+                          ) : (
+                            <ChevronDown className="w-5 h-5 text-slate-500 flex-shrink-0" />
+                          )}
+                        </button>
+                        
+                        {isOpen && (
+                          <div className="px-6 pb-4">
+                            <p className="text-slate-600 leading-relaxed">
+                              {item.answer}
+                            </p>
+                          </div>
                         )}
-                      </button>
-                      
-                      {isOpen && (
-                        <div className="px-6 pb-4">
-                          <p className="text-gray-600 font-poppins leading-relaxed">
-                            {item.answer}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Contact Section */}
+          <div className="max-w-4xl mx-auto mt-16">
+            <div className="bg-white rounded-3xl shadow-lg p-8 text-center border border-slate-200">
+              <h2 className="text-2xl font-bold text-slate-900 mb-4">
+                ¿No encontraste lo que buscabas?
+              </h2>
+              <p className="text-slate-600 mb-6">
+                Nuestro equipo de soporte está aquí para ayudarte
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link 
+                  href="/contact"
+                  className="bg-sky-500 hover:bg-sky-600 text-white px-6 py-3 rounded-2xl font-semibold transition-all duration-300 focus-ring"
+                >
+                  Contactar Soporte
+                </Link>
+                <Link 
+                  href="/help"
+                  className="border border-sky-500 text-sky-600 px-6 py-3 rounded-2xl font-semibold hover:bg-sky-50 transition-colors focus-ring"
+                >
+                  Centro de Ayuda
+                </Link>
               </div>
             </div>
-          ))}
-        </div>
-
-        {/* Contact Section */}
-        <div className="max-w-4xl mx-auto mt-16">
-          <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
-            <h2 className="text-2xl font-playfair font-bold text-gray-800 mb-4">
-              ¿No encontraste lo que buscabas?
-            </h2>
-            <p className="text-gray-600 font-poppins mb-6">
-              Nuestro equipo de soporte está aquí para ayudarte
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link 
-                href="/contact"
-                className="bg-gradient-to-r from-lavender-500 to-coral-500 text-white px-6 py-3 rounded-xl font-semibold font-poppins hover:from-lavender-600 hover:to-coral-600 transition-all duration-300"
-              >
-                Contactar Soporte
-              </Link>
-              <Link 
-                href="/help"
-                className="border border-lavender-500 text-lavender-600 px-6 py-3 rounded-xl font-semibold font-poppins hover:bg-lavender-50 transition-colors"
-              >
-                Centro de Ayuda
-              </Link>
-            </div>
           </div>
         </div>
-      </main>
-    </div>
+      </div>
+    </MarketingLayout>
   );
 } 
