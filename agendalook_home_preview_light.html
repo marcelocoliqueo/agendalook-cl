@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Agendalook — Agenda simple y profesional</title>
+  <meta name="description" content="Agenda online simple para profesionales: psicólogos, estilistas, coaches y más. Recordatorios por WhatsApp, reservas y gestión de clientes." />
+  <meta name="theme-color" content="#0ea5e9" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN (solo para preview) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    html { font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, 'Helvetica Neue', Arial; }
+    :root{
+      --brand:#0ea5e9; /* sky-500 */
+      --brand-600:#0284c7; /* sky-600 */
+      --accent:#22c55e;   /* emerald-500 */
+      --ink:#0f172a;      /* slate-900 */
+      --bg:#f8fafc;       /* slate-50 */
+    }
+
+    .lift { transition: transform .35s cubic-bezier(.2,.8,.2,1), box-shadow .35s, border-color .35s; }
+    .lift:hover { transform: translateY(-6px); box-shadow: 0 18px 45px rgba(2,132,199,.15); }
+
+    .shine { position: relative; overflow: hidden; }
+    .shine:before{ content:''; position:absolute; inset:-200% -150% auto auto; transform: rotate(35deg); width:60%; height:140%; background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent); transition: .8s; }
+    .shine:hover:before{ inset:-220% -120% auto auto; }
+
+    .glass { backdrop-filter: blur(10px); background: rgba(255,255,255,0.6); }
+
+    .gradient-text{ background: linear-gradient(90deg, #38bdf8, #22c55e, #38bdf8); background-size: 200% auto; -webkit-background-clip:text; background-clip:text; color:transparent; animation: gradient 8s linear infinite; }
+    @keyframes gradient { to { background-position: 200% center; } }
+
+    .blob { filter: blur(40px); opacity:.28; mix-blend-mode:multiply; animation: float 16s ease-in-out infinite; }
+    .blob2{ animation-delay: -8s; }
+    .blob3{ animation-delay: -12s; }
+    @keyframes float { 0%{ transform: translateY(0px) translateX(0);} 50%{ transform: translateY(-22px) translateX(10px);} 100%{ transform: translateY(0) translateX(0);} }
+
+    .focus-ring:focus { outline: none; box-shadow: 0 0 0 4px rgba(14,165,233,.28); }
+
+    .g-border { position: relative; }
+    .g-border:before { content:''; position:absolute; inset:0; padding:1px; border-radius:1.25rem; background: linear-gradient(135deg, rgba(56,189,248,.5), rgba(34,197,94,.5)); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
+
+    .magnet { will-change: transform; transition: transform .2s cubic-bezier(.2,.8,.2,1); }
+
+    @media (prefers-reduced-motion: reduce){
+      .lift, .blob, .gradient-text, .shine:before, .magnet { animation: none !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body class="antialiased text-slate-800 bg-[var(--bg)]">
+  <!-- NAVBAR -->
+  <header class="sticky top-0 z-50 backdrop-blur border-b border-slate-200 bg-white/70">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <a href="#" class="flex items-center gap-2 font-extrabold text-xl tracking-tight">
+        <span class="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-sky-500 text-white font-bold shadow-sm">A</span>
+        <span>Agendalook</span>
+      </a>
+      <nav class="hidden md:flex items-center gap-8 text-sm">
+        <a href="#beneficios" class="hover:text-sky-600">Beneficios</a>
+        <a href="#profesionales" class="hover:text-sky-600">Profesionales</a>
+        <a href="#precios" class="hover:text-sky-600">Precios</a>
+        <a href="#contacto" class="hover:text-sky-600">Demo</a>
+      </nav>
+      <div class="flex items-center gap-2">
+        <a href="#cta" class="shine magnet inline-flex items-center gap-2 rounded-2xl bg-sky-500 hover:bg-sky-600 text-white px-4 py-2 font-semibold shadow-sm">
+          Empieza gratis
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="relative overflow-hidden">
+    <div class="pointer-events-none absolute -top-24 -left-16 h-96 w-96 rounded-full bg-sky-300 blob contrast-125 mix-blend-overlay" data-parallax="-0.02"></div>
+    <div class="pointer-events-none absolute top-16 -right-20 h-[28rem] w-[28rem] rounded-full bg-emerald-300 blob blob2 mix-blend-overlay" data-parallax="0.02"></div>
+    <div class="pointer-events-none absolute bottom-[-6rem] left-1/2 -translate-x-1/2 h-[22rem] w-[44rem] rounded-full bg-sky-200 blob blob3 opacity-20" data-parallax="-0.01"></div>
+
+    <div class="max-w-7xl mx-auto px-6 pt-16 pb-20 lg:pt-28 lg:pb-28">
+      <div class="grid lg:grid-cols-2 gap-14 items-center">
+        <div>
+          <p class="inline-flex items-center gap-2 text-xs font-semibold px-3 py-1 rounded-full border border-sky-200 text-sky-700 bg-sky-50">Nuevo · Confirmaciones por WhatsApp</p>
+          <h1 class="mt-4 text-4xl sm:text-6xl font-extrabold leading-tight text-slate-900">
+            <span class="gradient-text">Agenda simple</span> y profesional para tus clientes
+          </h1>
+          <p class="mt-5 text-lg text-slate-700 max-w-prose">
+            La plataforma todo en uno para <span class="font-semibold">psicólogos</span>, <span class="font-semibold">estilistas</span>, <span class="font-semibold">coaches</span>, <span class="font-semibold">manicuristas</span> y más. Publica tu agenda, recibe reservas y confirma por WhatsApp.
+          </p>
+          <div class="mt-8 flex flex-col sm:flex-row gap-3">
+            <a id="cta" href="#precios" class="shine magnet inline-flex items-center justify-center rounded-2xl bg-sky-500 hover:bg-sky-600 text-white px-6 py-3 font-semibold shadow-sm focus-ring">Empieza gratis</a>
+            <a id="demo" href="#contacto" class="inline-flex items-center justify-center rounded-2xl bg-white hover:bg-slate-50 text-slate-900 px-6 py-3 font-semibold border border-slate-200 shadow-sm focus-ring">Solicita una demo</a>
+          </div>
+          <div class="mt-6 flex items-center gap-4 text-xs text-slate-600">
+            <span class="inline-flex items-center gap-1">⭐️⭐️⭐️⭐️⭐️</span>
+            <span>100+ profesionales ya agendando</span>
+          </div>
+        </div>
+        <div class="relative">
+          <div class="glass rounded-3xl shadow-xl ring-1 ring-slate-200 p-5">
+            <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden g-border">
+              <div class="px-4 py-3 border-b border-slate-200 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <div class="h-3 w-3 rounded-full bg-red-400"></div>
+                  <div class="h-3 w-3 rounded-full bg-amber-400"></div>
+                  <div class="h-3 w-3 rounded-full bg-emerald-400"></div>
+                </div>
+                <span class="text-sm font-semibold">Agenda semanal</span>
+                <span class="text-xs text-slate-500">Vista demo</span>
+              </div>
+              <div class="grid grid-cols-7 gap-px bg-slate-200 text-center text-xs">
+                <div class="bg-slate-50 p-3 font-semibold">Lun</div>
+                <div class="bg-slate-50 p-3 font-semibold">Mar</div>
+                <div class="bg-slate-50 p-3 font-semibold">Mié</div>
+                <div class="bg-slate-50 p-3 font-semibold">Jue</div>
+                <div class="bg-slate-50 p-3 font-semibold">Vie</div>
+                <div class="bg-slate-50 p-3 font-semibold">Sáb</div>
+                <div class="bg-slate-50 p-3 font-semibold">Dom</div>
+              </div>
+              <div class="p-5 space-y-3">
+                <div class="flex items-center justify-between">
+                  <div class="text-slate-700 font-medium">Consulta inicial</div>
+                  <span class="text-xs bg-emerald-50 text-emerald-700 px-2 py-1 rounded-md border border-emerald-200">Confirmada</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <div class="text-slate-700 font-medium">Manicure gel</div>
+                  <span class="text-xs bg-amber-50 text-amber-700 px-2 py-1 rounded-md border border-amber-200">Pendiente</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <div class="text-slate-700 font-medium">Sesión de coaching</div>
+                  <span class="text-xs bg-sky-50 text-sky-700 px-2 py-1 rounded-md border border-sky-200">Reagendada</span>
+                </div>
+              </div>
+            </div>
+            <div class="mt-4 flex flex-wrap items-center gap-3 text-sm">
+              <div class="lift inline-flex items-center gap-2 rounded-xl bg-white border border-slate-200 px-3 py-2 shadow-sm">
+                <span class="inline-flex h-6 w-6 items-center justify-center rounded-md bg-emerald-500 text-white text-xs font-bold">WA</span>
+                <span>Recordatorios por WhatsApp</span>
+              </div>
+              <div class="lift inline-flex items-center gap-2 rounded-xl bg-white border border-slate-200 px-3 py-2 shadow-sm">
+                <span class="inline-flex h-6 w-6 items-center justify-center rounded-md bg-indigo-500 text-white text-xs font-bold">AI</span>
+                <span>Confirmaciones automáticas</span>
+              </div>
+              <div class="lift inline-flex items-center gap-2 rounded-xl bg-white border border-slate-200 px-3 py-2 shadow-sm">
+                <span class="inline-flex h-6 w-6 items-center justify-center rounded-md bg-sky-500 text-white text-xs font-bold">API</span>
+                <span>Integración simple</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BENEFICIOS -->
+  <section id="beneficios" class="py-20 bg-gradient-to-b from-white to-slate-50">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="text-center max-w-3xl mx-auto">
+        <h2 class="text-3xl sm:text-4xl font-extrabold">Todo lo que necesitas para agendar sin fricción</h2>
+        <p class="mt-3 text-slate-600">Simplifica reservas, confirma por WhatsApp y mantén tu calendario bajo control.</p>
+      </div>
+      <div class="mt-12 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="lift g-border rounded-2xl bg-white/90 p-6 shadow-sm relative">
+          <div class="h-10 w-10 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center font-bold">📅</div>
+          <h3 class="mt-4 font-semibold text-lg">Agenda en línea</h3>
+          <p class="mt-1 text-slate-600">Tus clientes reservan desde un enlace único. Sin llamadas, sin enredos.</p>
+        </div>
+        <div class="lift g-border rounded-2xl bg-white/90 p-6 shadow-sm relative">
+          <div class="h-10 w-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">💬</div>
+          <h3 class="mt-4 font-semibold text-lg">Recordatorios automáticos</h3>
+          <p class="mt-1 text-slate-600">Confirmaciones por WhatsApp y correo para reducir ausencias.</p>
+        </div>
+        <div class="lift g-border rounded-2xl bg-white/90 p-6 shadow-sm relative">
+          <div class="h-10 w-10 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold">🗂️</div>
+          <h3 class="mt-4 font-semibold text-lg">Gestión de clientes</h3>
+          <p class="mt-1 text-slate-600">Historial, próximas citas y notas a un clic. Todo en un mismo lugar.</p>
+        </div>
+        <div class="lift g-border rounded-2xl bg-white/90 p-6 shadow-sm relative">
+          <div class="h-10 w-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold">⏱️</div>
+          <h3 class="mt-4 font-semibold text-lg">Disponibilidad inteligente</h3>
+          <p class="mt-1 text-slate-600">Evita choques de horario con reglas simples y bloques personalizados.</p>
+        </div>
+        <div class="lift g-border rounded-2xl bg-white/90 p-6 shadow-sm relative">
+          <div class="h-10 w-10 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center font-bold">🔗</div>
+          <h3 class="mt-4 font-semibold text-lg">Enlaces por profesional</h3>
+          <p class="mt-1 text-slate-600">Crea páginas públicas por cada negocio o profesional: <span class="font-mono text-xs">/tu-negocio</span>.</p>
+        </div>
+        <div class="lift g-border rounded-2xl bg-white/90 p-6 shadow-sm relative">
+          <div class="h-10 w-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center font-bold">🔒</div>
+          <h3 class="mt-4 font-semibold text-lg">Seguro y confiable</h3>
+          <p class="mt-1 text-slate-600">Autenticación, permisos y copias de seguridad para operar tranquilo.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROFESIONALES -->
+  <section id="profesionales" class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="text-center max-w-3xl mx-auto">
+        <h2 class="text-3xl sm:text-4xl font-extrabold">Creado para distintos profesionales como tú</h2>
+        <p class="mt-3 text-slate-600">Elige tu rubro y comienza en minutos.</p>
+      </div>
+      <div class="mt-12 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="lift rounded-2xl border border-slate-200 p-6 bg-slate-50 hover:bg-white hover:shadow-md transition">
+          <div class="text-3xl">✂️</div>
+          <h3 class="mt-3 font-semibold">Belleza & Estética</h3>
+          <p class="text-sm text-slate-600 mt-1">Peluquerías, barbershop, depilación, spa.</p>
+        </div>
+        <div class="lift rounded-2xl border border-slate-200 p-6 bg-slate-50 hover:bg-white hover:shadow-md transition">
+          <div class="text-3xl">🧠</div>
+          <h3 class="mt-3 font-semibold">Psicología & Terapias</h3>
+          <p class="text-sm text-slate-600 mt-1">Consulta privada, terapia online o presencial.</p>
+        </div>
+        <div class="lift rounded-2xl border border-slate-200 p-6 bg-slate-50 hover:bg-white hover:shadow-md transition">
+          <div class="text-3xl">💼</div>
+          <h3 class="mt-3 font-semibold">Coaching & Consultoría</h3>
+          <p class="text-sm text-slate-600 mt-1">Mentorías, asesorías, sesiones 1:1.</p>
+        </div>
+        <div class="lift rounded-2xl border border-slate-200 p-6 bg-slate-50 hover:bg-white hover:shadow-md transition">
+          <div class="text-3xl">💅</div>
+          <h3 class="mt-3 font-semibold">Manicure & Estilistas</h3>
+          <p class="text-sm text-slate-600 mt-1">Uñas, maquillaje, peinados y más.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIO / CASO -->
+  <section class="py-20">
+    <div class="max-w-5xl mx-auto px-6">
+      <div class="rounded-3xl bg-gradient-to-br from-sky-50 to-emerald-50 border border-slate-200 p-8 lg:p-12">
+        <div class="grid lg:grid-cols-3 gap-8 items-center">
+          <div class="lg:col-span-2">
+            <p class="text-slate-700 text-lg leading-relaxed">“Desde que uso Agendalook, mis clientes <span class="font-semibold">agendan solos</span>, reciben recordatorios y <span class="font-semibold">ya no pierdo citas</span>. Mi agenda está siempre al día.”</p>
+            <div class="mt-4 font-semibold">Carla, Psicóloga</div>
+          </div>
+          <div class="lg:justify-self-end">
+            <div class="rounded-2xl bg-white border border-slate-200 p-4 shadow-sm text-sm">
+              <div class="flex items-center justify-between">
+                <span class="text-slate-600">Ausencias</span>
+                <span class="font-semibold text-emerald-600">−62%</span>
+              </div>
+              <div class="flex items-center justify-between mt-2">
+                <span class="text-slate-600">Reservas al mes</span>
+                <span class="font-semibold">+38%</span>
+              </div>
+              <div class="flex items-center justify-between mt-2">
+                <span class="text-slate-600">Tiempo ahorrado</span>
+                <span class="font-semibold">3 h/sem</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRECIOS -->
+  <section id="precios" class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="text-center max-w-3xl mx-auto">
+        <h2 class="text-3xl sm:text-4xl font-extrabold">Planes simples para crecer</h2>
+        <p class="mt-3 text-slate-600">Comienza gratis. Cambia o cancela cuando quieras.</p>
+      </div>
+      <div class="mt-12 grid md:grid-cols-3 gap-6 items-stretch">
+        <!-- Free -->
+        <div class="lift rounded-3xl border border-slate-200 bg-slate-50 p-6 shadow-sm flex flex-col">
+          <div class="text-sm font-semibold text-slate-600">Free</div>
+          <div class="mt-2 text-4xl font-extrabold">$0</div>
+          <div class="text-sm text-slate-500">/mes</div>
+          <ul class="mt-6 space-y-2 text-slate-700">
+            <li>• Agenda básica</li>
+            <li>• Página pública /tu-negocio</li>
+            <li>• 1 usuario</li>
+          </ul>
+          <a href="#contacto" class="mt-auto inline-flex justify-center rounded-2xl bg-white border border-slate-200 px-4 py-2 font-semibold hover:bg-slate-50">Comenzar</a>
+        </div>
+        <!-- Pro -->
+        <div class="lift rounded-3xl border-2 border-sky-500 bg-white p-6 shadow-md flex flex-col relative">
+          <span class="absolute -top-3 right-6 rounded-full bg-sky-500 text-white text-xs px-3 py-1">Recomendado</span>
+          <div class="text-sm font-semibold text-slate-700">Pro</div>
+          <div class="mt-2 text-4xl font-extrabold">$9.990</div>
+          <div class="text-sm text-slate-500">/mes</div>
+          <ul class="mt-6 space-y-2 text-slate-700">
+            <li>• Todo lo del Free</li>
+            <li>• Recordatorios por WhatsApp</li>
+            <li>• Confirmaciones automáticas</li>
+            <li>• 3 usuarios</li>
+          </ul>
+          <a href="#contacto" class="mt-auto inline-flex justify-center rounded-2xl bg-sky-500 hover:bg-sky-600 text-white px-4 py-2 font-semibold magnet">Probar Pro</a>
+        </div>
+        <!-- Studio -->
+        <div class="lift rounded-3xl border border-slate-200 bg-slate-50 p-6 shadow-sm flex flex-col">
+          <div class="text-sm font-semibold text-slate-600">Studio</div>
+          <div class="mt-2 text-4xl font-extrabold">$19.990</div>
+          <div class="text-sm text-slate-500">/mes</div>
+          <ul class="mt-6 space-y-2 text-slate-700">
+            <li>• Todo lo del Pro</li>
+            <li>• Multi-sucursal</li>
+            <li>• Roles y permisos</li>
+            <li>• Soporte prioritario</li>
+          </ul>
+          <a href="#contacto" class="mt-auto inline-flex justify-center rounded-2xl bg-white border border-slate-200 px-4 py-2 font-semibold hover:bg-slate-50">Hablar con ventas</a>
+        </div>
+      </div>
+      <!-- FAQ -->
+      <div class="mt-16 max-w-3xl mx-auto">
+        <h3 class="text-xl font-extrabold">Preguntas frecuentes</h3>
+        <div class="mt-6 space-y-3">
+          <details class="group rounded-xl border border-slate-200 bg-white p-4">
+            <summary class="font-medium cursor-pointer flex justify-between items-center">¿Puedo cancelar cuando quiera?<span class="text-sky-500 group-open:rotate-45 transition">＋</span></summary>
+            <p class="mt-2 text-slate-600">Sí, sin amarras. Puedes cambiar de plan o cancelar en cualquier momento.</p>
+          </details>
+          <details class="group rounded-xl border border-slate-200 bg-white p-4">
+            <summary class="font-medium cursor-pointer flex justify-between items-center">¿Tienen prueba gratuita?<span class="text-sky-500 group-open:rotate-45 transition">＋</span></summary>
+            <p class="mt-2 text-slate-600">El plan Free te permite probar todas las bases sin costo.</p>
+          </details>
+          <details class="group rounded-xl border border-slate-200 bg-white p-4">
+            <summary class="font-medium cursor-pointer flex justify-between items-center">¿Envían recordatorios por WhatsApp?<span class="text-sky-500 group-open:rotate-45 transition">＋</span></summary>
+            <p class="mt-2 text-slate-600">Sí, en los planes Pro y Studio puedes automatizar confirmaciones y recordatorios.</p>
+          </details>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACTO / DEMO -->
+  <section id="contacto" class="py-20">
+    <div class="max-w-3xl mx-auto px-6">
+      <div class="rounded-3xl bg-white border border-slate-200 p-8 shadow-sm">
+        <h3 class="text-2xl font-extrabold">¿Quieres una demo?</h3>
+        <p class="mt-2 text-slate-600">Déjanos tu correo y agenda una llamada con nuestro equipo.</p>
+        <form class="mt-6 grid sm:grid-cols-[1fr_auto] gap-3">
+          <label class="sr-only" for="email">Correo</label>
+          <input id="email" type="email" required placeholder="tu@email.com" class="w-full rounded-2xl border border-slate-300 bg-white text-slate-900 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-500" />
+          <button class="rounded-2xl bg-sky-500 hover:bg-sky-600 text-white px-6 py-3 font-semibold">Solicitar demo</button>
+        </form>
+        <p class="mt-3 text-xs text-slate-500">Al continuar aceptas nuestros términos y política de privacidad.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="py-12 border-t border-slate-200 bg-white">
+    <div class="max-w-7xl mx-auto px-6 grid sm:grid-cols-3 gap-8 items-center">
+      <div class="flex items-center gap-2 text-slate-700">
+        <span class="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-sky-500 text-white font-bold">A</span>
+        <span class="font-semibold">Agendalook</span>
+      </div>
+      <ul class="flex items-center gap-6 text-sm text-slate-600 justify-center">
+        <li><a href="#" class="hover:text-sky-600">Sobre nosotros</a></li>
+        <li><a href="#precios" class="hover:text-sky-600">Precios</a></li>
+        <li><a href="#" class="hover:text-sky-600">Soporte</a></li>
+        <li><a href="#" class="hover:text-sky-600">Contacto</a></li>
+      </ul>
+      <p class="text-xs text-slate-500 sm:text-right">© <span id="year"></span> Agendalook. Todos los derechos reservados.</p>
+    </div>
+  </footer>
+
+  <script>
+    // Año dinámico
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Parallax blobs
+    const blobs = document.querySelectorAll('[data-parallax]');
+    const onMove = (e)=>{
+      const { innerWidth: w, innerHeight: h } = window;
+      const x = (e.clientX - w/2) / w;
+      const y = (e.clientY - h/2) / h;
+      blobs.forEach(el => {
+        const f = parseFloat(el.getAttribute('data-parallax')) || 0.02;
+        el.style.transform = `translate(${x * f * 100}px, ${y * f * 100}px)`;
+      });
+    };
+    window.addEventListener('pointermove', onMove);
+
+    // Magnetic buttons (sutil)
+    const magnets = document.querySelectorAll('.magnet');
+    magnets.forEach(btn => {
+      btn.addEventListener('pointermove', (e) => {
+        const r = btn.getBoundingClientRect();
+        const dx = (e.clientX - (r.left + r.width/2)) / (r.width/2);
+        const dy = (e.clientY - (r.top + r.height/2)) / (r.height/2);
+        btn.style.transform = `translate(${dx*6}px, ${dy*6}px)`;
+      });
+      btn.addEventListener('pointerleave', () => { btn.style.transform = 'translate(0,0)'; });
+    });
+  </script>
+</body>
+</html>
