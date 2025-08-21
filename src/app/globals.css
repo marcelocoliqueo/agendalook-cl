@@ -1,69 +1,133 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --brand: #0ea5e9; /* sky-500 */
+  --brand-600: #0284c7; /* sky-600 */
+  --accent: #22c55e; /* emerald-500 */
+  --ink: #0f172a; /* slate-900 */
+  --bg: #f8fafc; /* slate-50 */
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html { 
+  font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, 'Helvetica Neue', Arial; 
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: 'Poppins', Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, 'Helvetica Neue', Arial;
 }
 
-/* Animaciones personalizadas */
-@keyframes gradient-x {
-  0%, 100% {
-    background-size: 200% 200%;
-    background-position: left center;
-  }
-  50% {
-    background-size: 200% 200%;
-    background-position: right center;
-  }
+/* Estilos exactos del HTML de referencia */
+.lift { 
+  transition: transform .35s cubic-bezier(.2,.8,.2,1), box-shadow .35s, border-color .35s; 
 }
 
-.animate-gradient-x {
-  animation: gradient-x 3s ease infinite;
+.lift:hover { 
+  transform: translateY(-6px); 
+  box-shadow: 0 18px 45px rgba(2,132,199,.15); 
 }
 
-/* Efectos de hover mejorados */
-.hover\:shadow-3xl:hover {
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+.shine { 
+  position: relative; 
+  overflow: hidden; 
 }
 
-/* Transiciones suaves */
-* {
-  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
+.shine:before { 
+  content: ''; 
+  position: absolute; 
+  inset: -200% -150% auto auto; 
+  transform: rotate(35deg); 
+  width: 60%; 
+  height: 140%; 
+  background: linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent); 
+  transition: .8s; 
 }
 
-/* Scrollbar personalizada */
-::-webkit-scrollbar {
-  width: 8px;
+.shine:hover:before { 
+  inset: -220% -120% auto auto; 
 }
 
-::-webkit-scrollbar-track {
-  background: #f1f1f1;
+.glass { 
+  backdrop-filter: blur(10px); 
+  background: rgba(255,255,255,0.6); 
 }
 
-::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, #d946ef, #fb923c);
-  border-radius: 4px;
+.gradient-text { 
+  background: linear-gradient(90deg, #38bdf8, #22c55e, #38bdf8); 
+  background-size: 200% auto; 
+  -webkit-background-clip: text; 
+  background-clip: text; 
+  color: transparent; 
+  animation: gradient 8s linear infinite; 
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(to bottom, #c026d3, #ea580c);
+@keyframes gradient { 
+  to { 
+    background-position: 200% center; 
+  } 
+}
+
+.blob { 
+  filter: blur(40px); 
+  opacity: .28; 
+  mix-blend-mode: multiply; 
+  animation: float 16s ease-in-out infinite; 
+}
+
+.blob2 { 
+  animation-delay: -8s; 
+}
+
+.blob3 { 
+  animation-delay: -12s; 
+}
+
+@keyframes float { 
+  0% { 
+    transform: translateY(0px) translateX(0);
+  } 
+  50% { 
+    transform: translateY(-22px) translateX(10px);
+  } 
+  100% { 
+    transform: translateY(0) translateX(0);
+  } 
+}
+
+.focus-ring:focus { 
+  outline: none; 
+  box-shadow: 0 0 0 4px rgba(14,165,233,.28); 
+}
+
+.g-border { 
+  position: relative; 
+}
+
+.g-border:before { 
+  content: ''; 
+  position: absolute; 
+  inset: 0; 
+  padding: 1px; 
+  border-radius: 1.25rem; 
+  background: linear-gradient(135deg, rgba(56,189,248,.5), rgba(34,197,94,.5)); 
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); 
+  -webkit-mask-composite: xor; 
+  mask-composite: exclude; 
+}
+
+.magnet { 
+  will-change: transform; 
+  transition: transform .2s cubic-bezier(.2,.8,.2,1); 
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lift, .blob, .gradient-text, .shine:before, .magnet { 
+    animation: none !important; 
+    transition: none !important; 
+  } 
 }

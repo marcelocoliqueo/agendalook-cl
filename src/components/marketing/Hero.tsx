@@ -2,115 +2,115 @@
 
 import Link from 'next/link';
 import { useParallax } from '@/hooks/useParallax';
-import { Calendar, Sparkles, Users, Star } from 'lucide-react';
 
 export function Hero() {
-  const blob1Ref = useParallax({ speed: 0.3, direction: 'up' });
-  const blob2Ref = useParallax({ speed: 0.2, direction: 'down' });
-  const blob3Ref = useParallax({ speed: 0.4, direction: 'left' });
+  const blob1Ref = useParallax({ speed: 0.02, direction: 'up' });
+  const blob2Ref = useParallax({ speed: 0.02, direction: 'down' });
+  const blob3Ref = useParallax({ speed: 0.01, direction: 'up' });
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-lavender-50 via-white to-coral-50">
-      {/* Blobs de fondo con parallax */}
-      <div
+    <section className="relative overflow-hidden">
+      {/* Blobs exactos del HTML */}
+      <div 
         ref={blob1Ref}
-        className="absolute top-20 left-10 w-96 h-96 bg-gradient-to-r from-lavender-200 to-coral-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse"
-        style={{ animationDuration: '4s' }}
-      />
-      <div
+        className="pointer-events-none absolute -top-24 -left-16 h-96 w-96 rounded-full bg-sky-300 blob contrast-125 mix-blend-overlay" 
+        data-parallax="-0.02"
+      ></div>
+      <div 
         ref={blob2Ref}
-        className="absolute top-40 right-20 w-80 h-80 bg-gradient-to-r from-primary-200 to-sky-200 rounded-full mix-blend-multiply filter blur-xl opacity-60 animate-pulse"
-        style={{ animationDuration: '6s' }}
-      />
-      <div
+        className="pointer-events-none absolute top-16 -right-20 h-[28rem] w-[28rem] rounded-full bg-emerald-300 blob blob2 mix-blend-overlay" 
+        data-parallax="0.02"
+      ></div>
+      <div 
         ref={blob3Ref}
-        className="absolute bottom-20 left-1/2 w-72 h-72 bg-gradient-to-r from-emerald-200 to-gold-200 rounded-full mix-blend-multiply filter blur-xl opacity-50 animate-pulse"
-        style={{ animationDuration: '5s' }}
-      />
+        className="pointer-events-none absolute bottom-[-6rem] left-1/2 -translate-x-1/2 h-[22rem] w-[44rem] rounded-full bg-sky-200 blob blob3 opacity-20" 
+        data-parallax="-0.01"
+      ></div>
 
-      {/* Contenido principal */}
-      <div className="relative z-10 text-center px-4 max-w-6xl mx-auto">
-        {/* Badge superior */}
-        <div className="inline-flex items-center px-4 py-2 rounded-full bg-white/80 backdrop-blur-sm border border-gray-200 mb-8">
-          <Sparkles className="w-4 h-4 text-primary-500 mr-2" />
-          <span className="text-sm font-medium text-gray-700">
-            La agenda más simple para profesionales
-          </span>
-        </div>
-
-        {/* Headline principal */}
-        <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-8">
-          <span className="bg-gradient-to-r from-primary-600 via-coral-500 to-sky-500 bg-clip-text text-transparent animate-gradient-x">
-            Agenda simple
-          </span>
-          <br />
-          <span className="text-gray-900">y profesional</span>
-        </h1>
-
-        {/* Descripción */}
-        <p className="text-xl md:text-2xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed">
-          Gestiona tu agenda, clientes y recordatorios de forma simple. 
-          Perfecto para psicólogos, estilistas, coaches y más profesionales.
-        </p>
-
-        {/* CTA principal */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
-          <Link
-            href="/register"
-            className="group relative px-8 py-4 bg-gradient-to-r from-primary-500 to-coral-500 text-white font-semibold rounded-full text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
-          >
-            <span className="relative z-10">Crear cuenta gratis</span>
-            <div className="absolute inset-0 bg-gradient-to-r from-primary-600 to-coral-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          </Link>
-          
-          <Link
-            href="#how-it-works"
-            className="px-8 py-4 border-2 border-gray-300 text-gray-700 font-semibold rounded-full text-lg hover:border-primary-300 hover:text-primary-600 transition-all duration-300"
-          >
-            Ver demo
-          </Link>
-        </div>
-
-        {/* Estadísticas */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
-          <div className="text-center">
-            <div className="w-16 h-16 bg-gradient-to-r from-primary-100 to-coral-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <Calendar className="w-8 h-8 text-primary-600" />
+      <div className="max-w-7xl mx-auto px-6 pt-16 pb-20 lg:pt-28 lg:pb-28">
+        <div className="grid lg:grid-cols-2 gap-14 items-center">
+          <div>
+            <p className="inline-flex items-center gap-2 text-xs font-semibold px-3 py-1 rounded-full border border-sky-200 text-sky-700 bg-sky-50">
+              Nuevo · Confirmaciones por WhatsApp
+            </p>
+            <h1 className="mt-4 text-4xl sm:text-6xl font-extrabold leading-tight text-slate-900">
+              <span className="gradient-text">Agenda simple</span> y profesional para tus clientes
+            </h1>
+            <p className="mt-5 text-lg text-slate-700 max-w-prose">
+              La plataforma todo en uno para <span className="font-semibold">psicólogos</span>, <span className="font-semibold">estilistas</span>, <span className="font-semibold">coaches</span>, <span className="font-semibold">manicuristas</span> y más. Publica tu agenda, recibe reservas y confirma por WhatsApp.
+            </p>
+            <div className="mt-8 flex flex-col sm:flex-row gap-3">
+              <Link 
+                href="#precios" 
+                className="shine magnet inline-flex items-center justify-center rounded-2xl bg-sky-500 hover:bg-sky-600 text-white px-6 py-3 font-semibold shadow-sm focus-ring"
+              >
+                Empieza gratis
+              </Link>
+              <Link 
+                href="#contacto" 
+                className="inline-flex items-center justify-center rounded-2xl bg-white hover:bg-slate-50 text-slate-900 px-6 py-3 font-semibold border border-slate-200 shadow-sm focus-ring"
+              >
+                Solicita una demo
+              </Link>
             </div>
-            <div className="text-2xl font-bold text-gray-900">10k+</div>
-            <div className="text-sm text-gray-600">Citas gestionadas</div>
+            <div className="mt-6 flex items-center gap-4 text-xs text-slate-600">
+              <span className="inline-flex items-center gap-1">⭐️⭐️⭐️⭐️⭐️</span>
+              <span>100+ profesionales ya agendando</span>
+            </div>
           </div>
           
-          <div className="text-center">
-            <div className="w-16 h-16 bg-gradient-to-r from-lavender-100 to-sky-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <Users className="w-8 h-8 text-lavender-600" />
+          <div className="relative">
+            <div className="glass rounded-3xl shadow-xl ring-1 ring-slate-200 p-5">
+              <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden g-border">
+                <div className="px-4 py-3 border-b border-slate-200 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="h-3 w-3 rounded-full bg-red-400"></div>
+                    <div className="h-3 w-3 rounded-full bg-amber-400"></div>
+                    <div className="h-3 w-3 rounded-full bg-emerald-400"></div>
+                  </div>
+                  <span className="text-sm font-semibold">Agenda semanal</span>
+                  <span className="text-xs text-slate-500">Vista demo</span>
+                </div>
+                <div className="grid grid-cols-7 gap-px bg-slate-200 text-center text-xs">
+                  <div className="bg-slate-50 p-3 font-semibold">Lun</div>
+                  <div className="bg-slate-50 p-3 font-semibold">Mar</div>
+                  <div className="bg-slate-50 p-3 font-semibold">Mié</div>
+                  <div className="bg-slate-50 p-3 font-semibold">Jue</div>
+                  <div className="bg-slate-50 p-3 font-semibold">Vie</div>
+                  <div className="bg-slate-50 p-3 font-semibold">Sáb</div>
+                  <div className="bg-slate-50 p-3 font-semibold">Dom</div>
+                </div>
+                <div className="p-5 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="text-slate-700 font-medium">Consulta inicial</div>
+                    <span className="text-xs bg-emerald-50 text-emerald-700 px-2 py-1 rounded-md border border-emerald-200">Confirmada</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="text-slate-700 font-medium">Manicure gel</div>
+                    <span className="text-xs bg-amber-50 text-amber-700 px-2 py-1 rounded-md border border-amber-200">Pendiente</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="text-slate-700 font-medium">Sesión de coaching</div>
+                    <span className="text-xs bg-sky-50 text-sky-700 px-2 py-1 rounded-md border border-sky-200">Reagendada</span>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4 flex flex-wrap items-center gap-3 text-sm">
+                <div className="lift inline-flex items-center gap-2 rounded-xl bg-white border border-slate-200 px-3 py-2 shadow-sm">
+                  <span className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-emerald-500 text-white text-xs font-bold">WA</span>
+                  <span>Recordatorios por WhatsApp</span>
+                </div>
+                <div className="lift inline-flex items-center gap-2 rounded-xl bg-white border border-slate-200 px-3 py-2 shadow-sm">
+                  <span className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-indigo-500 text-white text-xs font-bold">AI</span>
+                  <span>Confirmaciones automáticas</span>
+                </div>
+                <div className="lift inline-flex items-center gap-2 rounded-xl bg-white border border-slate-200 px-3 py-2 shadow-sm">
+                  <span className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-sky-500 text-white text-xs font-bold">API</span>
+                  <span>Integración simple</span>
+                </div>
+              </div>
             </div>
-            <div className="text-2xl font-bold text-gray-900">5k+</div>
-            <div className="text-sm text-gray-600">Profesionales</div>
           </div>
-          
-          <div className="text-center">
-            <div className="w-16 h-16 bg-gradient-to-r from-emerald-100 to-gold-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <Star className="w-8 h-8 text-emerald-600" />
-            </div>
-            <div className="text-2xl font-bold text-gray-900">4.9/5</div>
-            <div className="text-sm text-gray-600">Calificación</div>
-          </div>
-          
-          <div className="text-center">
-            <div className="w-16 h-16 bg-gradient-to-r from-coral-100 to-primary-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <Sparkles className="w-8 h-8 text-coral-600" />
-            </div>
-            <div className="text-2xl font-bold text-gray-900">99.9%</div>
-            <div className="text-sm text-gray-600">Uptime</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-        <div className="w-6 h-10 border-2 border-gray-400 rounded-full flex justify-center">
-          <div className="w-1 h-3 bg-gray-400 rounded-full mt-2 animate-pulse" />
         </div>
       </div>
     </section>

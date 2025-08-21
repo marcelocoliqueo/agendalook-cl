@@ -1,28 +1,40 @@
 "use client";
 
-import { Navigation } from '@/components/layout/Navigation';
+import { Navbar } from '@/components/marketing/Navbar';
 import { Hero } from '@/components/marketing/Hero';
+import { Beneficios } from '@/components/marketing/Beneficios';
+import { Profesionales } from '@/components/marketing/Profesionales';
+import { Testimonio } from '@/components/marketing/Testimonio';
+import { Precios } from '@/components/marketing/Precios';
+import { Contacto } from '@/components/marketing/Contacto';
+import { Footer } from '@/components/marketing/Footer';
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-white">
-      {/* Navigation */}
-      <Navigation variant="landing" />
+    <div className="antialiased text-slate-800 bg-[var(--bg)]">
+      {/* Navbar */}
+      <Navbar />
       
       {/* Hero Section */}
       <Hero />
       
-      {/* Placeholder para otras secciones */}
-      <section className="py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          <h2 className="text-4xl font-bold text-gray-900 mb-6">
-            Landing en construcción
-          </h2>
-          <p className="text-xl text-gray-600">
-            Las demás secciones se están implementando. Por ahora, disfruta del Hero section.
-          </p>
-        </div>
-      </section>
+      {/* Beneficios Section */}
+      <Beneficios />
+      
+      {/* Profesionales Section */}
+      <Profesionales />
+      
+      {/* Testimonio Section */}
+      <Testimonio />
+      
+      {/* Precios Section */}
+      <Precios />
+      
+      {/* Contacto Section */}
+      <Contacto />
+      
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }
