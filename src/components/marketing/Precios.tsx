@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { CTAPrimaryButton, RegisterButton } from '@/components/ui/AuthButtons';
 
 export function Precios() {
   return (
@@ -21,12 +22,7 @@ export function Precios() {
               <li>• Página pública /tu-negocio</li>
               <li>• 1 usuario</li>
             </ul>
-            <Link 
-              href="#contacto" 
-              className="mt-auto inline-flex justify-center rounded-2xl bg-white border border-slate-200 px-4 py-2 font-semibold hover:bg-slate-50"
-            >
-              Comenzar
-            </Link>
+            <RegisterButton className="mt-auto w-full" />
           </div>
           {/* Pro */}
           <div className="lift rounded-3xl border-2 border-sky-500 bg-white p-6 shadow-md flex flex-col relative">
@@ -40,12 +36,7 @@ export function Precios() {
               <li>• Confirmaciones automáticas</li>
               <li>• 3 usuarios</li>
             </ul>
-            <Link 
-              href="#contacto" 
-              className="mt-auto inline-flex justify-center rounded-2xl bg-sky-500 hover:bg-sky-600 text-white px-4 py-2 font-semibold magnet"
-            >
-              Probar Pro
-            </Link>
+            <RegisterButton className="mt-auto w-full" />
           </div>
           {/* Studio */}
           <div className="lift rounded-3xl border border-slate-200 bg-slate-50 p-6 shadow-sm flex flex-col">
@@ -58,13 +49,19 @@ export function Precios() {
               <li>• Roles y permisos</li>
               <li>• Soporte prioritario</li>
             </ul>
-            <Link 
-              href="#contacto" 
-              className="mt-auto inline-flex justify-center rounded-2xl bg-white border border-slate-200 px-4 py-2 font-semibold hover:bg-slate-50"
-            >
-              Hablar con ventas
-            </Link>
+            <RegisterButton className="mt-auto w-full" />
           </div>
+        </div>
+        {/* CTA Principal */}
+        <div className="mt-16 text-center">
+          <h3 className="text-2xl font-bold text-slate-900 mb-4">
+            ¿Listo para empezar?
+          </h3>
+          <p className="text-slate-600 mb-8 max-w-2xl mx-auto">
+            Únete a más de 100 profesionales que ya están agendando con Agendalook. 
+            Configuración en menos de 5 minutos.
+          </p>
+          <CTAPrimaryButton />
         </div>
         {/* FAQ */}
         <div className="mt-16 max-w-3xl mx-auto">

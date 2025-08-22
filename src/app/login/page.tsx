@@ -7,6 +7,7 @@ import Image from 'next/image';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import { useSupabaseClient } from '@/contexts/SupabaseContext';
 import { MarketingLayout } from '@/components/layout/MarketingLayout';
+import { RegisterButton } from '@/components/ui/AuthButtons';
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -176,15 +177,10 @@ export default function LoginPage() {
             </form>
 
             <div className="mt-8 text-center">
-              <p className="text-slate-600">
-                ¿No tienes una cuenta?{' '}
-                <Link
-                  href="/register"
-                  className="text-sky-600 hover:text-sky-700 font-semibold"
-                >
-                  Regístrate aquí
-                </Link>
+              <p className="text-slate-600 mb-4">
+                ¿No tienes una cuenta?
               </p>
+              <RegisterButton className="w-full" />
             </div>
           </div>
         </div>

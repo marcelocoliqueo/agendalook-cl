@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { User, Building, Mail, Lock, Eye, EyeOff, CheckCircle } from 'lucide-react';
 import { MarketingLayout } from '@/components/layout/MarketingLayout';
+import { LoginButton } from '@/components/ui/AuthButtons';
 
 interface FormData {
   name: string;
@@ -317,15 +318,10 @@ export default function RegisterPage() {
             </form>
 
             <div className="mt-8 text-center">
-              <p className="text-slate-700">
-                ¿Ya tienes una cuenta?{' '}
-                <Link
-                  href="/login"
-                  className="text-sky-600 hover:text-sky-700 font-semibold"
-                >
-                  Inicia sesión aquí
-                </Link>
+              <p className="text-slate-700 mb-4">
+                ¿Ya tienes una cuenta?
               </p>
+              <LoginButton className="w-full" />
             </div>
           </div>
         </div>

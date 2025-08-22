@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useParallax } from '@/hooks/useParallax';
+import { CTAPrimaryButton } from '@/components/ui/AuthButtons';
 
 export function Hero() {
   const blob1Ref = useParallax({ speed: 0.02, direction: 'up' });
@@ -40,15 +41,10 @@ export function Hero() {
               La plataforma todo en uno para <span className="font-semibold">psicólogos</span>, <span className="font-semibold">estilistas</span>, <span className="font-semibold">coaches</span>, <span className="font-semibold">manicuristas</span> y más. Publica tu agenda, recibe reservas y confirma por WhatsApp.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row gap-3">
-              <Link 
-                href="#precios" 
-                className="shine magnet inline-flex items-center justify-center rounded-2xl bg-sky-500 hover:bg-sky-600 text-white px-6 py-3 font-semibold shadow-sm focus-ring"
-              >
-                Empieza gratis
-              </Link>
+              <CTAPrimaryButton />
               <Link 
                 href="#contacto" 
-                className="inline-flex items-center justify-center rounded-2xl bg-white hover:bg-slate-50 text-slate-900 px-6 py-3 font-semibold border border-slate-200 shadow-sm focus-ring"
+                className="inline-flex items-center justify-center rounded-2xl bg-white hover:bg-slate-50 text-slate-900 px-6 py-3 font-semibold border border-slate-200 shadow-sm focus-ring transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
               >
                 Solicita una demo
               </Link>
