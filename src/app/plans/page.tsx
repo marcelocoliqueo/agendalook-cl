@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { Check, Star, ArrowRight, Zap, Shield, Users, Calendar, MessageSquare } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfessional } from '@/hooks/useProfessional';
+import { MarketingLayout } from '@/components/layout/MarketingLayout';
 
 interface Plan {
   id: string;
@@ -49,8 +50,8 @@ const plans: Plan[] = [
       'Sin marca de Agendalook'
     ],
     popular: true,
-    color: 'primary',
-    gradient: 'from-primary-500 to-coral-500'
+    color: 'sky',
+    gradient: 'from-sky-500 to-emerald-500'
   },
   {
     id: 'studio',
@@ -65,8 +66,8 @@ const plans: Plan[] = [
       'API personalizada',
       'Soporte dedicado'
     ],
-    color: 'purple',
-    gradient: 'from-purple-500 to-pink-500'
+    color: 'emerald',
+    gradient: 'from-emerald-500 to-sky-500'
   }
 ];
 
@@ -98,94 +99,76 @@ export default function PlansPage() {
     if (!selectedPlan) return;
 
     setLoading(true);
+
     try {
-      // Actualizar el plan del profesional
-      if (user) {
-        const prof = await getProfessionalByUserId(user.id);
-        if (prof) {
-          await updateProfessional(prof.id, { plan: selectedPlan });
-        }
+      // Obtener el profesional actual
+      const professional = await getProfessionalByUserId(user!.id);
+      
+      if (!professional) {
+        console.error('No se encontró el profesional');
+        return;
       }
 
-      // Redirigir según el plan
+      // Actualizar el plan del profesional
+      await updateProfessional(professional.id, {
+        plan: selectedPlan
+      });
+
+      // Redirigir según el plan seleccionado
       if (selectedPlan === 'free') {
         router.push('/onboarding');
       } else {
-        // Para planes pagos, crear preferencia y redirigir directo a MP
-        const appUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
-        const resp = await fetch('/api/mercadopago/create-preference', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            plan: selectedPlan,
-            successUrl: `${appUrl}/dashboard`,
-            cancelUrl: `${appUrl}/plans`,
-          }),
-        });
-        if (!resp.ok) {
-          console.error('Error creando preferencia:', await resp.text());
-          setLoading(false);
-          return;
-        }
-        const { initPoint } = await resp.json();
-        window.location.href = initPoint;
+        // Para planes de pago, redirigir a MercadoPago
+        router.push(`/upgrade?plan=${selectedPlan}`);
       }
     } catch (error) {
-      console.error('Error updating plan:', error);
+      console.error('Error al actualizar el plan:', error);
+    } finally {
       setLoading(false);
     }
   };
 
-  const formatPrice = (price: number) => {
-    if (price === 0) return 'Gratis';
-    return new Intl.NumberFormat('es-CL', {
-      style: 'currency',
-      currency: 'CLP',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(price);
-  };
+  if (authLoading) {
+    return (
+      <MarketingLayout>
+        <div className="min-h-screen bg-gradient-to-b from-white to-slate-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sky-500 mx-auto mb-4"></div>
+            <p className="text-slate-600">Cargando...</p>
+          </div>
+        </div>
+      </MarketingLayout>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-lavender-50 via-white to-coral-50">
-      {/* Header */}
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center mb-12">
-          <Link href="/" className="inline-flex items-center justify-center mb-8">
-            <Image
-              src="/logo.png"
-              alt="Agendalook"
-              width={160}
-              height={45}
-              className="w-40 h-11 object-contain"
-            />
-          </Link>
-          
-          <h1 className="text-4xl font-playfair font-bold text-gray-800 mb-4">
-            Elige tu plan
-          </h1>
-          
-          <p className="text-xl text-gray-700 max-w-2xl mx-auto">
-            Selecciona el plan que mejor se adapte a las necesidades de tu negocio. 
-            Puedes cambiar tu plan en cualquier momento.
-          </p>
-        </div>
+    <MarketingLayout>
+      <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
+        <div className="max-w-7xl mx-auto px-6 py-20">
+          {/* Header */}
+          <div className="text-center mb-16">
+            <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-6">
+              Elige tu Plan
+            </h1>
+            <p className="text-xl text-slate-600 max-w-2xl mx-auto">
+              Selecciona el plan que mejor se adapte a tus necesidades. Puedes cambiar en cualquier momento.
+            </p>
+          </div>
 
-        {/* Plans Grid */}
-        <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-3 gap-8 mb-12">
+          {/* Plans Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
             {plans.map((plan) => (
               <div
                 key={plan.id}
-                className={`relative bg-white rounded-3xl shadow-xl p-8 transition-all duration-300 ${
-                  selectedPlan === plan.id 
-                    ? 'ring-4 ring-primary-500 scale-105' 
-                    : 'hover:shadow-2xl hover:scale-105'
+                className={`relative bg-white rounded-3xl shadow-lg p-8 border-2 transition-all duration-300 hover:shadow-xl ${
+                  selectedPlan === plan.id
+                    ? 'ring-4 ring-sky-500 scale-105'
+                    : 'border-slate-200'
                 }`}
               >
                 {plan.popular && (
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <div className="bg-gradient-to-r from-primary-500 to-coral-500 text-white px-6 py-2 rounded-full text-sm font-semibold flex items-center">
+                    <div className="bg-gradient-to-r from-sky-500 to-emerald-500 text-white px-6 py-2 rounded-full text-sm font-semibold flex items-center">
                       <Star className="w-4 h-4 mr-2" />
                       Más Popular
                     </div>
@@ -193,34 +176,31 @@ export default function PlansPage() {
                 )}
 
                 <div className="text-center mb-8">
-                  <h3 className="text-2xl font-bold text-gray-800 mb-2">{plan.name}</h3>
-                  <p className="text-gray-600 mb-6">{plan.description}</p>
-                  
-                  <div className="mb-6">
-                    <p className="text-4xl font-bold text-gray-800">
-                      {formatPrice(plan.price)}
-                    </p>
-                    {plan.price > 0 && (
-                      <p className="text-gray-500 text-sm">por mes</p>
-                    )}
+                  <h3 className="text-2xl font-bold text-slate-900 mb-2">{plan.name}</h3>
+                  <p className="text-slate-600 mb-4">{plan.description}</p>
+                  <div className="text-4xl font-bold text-slate-900 mb-2">
+                    {plan.price === 0 ? 'Gratis' : `$${plan.price.toLocaleString()}`}
                   </div>
+                  {plan.price > 0 && (
+                    <p className="text-slate-500">por mes</p>
+                  )}
                 </div>
 
-                <div className="space-y-4 mb-8">
+                <ul className="space-y-4 mb-8">
                   {plan.features.map((feature, index) => (
-                    <div key={index} className="flex items-start">
-                      <Check className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                      <span className="text-gray-700">{feature}</span>
-                    </div>
+                    <li key={index} className="flex items-start">
+                      <Check className="w-5 h-5 text-emerald-500 mr-3 mt-0.5 flex-shrink-0" />
+                      <span className="text-slate-700">{feature}</span>
+                    </li>
                   ))}
-                </div>
+                </ul>
 
                 <button
                   onClick={() => handlePlanSelect(plan.id)}
-                  className={`w-full py-3 px-6 rounded-xl font-semibold transition-all duration-300 ${
+                  className={`w-full py-3 px-6 rounded-2xl font-semibold transition-all duration-300 ${
                     selectedPlan === plan.id
-                      ? 'bg-gradient-to-r from-primary-500 to-coral-500 text-white shadow-lg'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      ? 'bg-gradient-to-r from-sky-500 to-emerald-500 text-white shadow-lg'
+                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                   }`}
                 >
                   {selectedPlan === plan.id ? 'Seleccionado' : 'Seleccionar'}
@@ -229,74 +209,114 @@ export default function PlansPage() {
             ))}
           </div>
 
-          {/* Action Button */}
-          <div className="text-center">
-            <button
-              onClick={handleContinue}
-              disabled={!selectedPlan || loading}
-              className="bg-gradient-to-r from-primary-500 to-coral-500 text-white px-8 py-4 rounded-2xl font-semibold text-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center mx-auto"
-            >
-              {loading ? (
-                <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                  Procesando...
-                </>
-              ) : (
-                <>
-                  Continuar
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </>
-              )}
-            </button>
-            
-            <p className="text-gray-500 text-sm mt-4">
-              {selectedPlan === 'free' 
-                ? 'Comenzarás con la configuración básica'
-                : selectedPlan === 'pro'
-                ? 'Serás redirigido al proceso de pago seguro'
-                : 'Serás redirigido al proceso de pago seguro'
-              }
-            </p>
-          </div>
-        </div>
+          {/* Continue Button */}
+          {selectedPlan && (
+            <div className="text-center">
+              <button
+                onClick={handleContinue}
+                disabled={loading}
+                className="bg-gradient-to-r from-sky-500 to-emerald-500 text-white px-8 py-4 rounded-2xl font-semibold text-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center mx-auto"
+              >
+                {loading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                    Procesando...
+                  </>
+                ) : (
+                  <>
+                    Continuar
+                    <ArrowRight className="w-5 h-5 ml-2" />
+                  </>
+                )}
+              </button>
+            </div>
+          )}
 
-        {/* FAQ Section */}
-        <div className="max-w-4xl mx-auto mt-16">
-          <h2 className="text-3xl font-bold text-gray-800 text-center mb-8">
-            Preguntas Frecuentes
-          </h2>
-          
-          <div className="grid md:grid-cols-2 gap-8">
-            <div className="bg-white rounded-2xl p-6 shadow-lg">
-              <h3 className="font-semibold text-gray-800 mb-3">¿Puedo cambiar de plan?</h3>
-              <p className="text-gray-600">
-                Sí, puedes cambiar tu plan en cualquier momento desde tu dashboard sin penalizaciones.
-              </p>
-            </div>
+          {/* Features Comparison */}
+          <div className="mt-20">
+            <h2 className="text-3xl font-bold text-center text-slate-900 mb-12">
+              Comparación de Características
+            </h2>
             
-            <div className="bg-white rounded-2xl p-6 shadow-lg">
-              <h3 className="font-semibold text-gray-800 mb-3">¿Hay período de prueba?</h3>
-              <p className="text-gray-600">
-                El plan Free es completamente gratuito. Los planes pagos incluyen 7 días de prueba gratuita.
-              </p>
+            <div className="bg-white rounded-3xl shadow-lg p-8 border border-slate-200">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-sky-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Zap className="w-8 h-8 text-white" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-slate-900 mb-2">Rápido</h3>
+                  <p className="text-slate-600 text-sm">Configuración en menos de 5 minutos</p>
+                </div>
+
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Shield className="w-8 h-8 text-white" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-slate-900 mb-2">Seguro</h3>
+                  <p className="text-slate-600 text-sm">Datos encriptados y respaldados</p>
+                </div>
+
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-sky-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Users className="w-8 h-8 text-white" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-slate-900 mb-2">Colaborativo</h3>
+                  <p className="text-slate-600 text-sm">Gestiona equipos y múltiples usuarios</p>
+                </div>
+
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <MessageSquare className="w-8 h-8 text-white" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-slate-900 mb-2">Soporte</h3>
+                  <p className="text-slate-600 text-sm">Ayuda disponible 24/7</p>
+                </div>
+              </div>
             </div>
+          </div>
+
+          {/* FAQ Section */}
+          <div className="mt-20">
+            <h2 className="text-3xl font-bold text-center text-slate-900 mb-12">
+              Preguntas Frecuentes
+            </h2>
             
-            <div className="bg-white rounded-2xl p-6 shadow-lg">
-              <h3 className="font-semibold text-gray-800 mb-3">¿Qué métodos de pago aceptan?</h3>
-              <p className="text-gray-600">
-                Aceptamos tarjetas de crédito/débito, transferencias bancarias y MercadoPago.
-              </p>
-            </div>
-            
-            <div className="bg-white rounded-2xl p-6 shadow-lg">
-              <h3 className="font-semibold text-gray-800 mb-3">¿Ofrecen soporte técnico?</h3>
-              <p className="text-gray-600">
-                Sí, todos los planes incluyen soporte. Pro y Premium incluyen soporte prioritario.
-              </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="bg-white rounded-3xl shadow-lg p-8 border border-slate-200">
+                <h3 className="text-xl font-bold text-slate-900 mb-4">¿Puedo cambiar de plan?</h3>
+                <p className="text-slate-600">
+                  Sí, puedes cambiar tu plan en cualquier momento desde tu panel de configuración. 
+                  Los cambios se aplican inmediatamente.
+                </p>
+              </div>
+
+              <div className="bg-white rounded-3xl shadow-lg p-8 border border-slate-200">
+                <h3 className="text-xl font-bold text-slate-900 mb-4">¿Hay contratos a largo plazo?</h3>
+                <p className="text-slate-600">
+                  No, todos nuestros planes son mensuales sin contratos a largo plazo. 
+                  Puedes cancelar en cualquier momento.
+                </p>
+              </div>
+
+              <div className="bg-white rounded-3xl shadow-lg p-8 border border-slate-200">
+                <h3 className="text-xl font-bold text-slate-900 mb-4">¿Qué métodos de pago aceptan?</h3>
+                <p className="text-slate-600">
+                  Aceptamos tarjetas de crédito/débito, transferencias bancarias y MercadoPago 
+                  para clientes en Chile.
+                </p>
+              </div>
+
+              <div className="bg-white rounded-3xl shadow-lg p-8 border border-slate-200">
+                <h3 className="text-xl font-bold text-slate-900 mb-4">¿Ofrecen reembolsos?</h3>
+                <p className="text-slate-600">
+                  Sí, ofrecemos reembolsos completos dentro de los primeros 30 días 
+                  si no estás satisfecho con nuestro servicio.
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </MarketingLayout>
   );
 } 

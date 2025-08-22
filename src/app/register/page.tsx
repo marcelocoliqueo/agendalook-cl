@@ -4,63 +4,84 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { Eye, EyeOff, Mail, Lock, User, Building } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
-import { useProfessional } from '@/hooks/useProfessional';
-import { RegisterFormData } from '@/types';
-import { NotificationService } from '@/lib/notifications';
-// Removido import de ResendService - ahora usamos API route
+import { User, Building, Mail, Lock, Eye, EyeOff, CheckCircle } from 'lucide-react';
+import { MarketingLayout } from '@/components/layout/MarketingLayout';
+
+interface FormData {
+  name: string;
+  businessName: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  acceptTerms: boolean;
+}
+
+interface Message {
+  type: 'success' | 'error';
+  text: string;
+}
 
 export default function RegisterPage() {
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [formData, setFormData] = useState<RegisterFormData>({
+  const [formData, setFormData] = useState<FormData>({
     name: '',
     businessName: '',
     email: '',
     password: '',
     confirmPassword: '',
+    acceptTerms: false,
   });
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [error, setError] = useState('');
+  const [message, setMessage] = useState<Message | null>(null);
   const router = useRouter();
-  const { signUp } = useAuth();
-  const { createProfessional } = useProfessional();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
   };
 
-  const generateSlug = (businessName: string) => {
-    return businessName
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '');
+  const validateForm = () => {
+    if (formData.password !== formData.confirmPassword) {
+      setError('Las contraseñas no coinciden');
+      return false;
+    }
+
+    if (formData.password.length < 6) {
+      setError('La contraseña debe tener al menos 6 caracteres');
+      return false;
+    }
+
+    if (!formData.acceptTerms) {
+      setError('Debes aceptar los términos y condiciones');
+      return false;
+    }
+
+    return true;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
+    setMessage(null);
 
-    // Validar que las contraseñas coincidan
-    if (formData.password !== formData.confirmPassword) {
-      setError('Las contraseñas no coinciden');
-      setLoading(false);
+    if (!validateForm()) {
       return;
     }
 
+    setLoading(true);
+
     try {
-      console.log('🚀 Iniciando proceso de registro...');
-      
-      // Registro server-side: crea usuario, profesional y envía email de verificación con Resend
-      const resp = await fetch('/api/auth/register', {
+      const response = await fetch('/api/auth/register', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
           name: formData.name,
           businessName: formData.businessName,
@@ -69,24 +90,33 @@ export default function RegisterPage() {
         }),
       });
 
-      if (!resp.ok) {
-        const { error } = await resp.json();
-        setError(error || 'No se pudo completar el registro');
-        return;
+      const data = await response.json();
+
+      if (response.ok) {
+        setMessage({
+          type: 'success',
+          text: 'Cuenta creada exitosamente. Revisa tu email para confirmar tu cuenta.'
+        });
+        
+        // Limpiar formulario
+        setFormData({
+          name: '',
+          businessName: '',
+          email: '',
+          password: '',
+          confirmPassword: '',
+          acceptTerms: false,
+        });
+
+        // Redirigir a verificación después de 2 segundos
+        setTimeout(() => {
+          router.push(`/verify-code?email=${encodeURIComponent(formData.email)}`);
+        }, 2000);
+      } else {
+        setError(data.error || 'Error al crear la cuenta');
       }
-
-      setMessage({
-        type: 'success',
-        text: `¡Registro exitoso! Te enviamos un email a ${formData.email} para confirmar tu cuenta.`,
-      });
-
-      // Guardar email pendiente y redirigir a verificación por código (OTP)
-      try {
-        localStorage.setItem('pendingEmail', formData.email);
-      } catch {}
-      router.push(`/verify-code?email=${encodeURIComponent(formData.email)}`);
     } catch (error) {
-      console.error('❌ Error general en registro:', error);
+      console.error('Error en registro:', error);
       setError(`Error al crear la cuenta: ${error instanceof Error ? error.message : 'Error desconocido'}`);
     } finally {
       setLoading(false);
@@ -94,39 +124,40 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-lavender-50 via-white to-coral-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center justify-center mb-6">
-            <div className="w-32 h-9 flex items-center justify-center">
-              <Image
-                src="/logo.png"
-                alt="Agendalook"
-                width={128}
-                height={36}
-                className="w-32 h-9 object-contain"
-              />
-            </div>
-          </Link>
-          <h1 className="text-3xl font-playfair font-bold text-gray-800 mb-2">
-            Únete a Agendalook
-          </h1>
-          <p className="text-gray-700">
-            Crea tu cuenta y comienza a gestionar tu agenda
-          </p>
-        </div>
+    <MarketingLayout showFooter={false}>
+      <div className="min-h-screen bg-gradient-to-b from-white to-slate-50 flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <Link href="/" className="inline-flex items-center justify-center mb-6">
+              <div className="w-32 h-9 flex items-center justify-center">
+                <Image
+                  src="/logo.png"
+                  alt="Agendalook"
+                  width={128}
+                  height={36}
+                  className="w-32 h-9 object-contain"
+                />
+              </div>
+            </Link>
+            <h1 className="text-3xl font-bold text-slate-900 mb-2">
+              Únete a Agendalook
+            </h1>
+            <p className="text-slate-700">
+              Crea tu cuenta y comienza a gestionar tu agenda
+            </p>
+          </div>
 
-        {/* Register Form */}
-        <div className="bg-white rounded-2xl shadow-xl p-8">
+          {/* Register Form */}
+          <div className="bg-white rounded-3xl shadow-xl p-8 border border-slate-200">
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-2xl mb-4">
                 {error}
               </div>
             )}
 
             {message && (
-              <div className={`border px-4 py-3 rounded-lg mb-4 ${
+              <div className={`border px-4 py-3 rounded-2xl mb-4 ${
                 message.type === 'success' 
                   ? 'bg-green-50 border-green-200 text-green-700' 
                   : 'bg-red-50 border-red-200 text-red-700'
@@ -136,160 +167,169 @@ export default function RegisterPage() {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                Nombre completo
-              </label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  id="name"
-                  name="name"
-                  type="text"
-                  value={formData.name}
-                  onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors text-gray-900 placeholder-gray-500"
-                  placeholder="Tu nombre completo"
-                  autoComplete="name"
-                  required
-                />
+              <div>
+                <label htmlFor="name" className="block text-sm font-medium text-slate-700 mb-2">
+                  Nombre completo
+                </label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+                  <input
+                    id="name"
+                    name="name"
+                    type="text"
+                    value={formData.name}
+                    onChange={handleChange}
+                    className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                    placeholder="Tu nombre completo"
+                    autoComplete="name"
+                    required
+                  />
+                </div>
               </div>
-            </div>
 
-            <div>
-              <label htmlFor="businessName" className="block text-sm font-medium text-gray-700 mb-2">
-                Nombre del negocio
-              </label>
-              <div className="relative">
-                <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  id="businessName"
-                  name="businessName"
-                  type="text"
-                  value={formData.businessName}
-                  onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors text-gray-900 placeholder-gray-500"
-                  placeholder="Ej: Nails by Carla"
-                  autoComplete="organization"
-                  required
-                />
+              <div>
+                <label htmlFor="businessName" className="block text-sm font-medium text-slate-700 mb-2">
+                  Nombre del negocio
+                </label>
+                <div className="relative">
+                  <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+                  <input
+                    id="businessName"
+                    name="businessName"
+                    type="text"
+                    value={formData.businessName}
+                    onChange={handleChange}
+                    className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                    placeholder="Ej: Nails by Carla"
+                    autoComplete="organization"
+                    required
+                  />
+                </div>
               </div>
-            </div>
 
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Correo electrónico
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors text-gray-900 placeholder-gray-500"
-                  placeholder="tu@email.com"
-                  autoComplete="email"
-                  required
-                />
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-2">
+                  Correo electrónico
+                </label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                    placeholder="tu@email.com"
+                    autoComplete="email"
+                    required
+                  />
+                </div>
               </div>
-            </div>
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                Contraseña
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors text-gray-900 placeholder-gray-500"
-                  placeholder="••••••••"
-                  autoComplete="new-password"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-2">
+                  Contraseña
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+                  <input
+                    id="password"
+                    name="password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={formData.password}
+                    onChange={handleChange}
+                    className="w-full pl-10 pr-12 py-3 border border-slate-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                    placeholder="••••••••"
+                    autoComplete="new-password"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  >
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
               </div>
-            </div>
 
-            <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                Confirmar contraseña
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors text-gray-900 placeholder-gray-500"
-                  placeholder="••••••••"
-                  autoComplete="new-password"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
+              <div>
+                <label htmlFor="confirmPassword" className="block text-sm font-medium text-slate-700 mb-2">
+                  Confirmar contraseña
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+                  <input
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    className="w-full pl-10 pr-12 py-3 border border-slate-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                    placeholder="••••••••"
+                    autoComplete="new-password"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  >
+                    {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
               </div>
-            </div>
 
-            <div className="flex items-start">
-              <input
-                type="checkbox"
-                className="mt-1 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                required
-              />
-              <label className="ml-2 text-sm text-gray-700">
-                Acepto los{' '}
-                <Link href="/terms" className="text-primary-600 hover:text-primary-700">
-                  términos y condiciones
-                </Link>{' '}
-                y la{' '}
-                <Link href="/privacy" className="text-primary-600 hover:text-primary-700">
-                  política de privacidad
-                </Link>
-              </label>
-            </div>
+              <div className="flex items-start">
+                <div className="flex items-center h-5">
+                  <input
+                    id="acceptTerms"
+                    name="acceptTerms"
+                    type="checkbox"
+                    checked={formData.acceptTerms}
+                    onChange={handleChange}
+                    className="mt-1 rounded border-slate-300 text-sky-600 focus:ring-sky-500"
+                    required
+                  />
+                </div>
+                <div className="ml-3 text-sm">
+                  <label htmlFor="acceptTerms" className="text-slate-700">
+                    Acepto los{' '}
+                    <Link href="/terms" className="text-sky-600 hover:text-sky-700">
+                      términos y condiciones
+                    </Link>
+                    {' '}y la{' '}
+                    <Link href="/privacy" className="text-sky-600 hover:text-sky-700">
+                      política de privacidad
+                    </Link>
+                  </label>
+                </div>
+              </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-gradient-to-r from-primary-500 to-coral-500 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? 'Creando cuenta...' : 'Crear cuenta'}
-            </button>
-          </form>
-
-          <div className="mt-6 text-center">
-            <p className="text-gray-600">
-              ¿Ya tienes una cuenta?{' '}
-              <Link
-                href="/login"
-                className="text-primary-600 hover:text-primary-700 font-semibold"
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-sky-500 hover:bg-sky-600 disabled:bg-sky-400 text-white py-3 px-6 rounded-2xl font-semibold transition-all duration-300 focus-ring"
               >
-                Inicia sesión aquí
-              </Link>
-            </p>
+                {loading ? 'Creando cuenta...' : 'Crear cuenta'}
+              </button>
+            </form>
+
+            <div className="mt-8 text-center">
+              <p className="text-slate-700">
+                ¿Ya tienes una cuenta?{' '}
+                <Link
+                  href="/login"
+                  className="text-sky-600 hover:text-sky-700 font-semibold"
+                >
+                  Inicia sesión aquí
+                </Link>
+              </p>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </MarketingLayout>
   );
 } 
