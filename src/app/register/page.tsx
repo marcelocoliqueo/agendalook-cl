@@ -126,31 +126,31 @@ export default function RegisterPage() {
 
   return (
     <MarketingLayout showFooter={false}>
-      <div className="min-h-screen bg-gradient-to-b from-white to-slate-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-b from-white to-slate-50 flex items-center justify-center p-4 sm:p-6">
         <div className="w-full max-w-md">
           {/* Header */}
-          <div className="text-center mb-8">
-            <Link href="/" className="inline-flex items-center justify-center mb-6">
-              <div className="w-32 h-9 flex items-center justify-center">
+          <div className="text-center mb-6 sm:mb-8">
+            <Link href="/" className="inline-flex items-center justify-center mb-4 sm:mb-6">
+              <div className="w-28 h-8 sm:w-32 sm:h-9 flex items-center justify-center">
                 <Image
                   src="/logo.png"
                   alt="Agendalook"
                   width={128}
                   height={36}
-                  className="w-32 h-9 object-contain"
+                  className="w-28 h-8 sm:w-32 sm:h-9 object-contain"
                 />
               </div>
             </Link>
-            <h1 className="text-3xl font-bold text-slate-900 mb-2">
+            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">
               Únete a Agendalook
             </h1>
-            <p className="text-slate-700">
+            <p className="text-sm sm:text-base text-slate-700">
               Crea tu cuenta y comienza a gestionar tu agenda
             </p>
           </div>
 
           {/* Register Form */}
-          <div className="bg-white rounded-3xl shadow-xl p-8 border border-slate-200">
+          <div className="bg-white rounded-2xl sm:rounded-3xl shadow-xl p-6 sm:p-8 border border-slate-200">
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-2xl mb-4">
                 {error}

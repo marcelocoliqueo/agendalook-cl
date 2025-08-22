@@ -27,9 +27,9 @@ export function AuthButton({
   };
   
   const sizes = {
-    sm: 'px-4 py-2 text-sm rounded-2xl',
-    md: 'px-6 py-3 text-base rounded-3xl',
-    lg: 'px-8 py-4 text-lg rounded-3xl'
+    sm: 'px-3 py-2 text-sm rounded-xl sm:px-4 sm:py-2 sm:text-sm',
+    md: 'px-4 py-2.5 text-sm rounded-2xl sm:px-6 sm:py-3 sm:text-base sm:rounded-3xl',
+    lg: 'px-6 py-3 text-base rounded-2xl sm:px-8 sm:py-4 sm:text-lg sm:rounded-3xl'
   };
   
   const classes = `${baseClasses} ${variants[variant]} ${sizes[size]} ${className}`;
@@ -59,7 +59,8 @@ export function LoginButton({ className = '', ...props }: Omit<AuthButtonProps, 
       className={className}
       {...props}
     >
-      Iniciar Sesión
+      <span className="hidden sm:inline">Iniciar Sesión</span>
+      <span className="sm:hidden">Login</span>
     </AuthButton>
   );
 }
@@ -73,7 +74,8 @@ export function RegisterButton({ className = '', ...props }: Omit<AuthButtonProp
       className={className}
       {...props}
     >
-      Registrarse
+      <span className="hidden sm:inline">Registrarse</span>
+      <span className="sm:hidden">Registro</span>
     </AuthButton>
   );
 }
@@ -88,7 +90,8 @@ export function CTAPrimaryButton({ className = '', ...props }: Omit<AuthButtonPr
       className={`shine magnet ${className}`}
       {...props}
     >
-      Empieza Gratis
+      <span className="hidden sm:inline">Empieza Gratis</span>
+      <span className="sm:hidden">Empezar</span>
     </AuthButton>
   );
 }
