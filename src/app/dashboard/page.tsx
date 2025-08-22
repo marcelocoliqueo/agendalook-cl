@@ -486,20 +486,22 @@ export default function DashboardPage() {
             </div>
           </Link>
 
-          <Link
-            href="/dashboard/settings"
-            className="group p-4 bg-white rounded-xl border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all duration-300"
-          >
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center group-hover:bg-slate-200 transition-colors">
-                <Settings className="w-5 h-5 text-slate-600" />
+          {isAdmin && (
+            <Link
+              href="/dashboard/settings"
+              className="group p-4 bg-white rounded-xl border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all duration-300"
+            >
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center group-hover:bg-slate-200 transition-colors">
+                  <Settings className="w-5 h-5 text-slate-600" />
+                </div>
+                <div>
+                  <p className="font-medium text-slate-800">Configuración</p>
+                  <p className="text-sm text-slate-500">Ajustar preferencias</p>
+                </div>
               </div>
-              <div>
-                <p className="font-medium text-slate-800">Configuración</p>
-                <p className="text-sm text-slate-500">Ajustar preferencias</p>
-              </div>
-            </div>
-          </Link>
+            </Link>
+          )}
         </div>
       </div>
 

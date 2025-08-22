@@ -190,13 +190,15 @@ export default function DashboardLayout({
                       </Link>
                     )}
                     
-                    <Link
-                      href="/dashboard/settings"
-                      className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 flex items-center transition-colors duration-200"
-                    >
-                      <Settings className="w-4 h-4 mr-2 text-slate-500" />
-                      Configuración
-                    </Link>
+                    {isAdmin && (
+                      <Link
+                        href="/dashboard/settings"
+                        className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 flex items-center transition-colors duration-200"
+                      >
+                        <Settings className="w-4 h-4 mr-2 text-slate-500" />
+                        Configuración
+                      </Link>
+                    )}
                     
                     <button 
                       onClick={handleLogout}
@@ -266,18 +268,6 @@ export default function DashboardLayout({
                   >
                     <Users className="w-5 h-5" />
                     <span className="font-medium">Disponibilidad</span>
-                  </Link>
-                  
-                  <Link
-                    href="/dashboard/security"
-                    className={`w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-left transition-all duration-300 ${
-                      isActiveRoute('/dashboard/security')
-                        ? 'bg-gradient-to-r from-sky-500 to-sky-600 text-white shadow-lg shadow-sky-500/25'
-                        : 'text-slate-600 hover:bg-white hover:shadow-md hover:shadow-slate-200/50 border border-transparent hover:border-slate-200'
-                    }`}
-                  >
-                    <Shield className="w-5 h-5" />
-                    <span className="font-medium">Seguridad</span>
                   </Link>
                 </>
               )}
