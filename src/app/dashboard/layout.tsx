@@ -13,7 +13,10 @@ import {
   Users, 
   ChevronDown,
   Shield,
-  Activity
+  Activity,
+  Home,
+  BarChart3,
+  UserCheck
 } from 'lucide-react';
 import { NotificationBell } from '@/components/ui/NotificationBell';
 import { Toast } from '@/components/ui/Toast';
@@ -102,111 +105,104 @@ export default function DashboardLayout({
   const handleLogout = async () => {
     try {
       await signOut();
-      router.push('/');
+      router.push('/login');
     } catch (error) {
-      console.error('Error signing out:', error);
+      console.error('Error during logout:', error);
     }
   };
 
-  const isActiveRoute = (path: string) => {
-    return pathname === path;
+  const handleCopyLink = () => {
+    const link = `${process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://agendalook.cl'}/${professional?.business_slug}`;
+    navigator.clipboard.writeText(link);
+    setToastMessage('Enlace copiado al portapapeles');
+    setShowToast(true);
   };
 
-  const handleCopyLink = async () => {
-    if (!professional?.business_slug) return;
-    
-    // Usar localhost en desarrollo, dominio real en producción
-    const baseUrl = process.env.NODE_ENV === 'development' 
-      ? 'http://localhost:3000' 
-      : 'https://agendalook.cl';
-    
-    const url = `${baseUrl}/${professional.business_slug}`;
-    
-    try {
-      await navigator.clipboard.writeText(url);
-      setToastMessage('¡Enlace copiado al portapapeles!');
-      setShowToast(true);
-    } catch (error) {
-      console.error('Error copying to clipboard:', error);
-      setToastMessage('Error al copiar el enlace');
-      setShowToast(true);
-    }
+  const isActiveRoute = (route: string) => {
+    return pathname === route;
   };
 
   if (loading) {
-    return <FullPageLoader text="Cargando..." />;
+    return <FullPageLoader />;
   }
 
   if (!user) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-600">No tienes acceso al dashboard</p>
-          <Link href="/login" className="text-lavender-600 hover:text-lavender-700 mt-2 inline-block">
-            Iniciar sesión
-          </Link>
-        </div>
-      </div>
-    );
+    router.push('/login');
+    return null;
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-sky-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+      <header className="bg-white/80 backdrop-blur-xl border-b border-slate-200/60 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 bg-gradient-to-r from-lavender-500 to-coral-500 rounded-lg flex items-center justify-center">
-                <Sparkles className="w-6 h-6 text-white" />
+          <div className="flex items-center justify-between h-16">
+            {/* Logo */}
+            <div className="flex items-center space-x-3">
+              <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-sky-500 to-sky-600 text-white font-bold text-lg shadow-lg">
+                A
               </div>
-              <span className="text-xl font-playfair font-bold text-gray-800">
-                {isAdmin ? 'Agendalook Admin' : 'Agendalook'}
-              </span>
+              <div className="hidden sm:block">
+                <h1 className="text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+                  Agendalook
+                </h1>
+                <p className="text-xs text-slate-500">Dashboard</p>
+              </div>
             </div>
 
+            {/* User Menu */}
             <div className="flex items-center space-x-4">
-              {!isAdmin && <NotificationBell professionalId={professional?.id} />}
+              <NotificationBell />
               
               <div className="relative">
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="flex items-center space-x-2 text-gray-700 hover:text-gray-900"
+                  className="flex items-center space-x-3 p-2 rounded-xl hover:bg-slate-100 transition-colors duration-200"
                 >
-                  <div className="w-8 h-8 bg-gradient-to-r from-lavender-500 to-coral-500 rounded-full flex items-center justify-center">
-                    <span className="text-white text-sm font-semibold">
-                      {user?.email?.charAt(0) || 'U'}
-                    </span>
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white font-semibold text-sm">
+                    {user.email?.charAt(0).toUpperCase()}
                   </div>
-                  <span className="hidden md:block">
-                    {user?.email}
-                  </span>
-                  <ChevronDown className="w-4 h-4" />
+                  <div className="hidden sm:block text-left">
+                    <p className="text-sm font-medium text-slate-900">{user.email}</p>
+                    <p className="text-xs text-slate-500">
+                      {isAdmin ? 'Administrador' : professional?.business_name || 'Usuario'}
+                    </p>
+                  </div>
+                  <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${showUserMenu ? 'rotate-180' : ''}`} />
                 </button>
 
                 {showUserMenu && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
-                    {!isAdmin && (
-                      <Link
-                        href="/dashboard/settings"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      >
-                        Configuración
-                      </Link>
-                    )}
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-200 py-2 z-50">
+                    <div className="px-4 py-3 border-b border-slate-100">
+                      <p className="text-sm font-medium text-slate-900">{user.email}</p>
+                      <p className="text-xs text-slate-500">
+                        {isAdmin ? 'Administrador' : professional?.plan || 'Usuario'}
+                      </p>
+                    </div>
+                    
                     {isAdmin && (
                       <Link
                         href="/dashboard/admin"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                        className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 flex items-center transition-colors duration-200"
                       >
-                        <Activity className="w-4 h-4 mr-2" />
+                        <Activity className="w-4 h-4 mr-2 text-sky-500" />
                         Admin Panel
                       </Link>
                     )}
+                    
+                    <Link
+                      href="/dashboard/settings"
+                      className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 flex items-center transition-colors duration-200"
+                    >
+                      <Settings className="w-4 h-4 mr-2 text-slate-500" />
+                      Configuración
+                    </Link>
+                    
                     <button 
                       onClick={handleLogout}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center transition-colors duration-200"
                     >
+                      <LogOut className="w-4 h-4 mr-2" />
                       Cerrar sesión
                     </button>
                   </div>
@@ -221,67 +217,67 @@ export default function DashboardLayout({
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar */}
           <aside className="lg:w-64">
-            <nav className="space-y-2">
+            <nav className="space-y-3">
               <Link
                 href="/dashboard"
-                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors ${
+                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-left transition-all duration-300 ${
                   isActiveRoute('/dashboard')
-                    ? 'bg-lavender-50 text-lavender-700 border border-lavender-200'
-                    : 'text-gray-600 hover:bg-gray-50'
+                    ? 'bg-gradient-to-r from-sky-500 to-sky-600 text-white shadow-lg shadow-sky-500/25'
+                    : 'text-slate-600 hover:bg-white hover:shadow-md hover:shadow-slate-200/50 border border-transparent hover:border-slate-200'
                 }`}
               >
-                <Calendar className="w-5 h-5" />
-                <span>{isAdmin ? 'Panel Admin' : 'Vista General'}</span>
+                <Home className="w-5 h-5" />
+                <span className="font-medium">{isAdmin ? 'Panel Admin' : 'Vista General'}</span>
               </Link>
               
               {!isAdmin && (
                 <>
                   <Link
                     href="/dashboard/services"
-                    className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors ${
+                    className={`w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-left transition-all duration-300 ${
                       isActiveRoute('/dashboard/services')
-                        ? 'bg-lavender-50 text-lavender-700 border border-lavender-200'
-                        : 'text-gray-600 hover:bg-gray-50'
+                        ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/25'
+                        : 'text-slate-600 hover:bg-white hover:shadow-md hover:shadow-slate-200/50 border border-transparent hover:border-slate-200'
                     }`}
                   >
                     <Plus className="w-5 h-5" />
-                    <span>Servicios</span>
+                    <span className="font-medium">Servicios</span>
                   </Link>
                   
                   <Link
                     href="/dashboard/bookings"
-                    className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors ${
+                    className={`w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-left transition-all duration-300 ${
                       isActiveRoute('/dashboard/bookings')
-                        ? 'bg-lavender-50 text-lavender-700 border border-lavender-200'
-                        : 'text-gray-600 hover:bg-gray-50'
+                        ? 'bg-gradient-to-r from-sky-500 to-sky-600 text-white shadow-lg shadow-sky-500/25'
+                        : 'text-slate-600 hover:bg-white hover:shadow-md hover:shadow-slate-200/50 border border-transparent hover:border-slate-200'
                     }`}
                   >
                     <Clock className="w-5 h-5" />
-                    <span>Reservas</span>
+                    <span className="font-medium">Reservas</span>
                   </Link>
                   
                   <Link
                     href="/dashboard/availability"
-                    className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors ${
+                    className={`w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-left transition-all duration-300 ${
                       isActiveRoute('/dashboard/availability')
-                        ? 'bg-lavender-50 text-lavender-700 border border-lavender-200'
-                        : 'text-gray-600 hover:bg-gray-50'
+                        ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/25'
+                        : 'text-slate-600 hover:bg-white hover:shadow-md hover:shadow-slate-200/50 border border-transparent hover:border-slate-200'
                     }`}
                   >
                     <Users className="w-5 h-5" />
-                    <span>Disponibilidad</span>
+                    <span className="font-medium">Disponibilidad</span>
                   </Link>
                   
                   <Link
                     href="/dashboard/security"
-                    className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors ${
+                    className={`w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-left transition-all duration-300 ${
                       isActiveRoute('/dashboard/security')
-                        ? 'bg-lavender-50 text-lavender-700 border border-lavender-200'
-                        : 'text-gray-600 hover:bg-gray-50'
+                        ? 'bg-gradient-to-r from-sky-500 to-sky-600 text-white shadow-lg shadow-sky-500/25'
+                        : 'text-slate-600 hover:bg-white hover:shadow-md hover:shadow-slate-200/50 border border-transparent hover:border-slate-200'
                     }`}
                   >
                     <Shield className="w-5 h-5" />
-                    <span>Seguridad</span>
+                    <span className="font-medium">Seguridad</span>
                   </Link>
                 </>
               )}
@@ -289,32 +285,51 @@ export default function DashboardLayout({
 
             {/* Página pública solo para usuarios normales */}
             {!isAdmin && professional?.business_slug && (
-              <div className="mt-8 p-4 bg-gradient-to-r from-lavender-500 to-coral-500 rounded-xl text-white">
-                <h3 className="font-semibold mb-2">Tu página pública</h3>
-                <p className="text-sm opacity-90 mb-3">
-                  Comparte este enlace con tus clientes
+              <div className="mt-8 p-6 bg-gradient-to-br from-sky-500 via-sky-600 to-sky-700 rounded-2xl text-white shadow-xl shadow-sky-500/25">
+                <div className="flex items-center space-x-3 mb-3">
+                  <UserCheck className="w-5 h-5 text-sky-100" />
+                  <h3 className="font-semibold">Tu página pública</h3>
+                </div>
+                <p className="text-sm text-sky-100 mb-4">
+                  Comparte este enlace con tus clientes para que puedan reservar
                 </p>
-                <div className="flex items-center space-x-2">
+                <div className="space-y-3">
                   <input
                     type="text"
                     value={`${process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://agendalook.cl'}/${professional.business_slug}`}
                     readOnly
-                    className="flex-1 bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-70 rounded px-3 py-2 text-sm"
+                    className="w-full bg-white/20 text-white placeholder-white/70 rounded-xl px-3 py-2 text-sm border border-white/20 focus:outline-none focus:ring-2 focus:ring-white/50"
+                    placeholder="Tu enlace público"
                   />
                   <button
                     onClick={handleCopyLink}
-                    className="bg-white bg-opacity-20 hover:bg-opacity-30 rounded px-3 py-2 text-sm transition-colors"
+                    className="w-full bg-white/20 hover:bg-white/30 text-white rounded-xl px-3 py-2 text-sm font-medium transition-all duration-300 hover:shadow-lg hover:shadow-white/25"
                   >
-                    Copiar
+                    Copiar enlace
                   </button>
                 </div>
+              </div>
+            )}
+
+            {/* Plan Info */}
+            {!isAdmin && professional?.plan && (
+              <div className="mt-6 p-4 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl text-white shadow-lg shadow-emerald-500/25">
+                <div className="flex items-center space-x-2 mb-2">
+                  <Sparkles className="w-4 h-4 text-emerald-100" />
+                  <span className="text-sm font-medium">Plan {professional.plan.toUpperCase()}</span>
+                </div>
+                <p className="text-xs text-emerald-100">
+                  Acceso completo a todas las funcionalidades
+                </p>
               </div>
             )}
           </aside>
 
           {/* Main Content */}
           <main className="flex-1">
-            {children}
+            <div className="bg-white/60 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20 p-6 sm:p-8">
+              {children}
+            </div>
           </main>
         </div>
       </div>

@@ -6,7 +6,7 @@ import { useProfessional } from '@/hooks/useProfessional';
 import { useBookings } from '@/hooks/useBookings';
 import { useServices } from '@/hooks/useServices';
 import { Professional, Booking } from '@/types';
-import { Calendar, Clock, TrendingUp, Sparkles, Activity, Settings, Shield } from 'lucide-react';
+import { Calendar, Clock, TrendingUp, Sparkles, Activity, Settings, Shield, Plus } from 'lucide-react';
 import { PlanAlert } from '@/components/ui/PlanAlert';
 import { PeriodFilter, PeriodType } from '@/components/ui/PeriodFilter';
 import { getCurrentPlan, getUsageProgress } from '@/lib/plans';
@@ -15,6 +15,7 @@ import { FullPageLoader } from '@/components/ui/LoadingSpinner';
 import { format, isWithinInterval } from 'date-fns';
 import { es } from 'date-fns/locale';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export default function DashboardPage() {
   const [professional, setProfessional] = useState<Professional | null>(null);
@@ -32,6 +33,7 @@ export default function DashboardPage() {
   const { getProfessionalByUserId } = useProfessional();
   const { getBookingsByProfessionalId } = useBookings(professional?.id || null);
   const { getServicesByProfessionalId } = useServices(professional?.id || null);
+  const router = useRouter();
 
   // Detectar si es el usuario admin
   const isAdmin = user?.email === 'admin@agendalook.cl';
@@ -348,155 +350,207 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
-      <div className="bg-white rounded-xl shadow-sm p-6">
-        <h1 className="text-2xl font-playfair font-bold text-gray-800 mb-2">
-          Vista General
+      <div className="text-center sm:text-left">
+        <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+          {isAdmin ? 'Panel de Administración' : '¡Hola de vuelta!'}
         </h1>
-        <p className="text-gray-600 font-poppins">
-          ¡Hola {professional?.business_name || 'Usuario'}! Aquí tienes un resumen de tu negocio.
+        <p className="mt-2 text-slate-600 text-lg">
+          {isAdmin 
+            ? 'Gestiona el sistema Agendalook desde aquí' 
+            : `Bienvenido de vuelta, ${professional?.business_name || 'Usuario'}`
+          }
         </p>
       </div>
 
-      {/* Filtros de período */}
-      <PeriodFilter
-        currentPeriod={currentPeriod}
-        onPeriodChange={handlePeriodChange}
-        onExportPDF={handleExportPDF}
-      />
-
-      {/* Alerta de plan */}
-      {professional && (
-        <PlanAlert
-          plan={professional.plan}
-          currentBookings={stats.totalBookings}
-          currentServices={currentServices}
-          onUpgrade={() => {
-            // TODO: Implementar actualización de plan
-            console.log('Actualizar plan');
-          }}
-        />
-      )}
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white p-6 rounded-xl shadow-sm">
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Total Bookings */}
+        <div className="bg-gradient-to-br from-sky-500 to-sky-600 rounded-2xl p-6 text-white shadow-lg shadow-sky-500/25">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 font-poppins">Reservas Totales</p>
-              <p className="text-2xl font-bold text-gray-800">{stats.totalBookings}</p>
+              <p className="text-sky-100 text-sm font-medium">Total Reservas</p>
+              <p className="text-3xl font-bold">{filteredBookings.length}</p>
             </div>
-            <div className="w-12 h-12 bg-lavender-100 rounded-lg flex items-center justify-center">
-              <Calendar className="w-6 h-6 text-lavender-600" />
+            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+              <Calendar className="w-6 h-6 text-white" />
             </div>
+          </div>
+          <div className="mt-4 flex items-center text-sky-100 text-sm">
+            <TrendingUp className="w-4 h-4 mr-1" />
+            <span>Este período</span>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow-sm">
+        {/* Services */}
+        <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-6 text-white shadow-lg shadow-emerald-500/25">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 font-poppins">Esta Semana</p>
-              <p className="text-2xl font-bold text-gray-800">{stats.thisWeek}</p>
+              <p className="text-emerald-100 text-sm font-medium">Servicios Activos</p>
+              <p className="text-3xl font-bold">{currentServices}</p>
             </div>
-            <div className="w-12 h-12 bg-coral-100 rounded-lg flex items-center justify-center">
-              <Clock className="w-6 h-6 text-coral-600" />
+            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+              <Plus className="w-6 h-6 text-white" />
             </div>
+          </div>
+          <div className="mt-4 flex items-center text-emerald-100 text-sm">
+            <Sparkles className="w-4 h-4 mr-1" />
+            <span>Disponibles</span>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow-sm">
+        {/* Recent Bookings */}
+        <div className="bg-gradient-to-br from-slate-600 to-slate-700 rounded-2xl p-6 text-white shadow-lg shadow-slate-600/25">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 font-poppins">Ingresos</p>
-              <p className="text-2xl font-bold text-gray-800">${stats.totalRevenue.toLocaleString()}</p>
+              <p className="text-slate-100 text-sm font-medium">Reservas Recientes</p>
+              <p className="text-3xl font-bold">
+                {filteredBookings.filter(booking => 
+                  isWithinInterval(new Date(booking.booking_date), { start: new Date(), end: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) })
+                ).length}
+              </p>
             </div>
-            <div className="w-12 h-12 bg-gold-100 rounded-lg flex items-center justify-center">
-              <TrendingUp className="w-6 h-6 text-gold-600" />
+            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+              <Clock className="w-6 h-6 text-white" />
             </div>
+          </div>
+          <div className="mt-4 flex items-center text-slate-100 text-sm">
+            <span>Próximos 7 días</span>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow-sm">
+        {/* Plan Status */}
+        <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-6 text-white shadow-lg shadow-purple-500/25">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 font-poppins">Calificación</p>
-              <p className="text-2xl font-bold text-gray-800">{stats.averageRating}</p>
+              <p className="text-purple-100 text-sm font-medium">Plan Actual</p>
+              <p className="text-3xl font-bold">{professional?.plan?.toUpperCase() || 'FREE'}</p>
             </div>
-            <div className="w-12 h-12 bg-lavender-100 rounded-lg flex items-center justify-center">
-              <Sparkles className="w-6 h-6 text-lavender-600" />
+            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+              <Sparkles className="w-6 h-6 text-white" />
             </div>
+          </div>
+          <div className="mt-4 flex items-center text-purple-100 text-sm">
+            <span>Activo</span>
           </div>
         </div>
       </div>
 
-      {/* Estadísticas detalladas */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-xl shadow-sm">
-          <div className="text-center">
-            <p className="text-sm font-medium text-gray-600 font-poppins">Confirmadas</p>
-            <p className="text-3xl font-bold text-green-600">{stats.confirmedBookings}</p>
-          </div>
-        </div>
-        <div className="bg-white p-6 rounded-xl shadow-sm">
-          <div className="text-center">
-            <p className="text-sm font-medium text-gray-600 font-poppins">Pendientes</p>
-            <p className="text-3xl font-bold text-yellow-600">{stats.pendingBookings}</p>
-          </div>
-        </div>
-        <div className="bg-white p-6 rounded-xl shadow-sm">
-          <div className="text-center">
-            <p className="text-sm font-medium text-gray-600 font-poppins">Canceladas</p>
-            <p className="text-3xl font-bold text-red-600">{stats.cancelledBookings}</p>
-          </div>
+      {/* Quick Actions */}
+      <div className="bg-gradient-to-br from-white to-slate-50 rounded-2xl p-6 border border-slate-200 shadow-sm">
+        <h2 className="text-xl font-semibold text-slate-800 mb-4">Acciones Rápidas</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Link
+            href="/dashboard/services"
+            className="group p-4 bg-white rounded-xl border border-slate-200 hover:border-sky-300 hover:shadow-md transition-all duration-300"
+          >
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-sky-100 rounded-lg flex items-center justify-center group-hover:bg-sky-200 transition-colors">
+                <Plus className="w-5 h-5 text-sky-600" />
+              </div>
+              <div>
+                <p className="font-medium text-slate-800">Crear Servicio</p>
+                <p className="text-sm text-slate-500">Añadir nuevo servicio</p>
+              </div>
+            </div>
+          </Link>
+
+          <Link
+            href="/dashboard/bookings"
+            className="group p-4 bg-white rounded-xl border border-slate-200 hover:border-emerald-300 hover:shadow-md transition-all duration-300"
+          >
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center group-hover:bg-emerald-200 transition-colors">
+                <Calendar className="w-5 h-5 text-emerald-600" />
+              </div>
+              <div>
+                <p className="font-medium text-slate-800">Ver Reservas</p>
+                <p className="text-sm text-slate-500">Gestionar citas</p>
+              </div>
+            </div>
+          </Link>
+
+          <Link
+            href="/dashboard/availability"
+            className="group p-4 bg-white rounded-xl border border-slate-200 hover:border-sky-300 hover:shadow-md transition-all duration-300"
+          >
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-sky-100 rounded-lg flex items-center justify-center group-hover:bg-sky-200 transition-colors">
+                <Clock className="w-5 h-5 text-sky-600" />
+              </div>
+              <div>
+                <p className="font-medium text-slate-800">Disponibilidad</p>
+                <p className="text-sm text-slate-500">Configurar horarios</p>
+              </div>
+            </div>
+          </Link>
+
+          <Link
+            href="/dashboard/settings"
+            className="group p-4 bg-white rounded-xl border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all duration-300"
+          >
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center group-hover:bg-slate-200 transition-colors">
+                <Settings className="w-5 h-5 text-slate-600" />
+              </div>
+              <div>
+                <p className="font-medium text-slate-800">Configuración</p>
+                <p className="text-sm text-slate-500">Ajustar preferencias</p>
+              </div>
+            </div>
+          </Link>
         </div>
       </div>
 
       {/* Recent Bookings */}
-      <div className="bg-white rounded-xl shadow-sm">
-        <div className="p-6 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-800 font-playfair">Reservas Recientes</h2>
-        </div>
-        <div className="p-6">
+      {filteredBookings.length > 0 && (
+        <div className="bg-gradient-to-br from-white to-slate-50 rounded-2xl p-6 border border-slate-200 shadow-sm">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-semibold text-slate-800">Reservas Recientes</h2>
+            <Link
+              href="/dashboard/bookings"
+              className="text-sky-600 hover:text-sky-700 font-medium text-sm hover:underline"
+            >
+              Ver todas →
+            </Link>
+          </div>
+          
           <div className="space-y-4">
             {filteredBookings.slice(0, 5).map((booking) => (
-              <div key={booking.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+              <div key={booking.id} className="flex items-center justify-between p-4 bg-white rounded-xl border border-slate-200 hover:shadow-md transition-shadow">
                 <div className="flex items-center space-x-4">
-                  <div className="w-10 h-10 bg-gradient-to-r from-lavender-500 to-coral-500 rounded-full flex items-center justify-center">
-                    <span className="text-white text-sm font-semibold">
-                      {booking.customer_name.charAt(0)}
-                    </span>
+                  <div className="w-10 h-10 bg-sky-100 rounded-lg flex items-center justify-center">
+                    <Calendar className="w-5 h-5 text-sky-600" />
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-800 font-poppins">{booking.customer_name}</p>
-                    <p className="text-sm text-gray-600 font-poppins">{booking.service_id}</p>
+                    <p className="font-medium text-slate-800">{booking.customer_name}</p>
+                    <p className="text-sm text-slate-500">
+                      {format(new Date(booking.booking_date), 'EEEE, d MMMM', { locale: es })} a las {booking.booking_time}
+                    </p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-medium text-gray-800 font-poppins">
-                    {format(new Date(booking.booking_date), 'dd/MM/yyyy', { locale: es })} a las {booking.booking_time}
+                  <p className="font-medium text-slate-800">{booking.service_id}</p>
+                  <p className="text-sm text-slate-500">
+                    {format(new Date(booking.booking_date), 'EEEE, d MMMM', { locale: es })} a las {booking.booking_time}
                   </p>
-                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                    booking.status === 'confirmed'
-                      ? 'bg-green-100 text-green-800'
-                      : booking.status === 'pending'
-                      ? 'bg-yellow-100 text-yellow-800'
-                      : 'bg-red-100 text-red-800'
-                  }`}>
-                    {booking.status === 'confirmed' ? 'Confirmada' : 
-                     booking.status === 'pending' ? 'Pendiente' : 'Cancelada'}
-                  </span>
                 </div>
               </div>
             ))}
-            {filteredBookings.length === 0 && (
-              <div className="text-center py-8">
-                <p className="text-gray-500 font-poppins">No hay reservas en este período</p>
-              </div>
-            )}
           </div>
         </div>
-      </div>
+      )}
+
+      {/* Plan Alert */}
+      {professional?.plan === 'free' && (
+        <PlanAlert 
+          plan={professional.plan}
+          currentBookings={filteredBookings.length}
+          currentServices={currentServices}
+          onUpgrade={() => router.push('/plans')}
+        />
+      )}
     </div>
   );
 } 
