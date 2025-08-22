@@ -64,7 +64,7 @@ export const metadata: Metadata = {
   other: {
     'theme-color': '#0ea5e9',
     'msapplication-TileColor': '#0ea5e9',
-    'apple-mobile-web-app-capable': 'yes',
+    'mobile-web-app-capable': 'yes',
     'apple-mobile-web-app-status-bar-style': 'default',
     'apple-mobile-web-app-title': 'Agendalook',
   },
