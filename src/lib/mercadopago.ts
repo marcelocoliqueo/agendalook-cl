@@ -191,13 +191,8 @@ export async function createSubscriptionPreference(preferenceData: {
   try {
     configureMercadoPago();
     
-    if (!mpConfig) {
-      throw new Error('MercadoPago no está configurado');
-    }
-
-    const { plan } = preferenceData;
-    const planName = plan === 'pro' ? 'Pro' : 'Studio';
-    const planPrice = plan === 'pro' ? 9900 : 19900;
+    const planName = preferenceData.plan === 'pro' ? 'Pro' : 'Premium';
+    const planPrice = preferenceData.plan === 'pro' ? 9900 : 19900;
 
     // Intentar crear suscripción (PreApproval) para cobro mensual automático
     try {
@@ -205,7 +200,7 @@ export async function createSubscriptionPreference(preferenceData: {
       const preapproval = new PreApproval(mpConfig);
       const payload = {
         reason: `Plan ${planName} Agendalook`,
-        external_reference: `subscription_${plan}_${preferenceData.customerId}`,
+        external_reference: `subscription_${preferenceData.plan}_${preferenceData.customerId}`,
         back_url: preferenceData.successUrl,
         auto_recurring: {
           frequency: 1,
@@ -230,12 +225,15 @@ export async function createSubscriptionPreference(preferenceData: {
       };
     } catch (e) {
       console.warn('PreApproval.create no disponible; fallback a Preference (pago único)');
+      
+      // Crear preferencia usando la sintaxis correcta del SDK v2.8.0
       const preference = new Preference(mpConfig);
       
+      // Crear el payload con la estructura exacta que espera MercadoPago
       const preferencePayload = {
         items: [
           {
-            id: `plan-${plan}`,
+            id: `plan-${preferenceData.plan}`,
             title: `Plan ${planName}`,
             quantity: 1,
             unit_price: planPrice,
@@ -248,7 +246,7 @@ export async function createSubscriptionPreference(preferenceData: {
           pending: preferenceData.cancelUrl,
         },
         auto_return: 'approved',
-        external_reference: `subscription_${plan}_${preferenceData.customerId}`,
+        external_reference: `subscription_${preferenceData.plan}_${preferenceData.customerId}`,
         notification_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/mercadopago/webhook`,
         expires: true,
         expiration_date_to: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
@@ -260,7 +258,8 @@ export async function createSubscriptionPreference(preferenceData: {
       
       console.log('🔍 MercadoPago: Preference payload:', JSON.stringify(preferencePayload, null, 2));
       
-      const fallback = await preference.create(preferencePayload);
+      // Usar la sintaxis correcta del SDK v2.8.0
+      const fallback = await preference.create({ body: preferencePayload });
       return fallback;
     }
   } catch (error) {
