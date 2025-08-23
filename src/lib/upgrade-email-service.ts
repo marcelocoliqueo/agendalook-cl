@@ -27,6 +27,11 @@ export async function sendUpgradeSuggestionEmail(data: UpgradeEmailData) {
   try {
     const { userEmail, userName, currentPlan, upgradePlan, upgradePrice } = data;
 
+    if (!resend) {
+      console.error('Resend no está configurado');
+      return { success: false, error: 'Resend not configured' };
+    }
+
     await resend.emails.send({
       from: 'Agendalook <noreply@agendalook.cl>',
       to: userEmail,
@@ -49,6 +54,11 @@ export async function sendPlanActivatedEmail(data: PlanActivatedEmailData) {
   try {
     const { userEmail, userName, planName, planPrice } = data;
 
+    if (!resend) {
+      console.error('Resend no está configurado');
+      return { success: false, error: 'Resend not configured' };
+    }
+
     await resend.emails.send({
       from: 'Agendalook <noreply@agendalook.cl>',
       to: userEmail,
@@ -70,7 +80,7 @@ export async function sendPlanActivatedEmail(data: PlanActivatedEmailData) {
  */
 export async function scheduleUpgradeSuggestions() {
   try {
-    const supabase = createServerSupabaseClient();
+    const supabase = await createServerSupabaseClient();
     
     // Buscar usuarios que han estado usando el plan gratuito por más de 7 días
     const sevenDaysAgo = new Date();
@@ -82,15 +92,10 @@ export async function scheduleUpgradeSuggestions() {
         id,
         user_id,
         plan,
-        created_at,
-        users!inner(
-          email,
-          user_metadata
-        )
+        created_at
       `)
       .eq('plan', 'free')
-      .lt('created_at', sevenDaysAgo.toISOString())
-      .not('users.email', 'is', null);
+      .lt('created_at', sevenDaysAgo.toISOString());
 
     if (error) {
       console.error('Error buscando usuarios para upgrade:', error);
@@ -99,21 +104,28 @@ export async function scheduleUpgradeSuggestions() {
 
     // Enviar emails de sugerencia
     for (const user of users || []) {
-      const userName = user.users?.user_metadata?.full_name || 'Usuario';
-      const userEmail = user.users?.email;
+      try {
+        // Obtener información del usuario desde auth
+        const { data: userProfile } = await supabase.auth.admin.getUserById(user.user_id);
+        const userEmail = userProfile?.user?.email;
+        const userName = userProfile?.user?.user_metadata?.full_name || 'Usuario';
 
-      if (userEmail) {
-        await sendUpgradeSuggestionEmail({
-          userId: user.user_id,
-          userEmail,
-          userName,
-          currentPlan: 'Free',
-          upgradePlan: 'Pro',
-          upgradePrice: 9990,
-        });
+        if (userEmail) {
+          await sendUpgradeSuggestionEmail({
+            userId: user.user_id,
+            userEmail,
+            userName,
+            currentPlan: 'Free',
+            upgradePlan: 'Pro',
+            upgradePrice: 9990,
+          });
 
-        // Esperar un poco entre emails para evitar rate limiting
-        await new Promise(resolve => setTimeout(resolve, 1000));
+          // Esperar un poco entre emails para evitar rate limiting
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      } catch (userError) {
+        console.error(`Error procesando usuario ${user.user_id}:`, userError);
+        continue;
       }
     }
 
@@ -129,40 +141,32 @@ export async function scheduleUpgradeSuggestions() {
  */
 export async function sendWelcomeUpgradeEmail(userId: string) {
   try {
-    const supabase = createServerSupabaseClient();
+    const supabase = await createServerSupabaseClient();
     
-    // Obtener información del usuario
-    const { data: user, error } = await supabase
-      .from('professionals')
-      .select(`
-        id,
-        plan,
-        users!inner(
-          email,
-          user_metadata
-        )
-      `)
-      .eq('user_id', userId)
-      .single();
+    // Obtener información del usuario desde auth
+    const { data: userProfile } = await supabase.auth.admin.getUserById(userId);
+    const userEmail = userProfile?.user?.email;
+    const userName = userProfile?.user?.user_metadata?.full_name || 'Usuario';
 
-    if (error || !user) {
-      console.error('Usuario no encontrado para email de bienvenida:', error);
-      return;
-    }
+    if (userEmail) {
+      // Verificar si el usuario tiene plan gratuito
+      const { data: professional } = await supabase
+        .from('professionals')
+        .select('plan')
+        .eq('user_id', userId)
+        .single();
 
-    const userName = user.users?.user_metadata?.full_name || 'Usuario';
-    const userEmail = user.users?.email;
-
-    if (userEmail && user.plan === 'free') {
-      // Enviar email de bienvenida con sugerencias
-      await sendUpgradeSuggestionEmail({
-        userId,
-        userEmail,
-        userName,
-        currentPlan: 'Free',
-        upgradePlan: 'Pro',
-        upgradePrice: 9990,
-      });
+      if (professional && professional.plan === 'free') {
+        // Enviar email de bienvenida con sugerencias
+        await sendUpgradeSuggestionEmail({
+          userId,
+          userEmail,
+          userName,
+          currentPlan: 'Free',
+          upgradePlan: 'Pro',
+          upgradePrice: 9990,
+        });
+      }
     }
   } catch (error) {
     console.error('Error enviando email de bienvenida con upgrade:', error);

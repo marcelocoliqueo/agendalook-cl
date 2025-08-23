@@ -2,7 +2,6 @@
 
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { toast } from '@/components/ui/Toast';
 
 export interface Plan {
   id: string;
@@ -34,15 +33,15 @@ export function usePlanManagement() {
     try {
       if (plan.id === 'free') {
         // Plan gratuito - ir directo a onboarding
-        toast.success('Plan gratuito seleccionado');
+        console.log('Plan gratuito seleccionado');
         router.push('/onboarding');
       } else {
         // Plan de pago - ir a página de pago premium
-        toast.success(`Plan ${plan.name} seleccionado`);
+        console.log(`Plan ${plan.name} seleccionado`);
         router.push(`/payment?plan=${plan.id}`);
       }
     } catch (error) {
-      toast.error('Error al seleccionar el plan');
+      console.error('Error al seleccionar el plan:', error);
     } finally {
       setIsLoading(false);
     }
@@ -76,7 +75,7 @@ export function usePlanManagement() {
       
     } catch (error) {
       console.error('Error al procesar el pago:', error);
-      toast.error('Error al procesar el pago. Inténtalo de nuevo.');
+      console.error('Error al procesar el pago. Inténtalo de nuevo.');
     } finally {
       setIsProcessing(false);
     }
