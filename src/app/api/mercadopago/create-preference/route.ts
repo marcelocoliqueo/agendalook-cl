@@ -121,6 +121,14 @@ export async function POST(request: NextRequest) {
     console.log('🔍 MercadoPago API: Creating MercadoPago preference for plan:', plan);
 
     try {
+      // Verificar variables de entorno antes de crear la preferencia
+      console.log('🔍 MercadoPago API: Environment variables check:', {
+        hasAccessToken: !!process.env.MERCADOPAGO_ACCESS_TOKEN,
+        accessTokenPrefix: process.env.MERCADOPAGO_ACCESS_TOKEN?.substring(0, 10),
+        isSandbox: process.env.MERCADOPAGO_IS_SANDBOX,
+        appUrl: process.env.NEXT_PUBLIC_APP_URL
+      });
+
       // Crear preferencia en MercadoPago
       const preference = await createSubscriptionPreference({
         customerId: professional.id,
@@ -150,12 +158,15 @@ export async function POST(request: NextRequest) {
       console.error('🔍 MercadoPago API: Error details:', {
         message: preferenceError instanceof Error ? preferenceError.message : 'Unknown error',
         stack: preferenceError instanceof Error ? preferenceError.stack : 'No stack trace',
-        error: preferenceError
+        error: preferenceError,
+        errorType: preferenceError?.constructor?.name || 'Unknown type',
+        errorKeys: preferenceError ? Object.keys(preferenceError) : 'No keys'
       });
       
       return NextResponse.json({ 
         error: 'Error creando preferencia de MercadoPago',
-        details: preferenceError instanceof Error ? preferenceError.message : 'Unknown error'
+        details: preferenceError instanceof Error ? preferenceError.message : 'Unknown error',
+        errorType: preferenceError?.constructor?.name || 'Unknown type'
       }, { status: 500 });
     }
 
