@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { Check, Star, ArrowRight, Zap, Shield, Users, Calendar, MessageSquare } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfessional } from '@/hooks/useProfessional';
+import { usePlanManagement } from '@/hooks/usePlanManagement';
 import { MarketingLayout } from '@/components/layout/MarketingLayout';
 
 interface Plan {
@@ -72,11 +73,10 @@ const plans: Plan[] = [
 ];
 
 export default function PlansPage() {
-  const [selectedPlan, setSelectedPlan] = useState<string>('');
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
   const { user, loading: authLoading } = useAuth();
-  const { getProfessionalByUserId, updateProfessional } = useProfessional();
+  const { selectPlan, isLoading } = usePlanManagement();
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     if (authLoading) return;
@@ -97,35 +97,11 @@ export default function PlansPage() {
 
   const handleContinue = async () => {
     if (!selectedPlan) return;
+    
+    const plan = plans.find(p => p.id === selectedPlan);
+    if (!plan) return;
 
-    setLoading(true);
-
-    try {
-      // Obtener el profesional actual
-      const professional = await getProfessionalByUserId(user!.id);
-      
-      if (!professional) {
-        console.error('No se encontró el profesional');
-        return;
-      }
-
-      // Actualizar el plan del profesional
-      await updateProfessional(professional.id, {
-        plan: selectedPlan
-      });
-
-      // Redirigir según el plan seleccionado
-      if (selectedPlan === 'free') {
-        router.push('/onboarding');
-      } else {
-        // Para planes de pago, redirigir a MercadoPago
-        router.push(`/upgrade?plan=${selectedPlan}`);
-      }
-    } catch (error) {
-      console.error('Error al actualizar el plan:', error);
-    } finally {
-      setLoading(false);
-    }
+    await selectPlan(plan);
   };
 
   if (authLoading) {
@@ -214,10 +190,10 @@ export default function PlansPage() {
             <div className="text-center">
               <button
                 onClick={handleContinue}
-                disabled={loading}
+                disabled={isLoading}
                 className="bg-gradient-to-r from-sky-500 to-emerald-500 text-white px-8 py-4 rounded-2xl font-semibold text-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center mx-auto"
               >
-                {loading ? (
+                {isLoading ? (
                   <>
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
                     Procesando...
