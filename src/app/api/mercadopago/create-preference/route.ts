@@ -120,27 +120,44 @@ export async function POST(request: NextRequest) {
 
     console.log('🔍 MercadoPago API: Creating MercadoPago preference for plan:', plan);
 
-    // Crear preferencia en MercadoPago
-    const preference = await createSubscriptionPreference({
-      customerId: professional.id,
-      plan,
-      successUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://agendalook.cl'}/dashboard`,
-      cancelUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://agendalook.cl'}/plans`,
-      payerEmail: userEmail
-    });
+    try {
+      // Crear preferencia en MercadoPago
+      const preference = await createSubscriptionPreference({
+        customerId: professional.id,
+        plan,
+        successUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://agendalook.cl'}/dashboard`,
+        cancelUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://agendalook.cl'}/plans`,
+        payerEmail: userEmail
+      });
 
-    if (!preference) {
-      console.log('🔍 MercadoPago API: Failed to create preference');
-      return NextResponse.json({ error: 'Error creando preferencia' }, { status: 500 });
+      console.log('🔍 MercadoPago API: Preference created successfully:', preference);
+
+      if (!preference) {
+        console.log('🔍 MercadoPago API: Failed to create preference - preference is null/undefined');
+        return NextResponse.json({ error: 'Error creando preferencia' }, { status: 500 });
+      }
+
+      console.log('🔍 MercadoPago API: Preference created successfully:', preference.id);
+
+      return NextResponse.json({
+        id: preference.id,
+        init_point: preference.init_point,
+        sandbox_init_point: preference.sandbox_init_point
+      });
+
+    } catch (preferenceError) {
+      console.error('🔍 MercadoPago API: Error creating preference:', preferenceError);
+      console.error('🔍 MercadoPago API: Error details:', {
+        message: preferenceError instanceof Error ? preferenceError.message : 'Unknown error',
+        stack: preferenceError instanceof Error ? preferenceError.stack : 'No stack trace',
+        error: preferenceError
+      });
+      
+      return NextResponse.json({ 
+        error: 'Error creando preferencia de MercadoPago',
+        details: preferenceError instanceof Error ? preferenceError.message : 'Unknown error'
+      }, { status: 500 });
     }
-
-    console.log('🔍 MercadoPago API: Preference created successfully:', preference.id);
-
-    return NextResponse.json({
-      id: preference.id,
-      init_point: preference.init_point,
-      sandbox_init_point: preference.sandbox_init_point
-    });
 
   } catch (error) {
     console.error('🔍 MercadoPago API: Unexpected error:', error);
