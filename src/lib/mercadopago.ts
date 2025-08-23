@@ -231,7 +231,8 @@ export async function createSubscriptionPreference(preferenceData: {
     } catch (e) {
       console.warn('PreApproval.create no disponible; fallback a Preference (pago único)');
       const preference = new Preference(mpConfig);
-      const fallback = await preference.create({
+      
+      const preferencePayload = {
         items: [
           {
             id: `plan-${plan}`,
@@ -255,7 +256,11 @@ export async function createSubscriptionPreference(preferenceData: {
           test: isMercadoPagoSandbox(),
           env: isMercadoPagoSandbox() ? 'sandbox' : 'live',
         },
-      });
+      };
+      
+      console.log('🔍 MercadoPago: Preference payload:', JSON.stringify(preferencePayload, null, 2));
+      
+      const fallback = await preference.create(preferencePayload);
       return fallback;
     }
   } catch (error) {
