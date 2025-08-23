@@ -39,6 +39,11 @@ export function SupabaseProvider({ children }: { children: ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+      
+      // Debug: verificar cookies disponibles
+      console.log('🔍 Frontend: Session obtained:', !!session);
+      console.log('🔍 Frontend: Cookies available:', document.cookie);
+      console.log('🔍 Frontend: Supabase cookies:', document.cookie.split(';').filter(c => c.trim().startsWith('sb-')));
     };
 
     getSession();
@@ -46,6 +51,7 @@ export function SupabaseProvider({ children }: { children: ReactNode }) {
     // Escuchar cambios en la autenticación
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('🔍 Frontend: Auth state change:', event, !!session);
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);

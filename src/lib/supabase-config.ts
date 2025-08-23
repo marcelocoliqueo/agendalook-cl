@@ -11,6 +11,15 @@ export const AUTH_CONFIG = {
   flowType: 'pkce' as const,
   persistSession: true,
   autoRefreshToken: true,
+  detectSessionInUrl: true,
+  cookieOptions: {
+    name: 'agendalook-auth',
+    lifetime: 60 * 60 * 8, // 8 horas
+    domain: process.env.NODE_ENV === 'production' ? '.agendalook.cl' : 'localhost',
+    path: '/',
+    sameSite: 'lax' as const,
+    secure: process.env.NODE_ENV === 'production',
+  },
 } as const;
 
 // Verificar que las variables de entorno estén configuradas
