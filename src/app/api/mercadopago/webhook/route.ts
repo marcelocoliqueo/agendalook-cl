@@ -5,6 +5,7 @@ import { verifyMercadoPagoSignature, validateWebhookPayload, isMercadoPagoSandbo
 import { webhookRateLimiter, getClientIP } from '@/lib/rate-limit';
 import { securityLogger, getUserAgent } from '@/lib/security-logger';
 import { getSubscriptionStatus, formatMoney } from '@/lib/plans';
+import { sendPlanActivatedEmail } from '@/lib/upgrade-email-service';
 
 export async function POST(request: NextRequest) {
   try {
@@ -144,6 +145,60 @@ export async function POST(request: NextRequest) {
               .insert({ payment_id: paymentId, type: 'payment', processed_at: new Date().toISOString() });
 
             console.log(`Successfully updated professional subscription: ${data.payer.id} -> ${plan} (${formatMoney(amount)})`);
+
+            // Si el pago fue aprobado, actualizar el plan del usuario
+            if (data.status === 'approved') {
+              try {
+                // Obtener información del usuario
+                const { data: user, error: userError } = await supabase
+                  .from('professionals')
+                  .select(`
+                    id,
+                    user_id,
+                    plan
+                  `)
+                  .eq('user_id', data.external_reference)
+                  .single();
+
+                if (userError || !user) {
+                  console.error('Error obteniendo usuario:', userError);
+                  return NextResponse.json({ error: 'User not found' }, { status: 404 });
+                }
+
+                // Actualizar el plan del profesional
+                const { error: updateError } = await supabase
+                  .from('professionals')
+                  .update({ 
+                    plan: 'pro', // O el plan correspondiente al precio
+                    updated_at: new Date().toISOString()
+                  })
+                  .eq('id', user.id);
+
+                if (updateError) {
+                  console.error('Error actualizando plan:', updateError);
+                  return NextResponse.json({ error: 'Failed to update plan' }, { status: 500 });
+                }
+
+                // Obtener email del usuario para enviar confirmación
+                const { data: userProfile } = await supabase.auth.admin.getUserById(data.external_reference);
+                const userEmail = userProfile?.user?.email;
+                const userName = userProfile?.user?.user_metadata?.full_name || 'Usuario';
+
+                if (userEmail) {
+                  await sendPlanActivatedEmail({
+                    userId: user.user_id,
+                    userEmail,
+                    userName,
+                    planName: 'Pro',
+                    planPrice: 9990,
+                  });
+                }
+
+                console.log(`Plan actualizado exitosamente para usuario ${data.external_reference}`);
+              } catch (error) {
+                console.error('Error procesando activación de plan:', error);
+              }
+            }
           }
         } else if (data.status === 'pending') {
           // Pago pendiente - actualizar estado
