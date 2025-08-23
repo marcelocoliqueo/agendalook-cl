@@ -92,10 +92,11 @@ export async function POST(request: NextRequest) {
 
     // Crear preferencia en MercadoPago
     const preference = await createSubscriptionPreference({
+      customerId: professional.id,
       plan,
-      userEmail,
-      userId,
-      professionalId: professional.id
+      successUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://agendalook.cl'}/dashboard`,
+      cancelUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://agendalook.cl'}/plans`,
+      payerEmail: userEmail
     });
 
     if (!preference) {
