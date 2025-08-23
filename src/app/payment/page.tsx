@@ -103,12 +103,28 @@ function PaymentPageContent() {
 
   useEffect(() => {
     if (!user) {
+      console.log('🔍 Payment page: No user found, redirecting to login');
       router.push('/login');
+    } else {
+      console.log('🔍 Payment page: User authenticated:', {
+        id: user.id,
+        email: user.email,
+        emailConfirmed: user.email_confirmed_at
+      });
     }
   }, [user, router]);
 
   const handlePayment = async () => {
-    if (!selectedPlan || !user) return;
+    if (!selectedPlan || !user) {
+      console.log('🔍 Payment: Missing plan or user:', { selectedPlan, user });
+      return;
+    }
+
+    console.log('🔍 Payment: Starting payment process for:', {
+      plan: selectedPlan.id,
+      userEmail: user.email,
+      userId: user.id
+    });
 
     const paymentData: PaymentData = {
       plan: selectedPlan,

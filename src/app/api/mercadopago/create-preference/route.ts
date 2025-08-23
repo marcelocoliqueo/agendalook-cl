@@ -1,52 +1,51 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSubscriptionPreference, createMPCustomer, isMercadoPagoSandbox } from '@/lib/mercadopago';
 import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('🔍 MercadoPago API: Iniciando request...');
+    console.log('🔍 MercadoPago API: Request received');
     
-    const { plan, successUrl, cancelUrl } = await request.json();
-    console.log('🔍 MercadoPago API: Plan recibido:', plan);
-
-    // Verificar autenticación con cookies del request (server-side)
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+    // Verificar que sea una llamada válida
+    const authHeader = request.headers.get('authorization');
+    console.log('🔍 MercadoPago API: Auth header:', authHeader ? 'Present' : 'Missing');
     
-    console.log('🔍 MercadoPago API: Config Supabase:', { 
-      url: supabaseUrl ? 'Configurado' : 'NO configurado',
-      anonKey: anonKey ? 'Configurado' : 'NO configurado'
-    });
+    // Para Vercel Cron, puedes usar un token secreto
+    const expectedToken = process.env.CRON_SECRET_TOKEN;
+    console.log('🔍 MercadoPago API: Expected token:', expectedToken ? 'Configured' : 'Not configured');
     
-    const supabase = createServerClient(supabaseUrl, anonKey, {
-      cookies: {
-        get(name: string) {
-          const cookie = request.cookies.get(name);
-          console.log(`🔍 MercadoPago API: Cookie ${name}:`, cookie ? 'Presente' : 'Ausente');
-          return cookie?.value;
-        },
-        set() {},
-        remove() {},
-      },
-    });
-    
-    console.log('🔍 MercadoPago API: Intentando obtener usuario...');
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    
-    console.log('🔍 MercadoPago API: Resultado auth:', { 
-      user: user ? `ID: ${user.id}` : 'null',
-      error: authError ? authError.message : 'null'
-    });
-
-    if (authError || !user) {
-      console.log('❌ MercadoPago API: Autenticación falló:', { authError, user });
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      );
+    if (expectedToken && authHeader !== `Bearer ${expectedToken}`) {
+      console.log('🔍 MercadoPago API: Token mismatch');
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    console.log('✅ MercadoPago API: Usuario autenticado:', user.id);
+    // Obtener el cuerpo de la solicitud
+    const body = await request.json();
+    console.log('🔍 MercadoPago API: Request body:', body);
+
+    // Verificar que el usuario esté autenticado
+    const supabase = createServerSupabaseClient();
+    console.log('🔍 MercadoPago API: Supabase client created');
+
+    // Obtener la cookie de sesión
+    const cookieStore = await cookies();
+    const supabaseCookie = cookieStore.get('sb-access-token');
+    console.log('🔍 MercadoPago API: Supabase cookie:', supabaseCookie ? 'Present' : 'Missing');
+
+    // Verificar el usuario
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    console.log('🔍 MercadoPago API: User verification result:', {
+      user: user ? { id: user.id, email: user.email } : null,
+      error: userError
+    });
+
+    if (userError || !user) {
+      console.log('🔍 MercadoPago API: User not authenticated');
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
+
+    console.log('🔍 MercadoPago API: User authenticated successfully:', user.id);
 
     // Obtener datos del profesional
     const { data: professional, error: profError } = await supabase
