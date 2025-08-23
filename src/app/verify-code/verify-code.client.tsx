@@ -117,24 +117,24 @@ export default function VerifyCodeClient() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-lavender-50 via-white to-coral-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
-        <h1 className="text-2xl font-bold text-gray-800 mb-2">Confirma tu correo</h1>
-        <p className="text-gray-600 mb-1">Ingresa el código de 6 dígitos que te enviamos.</p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-sky-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-3xl shadow-xl p-8 max-w-md w-full text-center border border-slate-200">
+        <h1 className="text-2xl font-bold text-slate-800 mb-2">Confirma tu correo</h1>
+        <p className="text-slate-600 mb-1">Ingresa el código de 6 dígitos que te enviamos.</p>
         {email ? (
-          <p className="text-sm text-gray-500 mb-6">Enviado a <span className="font-medium">{email}</span></p>
+          <p className="text-sm text-slate-500 mb-6">Enviado a <span className="font-medium text-slate-700">{email}</span></p>
         ) : (
-          <p className="text-sm text-gray-500 mb-6">Redirigiendo al registro...</p>
+          <p className="text-sm text-slate-500 mb-6">Redirigiendo al registro...</p>
         )}
 
-        <div className="flex justify-between mb-4">
+        <div className="flex justify-between mb-6">
           {digits.map((d, i) => (
             <input
               key={i}
               ref={(el) => {
                 inputsRef.current[i] = el;
               }}
-              className="w-12 h-12 text-center text-xl border rounded-lg text-gray-900 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              className="w-12 h-12 text-center text-xl border-2 border-slate-300 rounded-xl text-slate-900 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all duration-200"
               value={d}
               onChange={(e) => handleDigitChange(i, e.target.value)}
               onKeyDown={(e) => handleKeyDown(i, e)}
@@ -146,32 +146,37 @@ export default function VerifyCodeClient() {
           ))}
         </div>
 
-        {message && <div className="text-sm text-gray-700 mb-3">{message}</div>}
+        {message && (
+          <div className="text-sm text-slate-700 mb-4 p-3 bg-slate-50 rounded-xl border border-slate-200">
+            {message}
+          </div>
+        )}
 
-        <div className="flex gap-3 justify-center">
-          <button
-            onClick={requestCode}
-            disabled={!canResend}
-            aria-disabled={!canResend}
-            className={`px-4 py-2 rounded-lg transition-colors ${
-              canResend
-                ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                : 'bg-gray-100 text-gray-400 cursor-not-allowed opacity-60'
-            }`}
-          >
-            {countdown > 0 ? `Reenviar código (${countdown}s)` : 'Reenviar código'}
-          </button>
+        <div className="flex flex-col gap-3">
           <button
             onClick={verifyCode}
             disabled={loading || code.length !== 6 || !email}
             aria-disabled={loading || code.length !== 6 || !email}
-            className={`px-4 py-2 rounded-lg text-white ${
+            className={`px-6 py-3 rounded-2xl text-white font-semibold transition-all duration-300 ${
               loading || code.length !== 6 || !email
-                ? 'bg-primary-400 cursor-not-allowed opacity-70'
-                : 'bg-primary-500 hover:bg-primary-600'
+                ? 'bg-slate-400 cursor-not-allowed opacity-70'
+                : 'bg-sky-500 hover:bg-sky-600 hover:shadow-lg hover:-translate-y-0.5 focus:ring-2 focus:ring-offset-2 focus:ring-sky-500'
             }`}
           >
-            Confirmar
+            {loading ? 'Verificando...' : 'Confirmar Código'}
+          </button>
+          
+          <button
+            onClick={requestCode}
+            disabled={!canResend}
+            aria-disabled={!canResend}
+            className={`px-6 py-3 rounded-2xl transition-all duration-300 ${
+              canResend
+                ? 'bg-slate-100 text-slate-700 hover:bg-slate-200 hover:shadow-md border border-slate-200'
+                : 'bg-slate-100 text-slate-400 cursor-not-allowed opacity-60 border border-slate-200'
+            }`}
+          >
+            {countdown > 0 ? `Reenviar código (${countdown}s)` : 'Reenviar código'}
           </button>
         </div>
       </div>

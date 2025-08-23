@@ -99,145 +99,157 @@ export default function WelcomePage() {
     router.push('/plans');
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-lavender-50 via-white to-coral-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Cargando...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-lavender-50 via-white to-coral-50">
-      {/* Header */}
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center mb-12">
-          <Link href="/" className="inline-flex items-center justify-center mb-8">
-            <Image
-              src="/logo.png"
-              alt="Agendalook"
-              width={160}
-              height={45}
-              className="w-40 h-11 object-contain"
-            />
-          </Link>
-          
-          <div className="max-w-2xl mx-auto">
-            <div className="flex items-center justify-center mb-6">
-              <CheckCircle className="w-12 h-12 text-green-500 mr-3" />
-              <h1 className="text-4xl font-playfair font-bold text-gray-800">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-sky-50">
+      <div className="max-w-4xl mx-auto px-4 py-12">
+        {loading ? (
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-sky-500 mx-auto mb-4"></div>
+            <p className="text-slate-600">Configurando tu cuenta...</p>
+          </div>
+        ) : (
+          <div className="bg-white rounded-3xl shadow-xl p-8 border border-slate-200">
+            {/* Header */}
+            <div className="text-center mb-8">
+              <div className="w-20 h-20 bg-gradient-to-br from-sky-500 to-emerald-500 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                <CheckCircle className="w-10 h-10 text-white" />
+              </div>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent mb-4">
                 ¡Bienvenido a Agendalook!
               </h1>
-            </div>
-            
-            <p className="text-xl text-gray-700 mb-8">
-              Tu cuenta ha sido confirmada exitosamente. Ahora vamos a configurar tu negocio para que puedas comenzar a gestionar tus citas de manera profesional.
-            </p>
-          </div>
-        </div>
-
-        {/* Welcome Card */}
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white rounded-3xl shadow-2xl p-8 mb-8">
-            <div className="text-center mb-8">
-              <div className="w-20 h-20 bg-gradient-to-br from-primary-500 to-coral-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Sparkles className="w-10 h-10 text-white" />
-              </div>
-              
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">
-                ¡Hola, {professional?.business_name || (user as any)?.user_metadata?.business_name || 'Profesional'}!
-              </h2>
-              
-              <p className="text-gray-600 text-lg">
-                Estás a solo unos pasos de tener tu agenda profesional funcionando
+              <p className="text-xl text-slate-600 max-w-2xl mx-auto">
+                Tu cuenta ha sido creada exitosamente. Ahora es momento de configurar tu negocio y elegir el plan perfecto.
               </p>
             </div>
 
-            {/* Features Grid */}
-            <div className="grid md:grid-cols-3 gap-6 mb-8">
-              <div className="text-center p-6 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100">
-                <Calendar className="w-12 h-12 text-blue-600 mx-auto mb-4" />
-                <h3 className="font-semibold text-gray-800 mb-2">Gestión de Citas</h3>
-                <p className="text-gray-600 text-sm">
-                  Organiza tu agenda de manera profesional y eficiente
-                </p>
+            {/* Business Info */}
+            {professional && (
+              <div className="bg-gradient-to-br from-sky-50 to-emerald-50 rounded-2xl p-6 mb-8 border border-sky-200">
+                <div className="flex items-center space-x-4 mb-4">
+                  <div className="w-12 h-12 bg-gradient-to-br from-sky-500 to-sky-600 rounded-xl flex items-center justify-center">
+                    <Users className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-semibold text-slate-800">
+                      {professional.business_name}
+                    </h2>
+                    <p className="text-slate-600">
+                      Negocio configurado y listo para usar
+                    </p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="bg-white rounded-xl p-4 border border-sky-200">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <Calendar className="w-5 h-5 text-sky-600" />
+                      <span className="font-medium text-slate-800">Plan Actual</span>
+                    </div>
+                    <p className="text-2xl font-bold text-sky-600 capitalize">
+                      {professional.plan}
+                    </p>
+                  </div>
+                  <div className="bg-white rounded-xl p-4 border border-sky-200">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <Zap className="w-5 h-5 text-emerald-600" />
+                      <span className="font-medium text-slate-800">Estado</span>
+                    </div>
+                    <p className="text-2xl font-bold text-emerald-600">
+                      Activo
+                    </p>
+                  </div>
+                  <div className="bg-white rounded-xl p-4 border border-sky-200">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <Sparkles className="w-5 h-5 text-purple-600" />
+                      <span className="font-medium text-slate-800">Próximo Paso</span>
+                    </div>
+                    <p className="text-lg font-semibold text-purple-600">
+                      Elegir Plan
+                    </p>
+                  </div>
+                </div>
               </div>
-              
-              <div className="text-center p-6 rounded-xl bg-gradient-to-br from-green-50 to-green-100">
-                <Users className="w-12 h-12 text-green-600 mx-auto mb-4" />
-                <h3 className="font-semibold text-gray-800 mb-2">Clientes</h3>
-                <p className="text-gray-600 text-sm">
-                  Gestiona tu base de datos de clientes y su historial
-                </p>
-              </div>
-              
-              <div className="text-center p-6 rounded-xl bg-gradient-to-br from-purple-50 to-purple-100">
-                <Zap className="w-12 h-12 text-purple-600 mx-auto mb-4" />
-                <h3 className="font-semibold text-gray-800 mb-2">Automatización</h3>
-                <p className="text-gray-600 text-sm">
-                  Confirmaciones automáticas y recordatorios inteligentes
-                </p>
-              </div>
-            </div>
+            )}
 
             {/* Next Steps */}
-            <div className="bg-gradient-to-r from-primary-50 to-coral-50 rounded-2xl p-6">
-              <h3 className="text-xl font-semibold text-gray-800 mb-4 text-center">
-                ¿Qué sigue?
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold text-slate-800 mb-6 text-center">
+                ¿Qué quieres hacer ahora?
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <button
+                  onClick={handleContinue}
+                  className="group p-6 bg-gradient-to-br from-sky-500 to-sky-600 rounded-2xl text-white text-left hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                >
+                  <div className="flex items-center space-x-4 mb-3">
+                    <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center group-hover:bg-white/30 transition-colors">
+                      <Sparkles className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Elegir Plan</h3>
+                      <p className="text-sky-100">Desbloquear funcionalidades avanzadas</p>
+                    </div>
+                  </div>
+                  <p className="text-sky-100 text-sm">
+                    Compara nuestros planes y elige el que mejor se adapte a tu negocio
+                  </p>
+                  <div className="flex items-center mt-4 text-sky-100 group-hover:text-white transition-colors">
+                    <span className="font-medium">Continuar</span>
+                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </button>
+
+                <Link
+                  href="/dashboard"
+                  className="group p-6 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl text-white text-left hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                >
+                  <div className="flex items-center space-x-4 mb-3">
+                    <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center group-hover:bg-white/30 transition-colors">
+                      <Calendar className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Ir al Dashboard</h3>
+                      <p className="text-emerald-100">Comenzar a configurar tu negocio</p>
+                    </div>
+                  </div>
+                  <p className="text-emerald-100 text-sm">
+                    Accede directamente a tu panel de control y configura servicios
+                  </p>
+                  <div className="flex items-center mt-4 text-emerald-100 group-hover:text-white transition-colors">
+                    <span className="font-medium">Acceder</span>
+                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </Link>
+              </div>
+            </div>
+
+            {/* Quick Tips */}
+            <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200">
+              <h3 className="text-lg font-semibold text-slate-800 mb-4 text-center">
+                💡 Consejos para empezar
               </h3>
-              
-              <div className="space-y-4">
-                <div className="flex items-center">
-                  <div className="w-8 h-8 bg-primary-500 text-white rounded-full flex items-center justify-center text-sm font-semibold mr-4">
-                    1
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                <div className="text-center">
+                  <div className="w-8 h-8 bg-sky-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                    <span className="text-sky-600 font-bold">1</span>
                   </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-800">Elegir tu plan</h4>
-                    <p className="text-gray-600 text-sm">Selecciona el plan que mejor se adapte a tus necesidades</p>
-                  </div>
+                  <p className="text-slate-600">Elige el plan que mejor se adapte a tus necesidades</p>
                 </div>
-                
-                <div className="flex items-center">
-                  <div className="w-8 h-8 bg-coral-500 text-white rounded-full flex items-center justify-center text-sm font-semibold mr-4">
-                    2
+                <div className="text-center">
+                  <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                    <span className="text-emerald-600 font-bold">2</span>
                   </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-800">Configurar tu negocio</h4>
-                    <p className="text-gray-600 text-sm">Personaliza servicios, horarios y preferencias</p>
-                  </div>
+                  <p className="text-slate-600">Configura tus servicios y horarios disponibles</p>
                 </div>
-                
-                <div className="flex items-center">
-                  <div className="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center text-sm font-semibold mr-4">
-                    3
+                <div className="text-center">
+                  <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                    <span className="text-purple-600 font-bold">3</span>
                   </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-800">¡Comenzar!</h4>
-                    <p className="text-gray-600 text-sm">Recibe tu primera cita y gestiona tu agenda</p>
-                  </div>
+                  <p className="text-slate-600">Comparte tu enlace público con clientes</p>
                 </div>
               </div>
             </div>
           </div>
-
-          {/* Action Button */}
-          <div className="text-center">
-            <button
-              onClick={handleContinue}
-              className="bg-gradient-to-r from-primary-500 to-coral-500 text-white px-8 py-4 rounded-2xl font-semibold text-lg hover:shadow-xl transition-all duration-300 flex items-center mx-auto"
-            >
-              Elegir mi plan
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </button>
-            
-            <p className="text-gray-500 text-sm mt-4">
-              Puedes cambiar tu plan en cualquier momento desde tu dashboard
-            </p>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
