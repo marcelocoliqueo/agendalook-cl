@@ -307,4 +307,117 @@ export async function createMPCustomer(customerData: {
     console.error('❌ Error creating MercadoPago customer:', error);
     throw error;
   }
+}
+
+// Función para verificar la conexión con MercadoPago
+export async function testMercadoPagoConnection() {
+  try {
+    // Verificar que el access token esté configurado y sea válido
+    const accessToken = process.env.MERCADOPAGO_ACCESS_TOKEN;
+    
+    if (!accessToken || accessToken.includes('tu_access_token_aqui')) {
+      return {
+        success: true,
+        mode: 'simulated',
+        preferenceId: 'simulated_pref_123',
+        message: 'Modo simulado - Configura credenciales reales de MercadoPago para modo real'
+      };
+    }
+
+    console.log('🔍 Probando conexión con MercadoPago...');
+    console.log('Access Token:', accessToken.substring(0, 20) + '...');
+    
+    // Solo configurar si tenemos credenciales válidas
+    configureMercadoPago();
+    
+    if (!mpConfig) {
+      throw new Error('MercadoPago no está configurado');
+    }
+    
+    // Intentar crear un plan de suscripción de prueba
+    console.log('📝 Creando plan de suscripción de prueba...');
+    
+    const preapprovalPlan = new PreApprovalPlan(mpConfig);
+    
+    const testPlanData = {
+      reason: 'Test Plan Agendalook',
+      auto_recurring: {
+        frequency: 1,
+        frequency_type: 'months',
+        transaction_amount: 100,
+        currency_id: 'CLP',
+      },
+      back_url: 'https://example.com/success',
+      payment_methods_allowed: {
+        payment_types: [{}],
+        payment_methods: [{}]
+      }
+    };
+    
+    console.log('📋 Datos del plan de prueba:', JSON.stringify(testPlanData, null, 2));
+    
+    const testPlan = await preapprovalPlan.create({ body: testPlanData });
+
+    console.log('✅ Plan de suscripción de prueba creado exitosamente:', testPlan.id);
+
+    return {
+      success: true,
+      mode: 'real',
+      preferenceId: testPlan.id,
+      message: 'Conexión con MercadoPago exitosa'
+    };
+  } catch (error) {
+    console.error('❌ Error testing MercadoPago connection:', error);
+    
+    // Mostrar más detalles del error
+    let errorMessage = 'Error desconocido';
+    let errorDetails = '';
+    
+    if (error instanceof Error) {
+      errorMessage = error.message;
+      errorDetails = error.stack || '';
+    } else if (typeof error === 'object' && error !== null) {
+      errorMessage = JSON.stringify(error);
+    }
+    
+    console.error('Error details:', errorDetails);
+    
+    return {
+      success: false,
+      mode: 'simulated',
+      preferenceId: 'simulated_pref_123',
+      message: `Modo simulado - Error en credenciales de MercadoPago: ${errorMessage}`,
+      error: errorMessage,
+      details: errorDetails
+    };
+  }
+}
+
+// Función para validar el payload del webhook
+export function validateWebhookPayload(body: any): boolean {
+  try {
+    // Verificar estructura básica
+    if (!body || typeof body !== 'object') {
+      return false;
+    }
+
+    // Verificar campos requeridos según el tipo
+    if (body.type === 'payment') {
+      return !!(body.data && body.data.id && body.data.status);
+    }
+
+    if (body.type === 'subscription_authorized_payment') {
+      return !!(body.data && body.data.id && body.data.status);
+    }
+
+    if (body.type === 'subscription_cancelled') {
+      return !!(body.data && body.data.id);
+    }
+
+    // Para otros tipos, verificar al menos que tenga data
+    return !!(body.data && body.type);
+  } catch (error) {
+    console.error('Error validating webhook payload:', error);
+    return false;
+  }
 } 
