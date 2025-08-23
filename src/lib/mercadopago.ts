@@ -1,5 +1,5 @@
 // Importar MercadoPago usando require para evitar problemas con webpack
-const { MercadoPagoConfig, Preference } = require('mercadopago');
+const { MercadoPagoConfig, PreApprovalPlan, PreApproval } = require('mercadopago');
 const crypto = require('crypto');
 
 // Variable global para la configuración
@@ -102,85 +102,90 @@ export function verifyMercadoPagoSignature(
   }
 }
 
-// Función para validar el payload del webhook
-export function validateWebhookPayload(body: any): boolean {
-  try {
-    // Verificar estructura básica
-    if (!body || typeof body !== 'object') {
-      return false;
-    }
-
-    // Verificar campos requeridos según el tipo
-    if (body.type === 'payment') {
-      return !!(body.data && body.data.id && body.data.status);
-    }
-
-    if (body.type === 'subscription_authorized_payment') {
-      return !!(body.data && body.data.id && body.data.status);
-    }
-
-    if (body.type === 'subscription_cancelled') {
-      return !!(body.data && body.data.id);
-    }
-
-    // Para otros tipos, verificar al menos que tenga data
-    return !!(body.data && body.type);
-  } catch (error) {
-    console.error('Error validating webhook payload:', error);
-    return false;
-  }
-}
-
-// Función para crear/obtener cliente de MercadoPago
-export async function createMPCustomer(customerData: {
-  email: string;
-  name: string;
-  metadata?: any;
-}): Promise<{ id: string; message?: string }> {
+// Función para crear un plan de suscripción
+export async function createSubscriptionPlan(planData: {
+  plan: string;
+  planName: string;
+  planPrice: number;
+  currency: string;
+}) {
   try {
     configureMercadoPago();
-    if (!mpConfig) throw new Error('MercadoPago no está configurado');
-
-    if (!customerData.email || !customerData.name) {
-      throw new Error('Email y nombre son requeridos');
-    }
-
-    const { Customer } = require('mercadopago');
-    const customer = new Customer(mpConfig);
-
-    // Buscar por email
-    try {
-      const searchRes = await customer.search({ email: customerData.email });
-      if (searchRes && searchRes.results && searchRes.results.length > 0) {
-        return { id: searchRes.results[0].id };
+    
+    const preapprovalPlan = new PreApprovalPlan(mpConfig);
+    
+    const planPayload = {
+      reason: `Plan ${planData.planName} Agendalook`,
+      auto_recurring: {
+        frequency: 1,
+        frequency_type: 'months',
+        transaction_amount: planData.planPrice,
+        currency_id: planData.currency,
+      },
+      back_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
+      payment_methods_allowed: {
+        payment_types: [{}],
+        payment_methods: [{}]
       }
-    } catch (e) {
-      console.warn('Customer.search failed or not available, proceeding to create');
-    }
-
-    // Crear cliente si no existe
-    try {
-      const created = await customer.create({
-        email: customerData.email,
-        first_name: customerData.name,
-        metadata: customerData.metadata || {},
-      });
-      if (created && created.id) {
-        return { id: created.id };
-      }
-    } catch (e) {
-      console.warn('Customer.create failed; returning simulated id as fallback');
-      return { id: `simulated_cust_${Date.now()}`, message: 'Simulated customer (fallback)' };
-    }
-
-    return { id: `simulated_cust_${Date.now()}`, message: 'Simulated customer (no result)' };
+    };
+    
+    console.log('🔍 MercadoPago: Creating subscription plan:', JSON.stringify(planPayload, null, 2));
+    
+    const plan = await preapprovalPlan.create({ body: planPayload });
+    console.log('✅ Plan de suscripción creado:', plan.id);
+    
+    return plan;
   } catch (error) {
-    console.error('Error creating MercadoPago customer:', error);
-    return { id: `simulated_cust_${Date.now()}`, message: 'Simulated customer (error)' };
+    console.error('❌ Error creating subscription plan:', error);
+    throw error;
   }
 }
 
-// Función para crear preferencia de suscripción
+// Función para crear una suscripción usando el plan
+export async function createSubscriptionWithPlan(subscriptionData: {
+  planId: string;
+  customerId: string;
+  plan: string;
+  planName: string;
+  planPrice: number;
+  payerEmail: string;
+  cardTokenId: string;
+}) {
+  try {
+    configureMercadoPago();
+    
+    const preapproval = new PreApproval(mpConfig);
+    
+    const subscriptionPayload = {
+      preapproval_plan_id: subscriptionData.planId,
+      reason: `Plan ${subscriptionData.planName} Agendalook`,
+      external_reference: `subscription_${subscriptionData.plan}_${subscriptionData.customerId}`,
+      payer_email: subscriptionData.payerEmail,
+      card_token_id: subscriptionData.cardTokenId,
+      auto_recurring: {
+        frequency: 1,
+        frequency_type: 'months',
+        start_date: new Date().toISOString(),
+        transaction_amount: subscriptionData.planPrice,
+        currency_id: 'CLP',
+      },
+      back_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
+      status: 'authorized'
+    };
+    
+    console.log('🔍 MercadoPago: Creating subscription with plan:', JSON.stringify(subscriptionPayload, null, 2));
+    
+    const subscription = await preapproval.create({ body: subscriptionPayload });
+    console.log('✅ Suscripción creada:', subscription.id);
+    
+    return subscription;
+  } catch (error) {
+    console.error('❌ Error creating subscription:', error);
+    throw error;
+  }
+}
+
+// Función principal para crear preferencia de suscripción
 export async function createSubscriptionPreference(preferenceData: {
   customerId: string;
   plan: string;
@@ -194,74 +199,28 @@ export async function createSubscriptionPreference(preferenceData: {
     const planName = preferenceData.plan === 'pro' ? 'Pro' : 'Premium';
     const planPrice = preferenceData.plan === 'pro' ? 9900 : 19900;
 
-    // Intentar crear suscripción (PreApproval) para cobro mensual automático
-    try {
-      const { PreApproval } = require('mercadopago');
-      const preapproval = new PreApproval(mpConfig);
-      const payload = {
-        reason: `Plan ${planName} Agendalook`,
-        external_reference: `subscription_${preferenceData.plan}_${preferenceData.customerId}`,
-        back_url: preferenceData.successUrl,
-        auto_recurring: {
-          frequency: 1,
-          frequency_type: 'months',
-          transaction_amount: planPrice,
-          currency_id: 'CLP',
-        },
-        payer_email: preferenceData.payerEmail,
-        notification_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/mercadopago/webhook`,
-        metadata: {
-          test: isMercadoPagoSandbox(),
-          env: isMercadoPagoSandbox() ? 'sandbox' : 'live',
-        },
-      };
-      const result = await preapproval.create(payload);
-      console.log('PreApproval creado:', result.id);
-      // Normalizar shape esperado por el caller
-      return {
-        id: result.id,
-        init_point: result.init_point,
-        sandbox_init_point: result.sandbox_init_point,
-      };
-    } catch (e) {
-      console.warn('PreApproval.create no disponible; fallback a Preference (pago único)');
-      
-      // Crear preferencia usando la sintaxis correcta del SDK v2.8.0
-      const preference = new Preference(mpConfig);
-      
-      // Crear el payload con la estructura exacta que espera MercadoPago
-      const preferencePayload = {
-        items: [
-          {
-            id: `plan-${preferenceData.plan}`,
-            title: `Plan ${planName}`,
-            quantity: 1,
-            unit_price: planPrice,
-            currency_id: 'CLP',
-          },
-        ],
-        back_urls: {
-          success: preferenceData.successUrl,
-          failure: preferenceData.cancelUrl,
-          pending: preferenceData.cancelUrl,
-        },
-        auto_return: 'approved',
-        external_reference: `subscription_${preferenceData.plan}_${preferenceData.customerId}`,
-        notification_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/mercadopago/webhook`,
-        expires: true,
-        expiration_date_to: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-        metadata: {
-          test: isMercadoPagoSandbox(),
-          env: isMercadoPagoSandbox() ? 'sandbox' : 'live',
-        },
-      };
-      
-      console.log('🔍 MercadoPago: Preference payload:', JSON.stringify(preferencePayload, null, 2));
-      
-      // Usar la sintaxis correcta del SDK v2.8.0
-      const fallback = await preference.create({ body: preferencePayload });
-      return fallback;
-    }
+    console.log('🔍 MercadoPago: Creating subscription preference for plan:', preferenceData.plan);
+
+    // Paso 1: Crear el plan de suscripción
+    const plan = await createSubscriptionPlan({
+      plan: preferenceData.plan,
+      planName,
+      planPrice,
+      currency: 'CLP'
+    });
+
+    // Paso 2: Crear la suscripción (requiere card_token_id)
+    // Por ahora, retornamos el plan para que el frontend pueda continuar
+    // El card_token_id se obtendrá del frontend después de la validación de tarjeta
+    
+    return {
+      id: plan.id,
+      plan_id: plan.id,
+      init_point: plan.back_url,
+      sandbox_init_point: plan.back_url,
+      type: 'subscription_plan'
+    };
+    
   } catch (error) {
     console.error('Error creating subscription preference:', error);
     throw error;
@@ -296,7 +255,6 @@ export async function getSubscriptionInfo(subscriptionId: string) {
       throw new Error('Subscription ID es requerido');
     }
 
-    const { PreApproval } = require('mercadopago');
     const preapproval = new PreApproval(mpConfig);
     const result = await preapproval.get({ id: subscriptionId });
     return result;
@@ -306,91 +264,47 @@ export async function getSubscriptionInfo(subscriptionId: string) {
   }
 }
 
-// Función para verificar la conexión con MercadoPago
-export async function testMercadoPagoConnection() {
+// Función para obtener información de un plan
+export async function getPlanInfo(planId: string) {
   try {
-    // Verificar que el access token esté configurado y sea válido
-    const accessToken = process.env.MERCADOPAGO_ACCESS_TOKEN;
-    
-    if (!accessToken || accessToken.includes('tu_access_token_aqui')) {
-      return {
-        success: true,
-        mode: 'simulated',
-        preferenceId: 'simulated_pref_123',
-        message: 'Modo simulado - Configura credenciales reales de MercadoPago para modo real'
-      };
-    }
-
-    console.log('🔍 Probando conexión con MercadoPago...');
-    console.log('Access Token:', accessToken.substring(0, 20) + '...');
-    
-    // Solo configurar si tenemos credenciales válidas
     configureMercadoPago();
     
-    if (!mpConfig) {
-      throw new Error('MercadoPago no está configurado');
+    if (!planId) {
+      throw new Error('Plan ID es requerido');
     }
-    
-    // Intentar crear una preferencia de prueba
-    console.log('📝 Creando preferencia de prueba...');
-    
-    // Crear instancia de Preference
-    const preference = new Preference(mpConfig);
-    
-    // Formato simplificado que funcionó en el script de prueba
-    const preferenceData = {
-      items: [
-        {
-          id: 'test',
-          title: 'Test',
-          quantity: 1,
-          unit_price: 100,
-          currency_id: 'CLP'
-        }
-      ],
-      back_urls: {
-        success: 'https://example.com/success',
-        failure: 'https://example.com/failure'
-      },
-      auto_return: 'approved',
-      external_reference: 'test'
-    };
-    
-    console.log('📋 Datos de preferencia:', JSON.stringify(preferenceData, null, 2));
-    
-    const testPreference = await preference.create(preferenceData);
 
-    console.log('✅ Preferencia creada exitosamente:', testPreference.id);
-
-    return {
-      success: true,
-      mode: 'real',
-      preferenceId: testPreference.id,
-      message: 'Conexión con MercadoPago exitosa'
-    };
+    const preapprovalPlan = new PreApprovalPlan(mpConfig);
+    const result = await preapprovalPlan.get({ id: planId });
+    return result;
   } catch (error) {
-    console.error('❌ Error testing MercadoPago connection:', error);
+    console.error('Error getting plan info:', error);
+    throw error;
+  }
+}
+
+// Función para crear un cliente en MercadoPago
+export async function createMPCustomer(customerData: {
+  email: string;
+  name: string;
+  surname: string;
+}) {
+  try {
+    configureMercadoPago();
     
-    // Mostrar más detalles del error
-    let errorMessage = 'Error desconocido';
-    let errorDetails = '';
+    const { Customer } = require('mercadopago');
+    const customer = new Customer(mpConfig);
     
-    if (error instanceof Error) {
-      errorMessage = error.message;
-      errorDetails = error.stack || '';
-    } else if (typeof error === 'object' && error !== null) {
-      errorMessage = JSON.stringify(error);
-    }
-    
-    console.error('Error details:', errorDetails);
-    
-    return {
-      success: false,
-      mode: 'simulated',
-      preferenceId: 'simulated_pref_123',
-      message: `Modo simulado - Error en credenciales de MercadoPago: ${errorMessage}`,
-      error: errorMessage,
-      details: errorDetails
+    const customerPayload = {
+      email: customerData.email,
+      first_name: customerData.name,
+      last_name: customerData.surname,
     };
+    
+    const result = await customer.create({ body: customerPayload });
+    console.log('✅ Cliente MercadoPago creado:', result.id);
+    return result;
+  } catch (error) {
+    console.error('❌ Error creating MercadoPago customer:', error);
+    throw error;
   }
 } 
