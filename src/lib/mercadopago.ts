@@ -119,14 +119,17 @@ export async function createSubscriptionPlan(planData: {
       auto_recurring: {
         frequency: 1,
         frequency_type: 'months',
+        repetitions: 12, // 12 meses de suscripción
+        billing_day: 10, // Día 10 de cada mes
+        billing_day_proportional: true, // Proporcional si el día no existe
         transaction_amount: planData.planPrice,
         currency_id: planData.currency,
       },
-      back_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
       payment_methods_allowed: {
-        payment_types: [{}],
-        payment_methods: [{}]
-      }
+        payment_types: [{}], // Todos los tipos de pago
+        payment_methods: [{}] // Todos los métodos de pago
+      },
+      back_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`
     };
     
     console.log('🔍 MercadoPago: Creating subscription plan:', JSON.stringify(planPayload, null, 2));
@@ -166,6 +169,7 @@ export async function createSubscriptionWithPlan(subscriptionData: {
         frequency: 1,
         frequency_type: 'months',
         start_date: new Date().toISOString(),
+        end_date: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(), // 1 año
         transaction_amount: subscriptionData.planPrice,
         currency_id: 'CLP',
       },
@@ -344,6 +348,9 @@ export async function testMercadoPagoConnection() {
       auto_recurring: {
         frequency: 1,
         frequency_type: 'months',
+        repetitions: 12,
+        billing_day: 10,
+        billing_day_proportional: true,
         transaction_amount: 100,
         currency_id: 'CLP',
       },
