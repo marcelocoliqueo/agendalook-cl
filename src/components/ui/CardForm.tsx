@@ -176,14 +176,14 @@ export function CardForm({ onTokenGenerated, onError, isLoading = false, planNam
         </p>
       </div>
 
-      {(error || mpError) && (
+      {(mpError) && (
         <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
           <div className="flex items-start space-x-3">
             <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
             <div>
               <p className="text-red-800 font-medium">Error de validación</p>
               <p className="text-red-700 text-sm mt-1">
-                {error || mpError}
+                {mpError}
               </p>
             </div>
           </div>

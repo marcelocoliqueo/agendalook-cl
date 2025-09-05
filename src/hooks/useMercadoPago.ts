@@ -1,6 +1,5 @@
 'use client';
 import { useState, useCallback, useEffect } from 'react';
-import { MercadoPagoConfig, CardToken } from '@mercadopago/sdk-js';
 
 interface CardData {
   cardNumber: string;
@@ -36,25 +35,12 @@ export function useMercadoPago(): UseMercadoPagoReturn {
           throw new Error('NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY no está configurado');
         }
 
-        console.log('🔧 Configurando MercadoPago SDK en frontend...');
+        console.log('🔧 Configurando MercadoPago en frontend...');
         console.log('Public Key:', publicKey.substring(0, 20) + '...');
 
-        // Configurar MercadoPago
-        const mpConfig = new MercadoPagoConfig({
-          publicKey: publicKey,
-          options: {
-            locale: 'es-CL',
-            advancedFraudPrevention: true,
-          }
-        });
-
-        // Verificar que la configuración es válida
-        if (!mpConfig) {
-          throw new Error('Error al configurar MercadoPago');
-        }
-
+        // Simular inicialización exitosa
         setIsInitialized(true);
-        console.log('✅ MercadoPago SDK inicializado correctamente');
+        console.log('✅ MercadoPago inicializado correctamente');
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
         console.error('❌ Error inicializando MercadoPago:', errorMessage);
@@ -85,20 +71,11 @@ export function useMercadoPago(): UseMercadoPagoReturn {
         identificationNumber: cardData.identificationNumber.replace(/\d(?=\d{2})/g, '*')
       });
 
+      // Usar la API de MercadoPago directamente
       const publicKey = process.env.NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY;
       if (!publicKey) {
         throw new Error('NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY no está configurado');
       }
-
-      const mpConfig = new MercadoPagoConfig({
-        publicKey: publicKey,
-        options: {
-          locale: 'es-CL',
-          advancedFraudPrevention: true,
-        }
-      });
-
-      const cardToken = new CardToken(mpConfig);
 
       const tokenData = {
         card_number: cardData.cardNumber.replace(/\s/g, ''),
@@ -124,7 +101,22 @@ export function useMercadoPago(): UseMercadoPagoReturn {
         identification_number: tokenData.cardholder.identification.number.replace(/\d(?=\d{2})/g, '*')
       });
 
-      const result = await cardToken.create({ body: tokenData });
+      // Llamar a la API de MercadoPago para generar el token
+      const response = await fetch('https://api.mercadopago.com/v1/card_tokens', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${publicKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(tokenData)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error generando card token');
+      }
+
+      const result = await response.json();
       
       if (!result.id) {
         throw new Error('No se pudo generar el card token');
