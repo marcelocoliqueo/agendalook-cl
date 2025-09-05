@@ -35,7 +35,11 @@ const PLANS: Plan[] = [
       'Dashboard básico'
     ],
     color: 'text-slate-600',
-    gradient: 'from-slate-500 to-slate-600'
+    gradient: 'from-slate-500 to-slate-600',
+    bgColor: 'bg-slate-50',
+    borderColor: 'border-slate-200',
+    icon: 'Zap',
+    popular: false
   },
   {
     id: 'pro',
@@ -54,7 +58,10 @@ const PLANS: Plan[] = [
     ],
     popular: true,
     color: 'text-sky-600',
-    gradient: 'from-sky-500 to-sky-600'
+    gradient: 'from-sky-500 to-sky-600',
+    bgColor: 'bg-sky-50',
+    borderColor: 'border-sky-200',
+    icon: 'Star'
   },
   {
     id: 'studio',
@@ -72,7 +79,11 @@ const PLANS: Plan[] = [
       'API de integración'
     ],
     color: 'text-emerald-600',
-    gradient: 'from-emerald-500 to-emerald-600'
+    gradient: 'from-emerald-500 to-emerald-600',
+    bgColor: 'bg-emerald-50',
+    borderColor: 'border-emerald-200',
+    icon: 'Crown',
+    popular: false
   }
 ];
 
