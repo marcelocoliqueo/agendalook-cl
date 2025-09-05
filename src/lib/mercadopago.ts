@@ -12,9 +12,19 @@ export function isMercadoPagoSandbox(): boolean {
 // Función para configurar MercadoPago
 function configureMercadoPago() {
   const accessToken = process.env.MERCADOPAGO_ACCESS_TOKEN;
+  const clientId = process.env.MERCADOPAGO_CLIENT_ID;
+  const clientSecret = process.env.MERCADOPAGO_CLIENT_SECRET;
   
   if (!accessToken) {
     throw new Error('MERCADOPAGO_ACCESS_TOKEN no está configurado');
+  }
+
+  if (!clientId) {
+    throw new Error('MERCADOPAGO_CLIENT_ID no está configurado');
+  }
+
+  if (!clientSecret) {
+    throw new Error('MERCADOPAGO_CLIENT_SECRET no está configurado');
   }
 
   // Verificar formato del access token
@@ -25,10 +35,18 @@ function configureMercadoPago() {
   try {
     console.log('🔧 Configurando MercadoPago...');
     console.log('Access Token:', accessToken.substring(0, 20) + '...');
+    console.log('Client ID:', clientId);
+    console.log('Client Secret:', clientSecret.substring(0, 8) + '...');
     
-    // Configurar MercadoPago con el access token usando la nueva sintaxis
+    // Configurar MercadoPago con las credenciales completas
     mpConfig = new MercadoPagoConfig({
       accessToken: accessToken,
+      options: {
+        clientId: clientId,
+        clientSecret: clientSecret,
+        locale: 'es-CL',
+        advancedFraudPrevention: true,
+      }
     });
     
     console.log('✅ MercadoPago configurado exitosamente');

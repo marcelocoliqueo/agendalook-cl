@@ -33,8 +33,11 @@ export function useMercadoPago(): UseMercadoPagoReturn {
         // Verificar que tenemos la public key
         const publicKey = process.env.NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY;
         if (!publicKey) {
-          throw new Error('MERCADOPAGO_PUBLIC_KEY no está configurado');
+          throw new Error('NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY no está configurado');
         }
+
+        console.log('🔧 Configurando MercadoPago SDK en frontend...');
+        console.log('Public Key:', publicKey.substring(0, 20) + '...');
 
         // Configurar MercadoPago
         const mpConfig = new MercadoPagoConfig({
@@ -84,7 +87,7 @@ export function useMercadoPago(): UseMercadoPagoReturn {
 
       const publicKey = process.env.NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY;
       if (!publicKey) {
-        throw new Error('MERCADOPAGO_PUBLIC_KEY no está configurado');
+        throw new Error('NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY no está configurado');
       }
 
       const mpConfig = new MercadoPagoConfig({
