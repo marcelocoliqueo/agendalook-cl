@@ -75,7 +75,7 @@ export default function WelcomePage() {
             description: '',
             address: '',
             plan: 'free',
-            role: 'owner',
+            role: 'user',
             subscription_status: 'none',
           } as any);
           try {
