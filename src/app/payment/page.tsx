@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { usePlanManagement, Plan, PaymentData } from '@/hooks/usePlanManagement';
 import { MarketingLayout } from '@/components/layout/MarketingLayout';
+import { CardForm } from '@/components/ui/CardForm';
 import { 
   Check, 
   Shield, 
@@ -95,6 +96,8 @@ function PaymentPageContent() {
   
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
   const [currentStep, setCurrentStep] = useState(1);
+  const [subscriptionPlan, setSubscriptionPlan] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const planId = searchParams.get('plan');
@@ -137,13 +140,74 @@ function PaymentPageContent() {
       userId: user.id
     });
 
-    const paymentData: PaymentData = {
-      plan: selectedPlan,
-      userEmail: user.email || '',
-      userId: user.id
-    };
+    try {
+      setError(null);
+      
+      // Crear el plan de suscripción primero
+      const response = await fetch('/api/mercadopago/create-preference', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          plan: selectedPlan.id,
+          userEmail: user.email,
+          userId: user.id,
+        }),
+      });
 
-    await processPayment(paymentData);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error al crear plan de suscripción');
+      }
+
+      const planData = await response.json();
+      console.log('🔍 Plan de suscripción creado:', planData);
+      
+      setSubscriptionPlan(planData);
+      setCurrentStep(2); // Mostrar formulario de tarjeta
+
+    } catch (error) {
+      console.error('Error al crear plan de suscripción:', error);
+      setError(error instanceof Error ? error.message : 'Error desconocido');
+    }
+  };
+
+  const handleCardTokenGenerated = async (cardToken: string) => {
+    if (!subscriptionPlan || !selectedPlan || !user) {
+      console.log('🔍 Missing data for subscription creation:', { subscriptionPlan, selectedPlan, user });
+      return;
+    }
+
+    try {
+      setError(null);
+      console.log('🔍 Creating subscription with card token:', cardToken);
+
+      const response = await fetch('/api/mercadopago/create-subscription', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          planId: subscriptionPlan.plan_id,
+          plan: selectedPlan.id,
+          cardTokenId: cardToken,
+          userEmail: user.email,
+          userId: user.id,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error al crear suscripción');
+      }
+
+      const subscriptionData = await response.json();
+      console.log('✅ Suscripción creada exitosamente:', subscriptionData);
+      
+      // Redirigir al dashboard con mensaje de éxito
+      router.push('/dashboard?subscription=success&plan=' + selectedPlan.id);
+
+    } catch (error) {
+      console.error('Error al crear suscripción:', error);
+      setError(error instanceof Error ? error.message : 'Error desconocido');
+    }
   };
 
   const getPlanIcon = (planId: string) => {
@@ -245,86 +309,115 @@ function PaymentPageContent() {
 
           {/* Contenido principal */}
           <div className="p-8">
-            {/* Precio y características */}
-            <div className="text-center mb-8">
-              <div className="text-5xl font-bold text-slate-800 mb-2">
-                {selectedPlan.price === 0 ? 'Gratis' : `$${selectedPlan.price.toLocaleString()}`}
-              </div>
-              {selectedPlan.price > 0 && (
-                <p className="text-slate-600 text-lg">por mes</p>
-              )}
-            </div>
-
-            {/* Características del plan */}
-            <div className="bg-gradient-to-br from-slate-50 to-sky-50 rounded-2xl p-6 mb-8 border border-slate-200">
-              <h3 className="text-xl font-semibold text-slate-800 mb-6 text-center">
-                Todo lo que incluye tu plan
-              </h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {selectedPlan.features.map((feature, index) => (
-                  <div key={index} className="flex items-start space-x-3">
-                    <div className="w-6 h-6 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <Check className="w-4 h-4 text-emerald-600" />
-                    </div>
-                    <span className="text-slate-700">{feature}</span>
+            {currentStep === 1 && (
+              <>
+                {/* Precio y características */}
+                <div className="text-center mb-8">
+                  <div className="text-5xl font-bold text-slate-800 mb-2">
+                    {selectedPlan.price === 0 ? 'Gratis' : `$${selectedPlan.price.toLocaleString()}`}
                   </div>
-                ))}
-              </div>
-            </div>
+                  {selectedPlan.price > 0 && (
+                    <p className="text-slate-600 text-lg">por mes</p>
+                  )}
+                </div>
 
-            {/* Beneficios adicionales */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className="text-center p-4">
-                <div className="w-12 h-12 bg-sky-100 rounded-xl flex items-center justify-center mx-auto mb-3">
-                  <Shield className="w-6 h-6 text-sky-600" />
+                {/* Características del plan */}
+                <div className="bg-gradient-to-br from-slate-50 to-sky-50 rounded-2xl p-6 mb-8 border border-slate-200">
+                  <h3 className="text-xl font-semibold text-slate-800 mb-6 text-center">
+                    Todo lo que incluye tu plan
+                  </h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {selectedPlan.features.map((feature, index) => (
+                      <div key={index} className="flex items-start space-x-3">
+                        <div className="w-6 h-6 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <Check className="w-4 h-4 text-emerald-600" />
+                        </div>
+                        <span className="text-slate-700">{feature}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <h4 className="font-semibold text-slate-800 mb-2">100% Seguro</h4>
-                <p className="text-sm text-slate-600">Pagos encriptados y protegidos</p>
-              </div>
-              
-              <div className="text-center p-4">
-                <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center mx-auto mb-3">
-                  <Zap className="w-6 h-6 text-emerald-600" />
-                </div>
-                <h4 className="font-semibold text-slate-800 mb-2">Activación Inmediata</h4>
-                <p className="text-sm text-slate-600">Acceso instantáneo a todas las funciones</p>
-              </div>
-              
-              <div className="text-center p-4">
-                <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-3">
-                  <Users className="w-6 h-6 text-purple-600" />
-                </div>
-                <h4 className="font-semibold text-slate-800 mb-2">Soporte Premium</h4>
-                <p className="text-sm text-slate-600">Ayuda personalizada cuando la necesites</p>
-              </div>
-            </div>
 
-            {/* Botón de pago */}
-            <div className="text-center">
-              <button
-                onClick={handlePayment}
-                disabled={isProcessing}
-                className={`w-full max-w-md bg-gradient-to-r ${selectedPlan.gradient} text-white py-4 px-8 rounded-2xl font-semibold text-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center mx-auto`}
-              >
-                {isProcessing ? (
-                  <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
-                    Procesando pago...
-                  </>
-                ) : (
-                  <>
-                    <CreditCard className="w-5 h-5 mr-3" />
-                    {selectedPlan.price === 0 ? 'Activar Plan Gratuito' : `Pagar $${selectedPlan.price.toLocaleString()}`}
-                  </>
-                )}
-              </button>
-              
-              <p className="text-sm text-slate-500 mt-4 flex items-center justify-center">
-                <Lock className="w-4 h-4 mr-2" />
-                Tus datos están protegidos con encriptación SSL
-              </p>
-            </div>
+                {/* Beneficios adicionales */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                  <div className="text-center p-4">
+                    <div className="w-12 h-12 bg-sky-100 rounded-xl flex items-center justify-center mx-auto mb-3">
+                      <Shield className="w-6 h-6 text-sky-600" />
+                    </div>
+                    <h4 className="font-semibold text-slate-800 mb-2">100% Seguro</h4>
+                    <p className="text-sm text-slate-600">Pagos encriptados y protegidos</p>
+                  </div>
+                  
+                  <div className="text-center p-4">
+                    <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center mx-auto mb-3">
+                      <Zap className="w-6 h-6 text-emerald-600" />
+                    </div>
+                    <h4 className="font-semibold text-slate-800 mb-2">Activación Inmediata</h4>
+                    <p className="text-sm text-slate-600">Acceso instantáneo a todas las funciones</p>
+                  </div>
+                  
+                  <div className="text-center p-4">
+                    <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-3">
+                      <Users className="w-6 h-6 text-purple-600" />
+                    </div>
+                    <h4 className="font-semibold text-slate-800 mb-2">Soporte Premium</h4>
+                    <p className="text-sm text-slate-600">Ayuda personalizada cuando la necesites</p>
+                  </div>
+                </div>
+
+                {/* Botón de pago */}
+                <div className="text-center">
+                  <button
+                    onClick={handlePayment}
+                    disabled={isProcessing}
+                    className={`w-full max-w-md bg-gradient-to-r ${selectedPlan.gradient} text-white py-4 px-8 rounded-2xl font-semibold text-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center mx-auto`}
+                  >
+                    {isProcessing ? (
+                      <>
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
+                        Procesando pago...
+                      </>
+                    ) : (
+                      <>
+                        <CreditCard className="w-5 h-5 mr-3" />
+                        {selectedPlan.price === 0 ? 'Activar Plan Gratuito' : `Pagar $${selectedPlan.price.toLocaleString()}`}
+                      </>
+                    )}
+                  </button>
+                  
+                  <p className="text-sm text-slate-500 mt-4 flex items-center justify-center">
+                    <Lock className="w-4 h-4 mr-2" />
+                    Tus datos están protegidos con encriptación SSL
+                  </p>
+                </div>
+              </>
+            )}
+
+            {currentStep === 2 && (
+              <div className="max-w-2xl mx-auto">
+                <CardForm
+                  onTokenGenerated={handleCardTokenGenerated}
+                  onError={setError}
+                  isLoading={isProcessing}
+                  planName={selectedPlan.name}
+                  planPrice={selectedPlan.price}
+                />
+              </div>
+            )}
+
+            {/* Mostrar errores */}
+            {error && (
+              <div className="mt-6 bg-red-50 border border-red-200 rounded-xl p-4">
+                <div className="flex items-start space-x-3">
+                  <div className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5">⚠️</div>
+                  <div>
+                    <p className="text-red-800 font-medium">Error</p>
+                    <p className="text-red-700 text-sm mt-1">{error}</p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

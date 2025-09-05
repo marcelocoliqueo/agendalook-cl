@@ -231,6 +231,45 @@ export async function createSubscriptionPreference(preferenceData: {
   }
 }
 
+// Función para crear suscripción completa con card_token
+export async function createCompleteSubscription(subscriptionData: {
+  planId: string;
+  customerId: string;
+  plan: string;
+  planName: string;
+  planPrice: number;
+  payerEmail: string;
+  cardTokenId: string;
+}) {
+  try {
+    configureMercadoPago();
+    
+    console.log('🔍 MercadoPago: Creating complete subscription with card token');
+
+    // Crear la suscripción usando el plan y el card_token
+    const subscription = await createSubscriptionWithPlan({
+      planId: subscriptionData.planId,
+      customerId: subscriptionData.customerId,
+      plan: subscriptionData.plan,
+      planName: subscriptionData.planName,
+      planPrice: subscriptionData.planPrice,
+      payerEmail: subscriptionData.payerEmail,
+      cardTokenId: subscriptionData.cardTokenId
+    });
+
+    return {
+      id: subscription.id,
+      status: subscription.status,
+      type: 'subscription',
+      message: 'Suscripción creada exitosamente'
+    };
+    
+  } catch (error) {
+    console.error('Error creating complete subscription:', error);
+    throw error;
+  }
+}
+
 // Función para obtener información de un pago
 export async function getPaymentInfo(paymentId: string) {
   try {
