@@ -319,7 +319,7 @@ export default function OnboardingPage() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center justify-center mb-6">
             <Image
-              src="/logo.png"
+              src="/logo-main.png"
               alt="Agendalook"
               width={160}
               height={45}

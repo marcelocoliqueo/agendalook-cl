@@ -42,7 +42,7 @@ export default function ForgotPasswordPage() {
             <Link href="/" className="inline-flex items-center justify-center mb-6">
               <div className="w-32 h-9 flex items-center justify-center">
                 <Image
-                  src="/logo.png"
+                  src="/logo-main.png"
                   alt="Agendalook"
                   width={128}
                   height={36}

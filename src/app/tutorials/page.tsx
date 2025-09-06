@@ -17,7 +17,7 @@ export default function Tutorials() {
             </Link>
             <div className="w-28 h-8 flex items-center justify-center">
               <Image
-                src="/logo.png"
+                src="/logo-main.png"
                 alt="Agendalook"
                 width={112}
                 height={31}

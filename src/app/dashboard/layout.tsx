@@ -140,9 +140,9 @@ export default function DashboardLayout({
             {/* Logo */}
             <div className="flex items-center space-x-3">
               <img 
-                src="/logo-compact.svg" 
+                src="/logo-compact.png" 
                 alt="Agendalook" 
-                className="w-10 h-10"
+                className="w-10 h-10 object-contain"
               />
               <div className="hidden sm:block">
                 <h1 className="text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">

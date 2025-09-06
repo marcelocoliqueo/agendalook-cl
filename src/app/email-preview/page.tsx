@@ -13,7 +13,7 @@ export default function EmailPreviewPage() {
         <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);">
           <div style="background: linear-gradient(135deg, #8b5cf6 0%, #f97316 100%); padding: 40px 30px; text-align: center; color: white;">
             <div style="margin-bottom: 20px;">
-              <img src="/logo.png" alt="Agendalook" style="width: 120px; height: auto; margin: 0 auto 15px; display: block; filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));">
+              <img src="/logo-main.png" alt="Agendalook" style="width: 120px; height: auto; margin: 0 auto 15px; display: block; filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));">
               <div style="font-size: 36px; font-weight: bold; margin-bottom: 8px; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">Agendalook</div>
               <div style="font-size: 18px; opacity: 0.95; font-weight: 300;">Tu cita, tu estilo</div>
             </div>
@@ -78,7 +78,7 @@ export default function EmailPreviewPage() {
         <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);">
           <div style="background: linear-gradient(135deg, #8b5cf6 0%, #f97316 100%); padding: 40px 30px; text-align: center; color: white;">
             <div style="margin-bottom: 20px;">
-              <img src="/logo.png" alt="Agendalook" style="width: 120px; height: auto; margin: 0 auto 15px; display: block; filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));">
+              <img src="/logo-main.png" alt="Agendalook" style="width: 120px; height: auto; margin: 0 auto 15px; display: block; filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));">
               <div style="font-size: 36px; font-weight: bold; margin-bottom: 8px; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">Agendalook</div>
               <div style="font-size: 18px; opacity: 0.95; font-weight: 300;">Tu cita, tu estilo</div>
             </div>

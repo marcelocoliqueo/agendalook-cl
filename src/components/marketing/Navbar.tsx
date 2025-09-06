@@ -9,9 +9,9 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3 font-extrabold text-lg sm:text-xl tracking-tight">
           <img 
-            src="/logo-compact.svg" 
+            src="/logo-compact.png" 
             alt="Agendalook" 
-            className="h-8 w-8 sm:h-10 sm:w-10"
+            className="h-8 w-8 sm:h-10 sm:w-10 object-contain"
           />
           <span className="hidden sm:inline">Agendalook</span>
           <span className="sm:hidden">Agenda</span>

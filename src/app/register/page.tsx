@@ -133,7 +133,7 @@ export default function RegisterPage() {
             <Link href="/" className="inline-flex items-center justify-center mb-4 sm:mb-6">
               <div className="w-28 h-8 sm:w-32 sm:h-9 flex items-center justify-center">
                 <Image
-                  src="/logo.png"
+                  src="/logo-main.png"
                   alt="Agendalook"
                   width={128}
                   height={36}

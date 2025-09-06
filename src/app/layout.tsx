@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     siteName: 'Agendalook',
     images: [
       {
-        url: '/logo.svg',
+        url: '/logo-main.png',
         width: 200,
         height: 200,
         alt: 'Agendalook Logo',
@@ -45,7 +45,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Agendalook — Agenda simple y profesional',
     description: 'Agenda online simple para psicólogos, estilistas, coaches y más.',
-    images: ['/logo.svg'],
+    images: ['/logo-main.png'],
   },
   robots: {
     index: true,
@@ -78,9 +78,9 @@ export default function RootLayout({
   return (
     <html lang="es" className="scroll-smooth">
       <head>
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <link rel="icon" href="/favicon.jpeg" type="image/jpeg" />
         <link rel="icon" href="/favicon.ico" sizes="any" />
-        <link rel="apple-touch-icon" href="/logo-compact.svg" />
+        <link rel="apple-touch-icon" href="/logo-compact.png" />
       </head>
       <body className={`${inter.variable} font-inter`}>
         <SupabaseProvider>
