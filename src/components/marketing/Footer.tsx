@@ -6,13 +6,12 @@ export function Footer() {
   return (
     <footer className="py-12 border-t border-slate-200 bg-white">
       <div className="max-w-7xl mx-auto px-6 grid sm:grid-cols-3 gap-8 items-center">
-        <div className="flex items-center gap-3 text-slate-700">
+        <div className="flex items-center">
           <img 
             src="/favicon.jpeg" 
             alt="Agendalook" 
             className="h-8 w-8 object-contain"
           />
-          <span className="font-semibold">Agendalook</span>
         </div>
         <ul className="flex items-center gap-6 text-sm text-slate-600 justify-center">
           <li><Link href="#" className="hover:text-sky-600">Sobre nosotros</Link></li>
