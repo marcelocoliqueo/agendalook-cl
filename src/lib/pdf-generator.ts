@@ -1,5 +1,8 @@
 import { InvoiceData, generateInvoiceHTML, generateInvoiceNumber } from './invoice-templates';
 
+// Re-exportar InvoiceData para que esté disponible
+export type { InvoiceData } from './invoice-templates';
+
 export interface PDFGenerationResult {
   success: boolean;
   pdfBuffer?: Buffer;
@@ -56,4 +59,12 @@ export async function generatePDFWithPuppeteer(htmlContent: string): Promise<Buf
   // Por ahora, retornamos un buffer vacío
   console.log('📄 Generando PDF con Puppeteer...');
   return Buffer.from('PDF placeholder');
+}
+
+// Función para descargar PDF (placeholder para compatibilidad)
+export function downloadPDF(data: any, filename?: string) {
+  console.log('📄 Función downloadPDF llamada:', { data, filename });
+  // Esta función sería implementada para generar y descargar PDFs
+  // Por ahora, solo logueamos la llamada
+  alert('Función de descarga de PDF en desarrollo');
 }
