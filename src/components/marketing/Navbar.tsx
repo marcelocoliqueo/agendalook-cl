@@ -9,9 +9,9 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center p-2">
           <img 
-            src="/logo-square.png" 
+            src="/logo-main.png" 
             alt="Agendalook" 
-            className="h-10 w-10 sm:h-12 sm:w-12 object-contain"
+            className="h-8 w-auto sm:h-10 sm:w-auto object-contain"
           />
         </Link>
         
