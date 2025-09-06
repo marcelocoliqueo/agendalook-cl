@@ -65,11 +65,13 @@ export function CardForm({ onTokenGenerated, onError, isLoading = false, planNam
     const body = cleaned.slice(0, -1);
     const dv = cleaned.slice(-1);
     
-    if (body.length <= 7) {
+    // Permitir hasta 8 dígitos en el cuerpo del RUT
+    if (body.length <= 8) {
       return body.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.') + '-' + dv;
     }
     
-    return body.slice(0, 7).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.') + '-' + dv;
+    // Si tiene más de 8 dígitos, tomar solo los primeros 8
+    return body.slice(0, 8).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.') + '-' + dv;
   };
 
   const validateCardData = (): boolean => {
@@ -97,6 +99,8 @@ export function CardForm({ onTokenGenerated, onError, isLoading = false, planNam
 
     if (!cardData.identificationNumber || cardData.identificationNumber.length < 7) {
       newErrors.identificationNumber = 'Número de identificación inválido';
+    } else if (cardData.identificationType === 'RUT' && cardData.identificationNumber.length < 9) {
+      newErrors.identificationNumber = 'RUT debe tener al menos 8 dígitos + 1 dígito verificador';
     }
 
     setErrors(newErrors);

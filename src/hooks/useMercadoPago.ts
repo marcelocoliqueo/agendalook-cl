@@ -101,11 +101,10 @@ export function useMercadoPago(): UseMercadoPagoReturn {
         identification_number: tokenData.cardholder.identification.number.replace(/\d(?=\d{2})/g, '*')
       });
 
-      // Llamar a la API de MercadoPago para generar el token
-      const response = await fetch('https://api.mercadopago.com/v1/card_tokens', {
+      // Llamar a nuestra API para generar el card token
+      const response = await fetch('/api/mercadopago/generate-card-token', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${publicKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(tokenData)
