@@ -7,11 +7,11 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-50 backdrop-blur border-b border-slate-200 bg-white/70">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        <Link href="/" className="flex items-center">
+        <Link href="/" className="flex items-center p-2">
           <img 
-            src="/logo-compact.png" 
+            src="/logo-main.png" 
             alt="Agendalook" 
-            className="h-12 w-12 sm:h-14 sm:w-14 object-contain"
+            className="h-10 w-10 sm:h-12 sm:w-12 object-contain"
           />
         </Link>
         

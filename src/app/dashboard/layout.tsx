@@ -140,9 +140,9 @@ export default function DashboardLayout({
             {/* Logo */}
             <div className="flex items-center">
               <img 
-                src="/logo-compact.png" 
+                src="/logo-main.png" 
                 alt="Agendalook" 
-                className="w-12 h-12 object-contain"
+                className="w-10 h-10 object-contain"
               />
             </div>
 
