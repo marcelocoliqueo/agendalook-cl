@@ -183,14 +183,18 @@ export async function POST(request: NextRequest) {
                 const { data: userProfile } = await supabase.auth.admin.getUserById(data.external_reference);
                 const userEmail = userProfile?.user?.email;
                 const userName = userProfile?.user?.user_metadata?.full_name || 'Usuario';
+                const businessName = userProfile?.user?.user_metadata?.business_name || 'Mi Negocio';
 
                 if (userEmail) {
                   await sendPlanActivatedEmail({
                     userId: user.user_id,
                     userEmail,
                     userName,
+                    businessName,
                     planName: 'Pro',
                     planPrice: 9990,
+                    transactionId: data.id,
+                    paymentMethod: 'Tarjeta de crédito',
                   });
                 }
 

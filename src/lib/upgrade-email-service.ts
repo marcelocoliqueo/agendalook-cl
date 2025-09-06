@@ -1,6 +1,7 @@
 import { createServerSupabaseClient } from '@/lib/supabase-server';
 import { resend } from '@/lib/resend';
 import { UPGRADE_SUGGESTION_EMAIL, PLAN_ACTIVATED_EMAIL } from './email-templates';
+import { generateInvoicePDF, InvoiceData } from './pdf-generator';
 
 export interface UpgradeEmailData {
   userId: string;
@@ -15,8 +16,11 @@ export interface PlanActivatedEmailData {
   userId: string;
   userEmail: string;
   userName: string;
+  businessName: string;
   planName: string;
   planPrice: number;
+  transactionId?: string;
+  paymentMethod?: string;
 }
 
 /**
@@ -52,22 +56,92 @@ export async function sendUpgradeSuggestionEmail(data: UpgradeEmailData) {
  */
 export async function sendPlanActivatedEmail(data: PlanActivatedEmailData) {
   try {
-    const { userEmail, userName, planName, planPrice } = data;
+    const { userEmail, userName, businessName, planName, planPrice, transactionId, paymentMethod } = data;
 
     if (!resend) {
       console.error('Resend no está configurado');
       return { success: false, error: 'Resend not configured' };
     }
 
+    // Generar boleta
+    const invoiceData: InvoiceData = {
+      invoiceNumber: '', // Se generará automáticamente
+      date: new Date().toLocaleDateString('es-CL'),
+      customerName: userName,
+      customerEmail: userEmail,
+      businessName: businessName,
+      planName: planName,
+      planPrice: planPrice,
+      currency: 'CLP',
+      paymentMethod: paymentMethod || 'Tarjeta de crédito',
+      transactionId: transactionId || 'N/A',
+      status: 'Aprobado'
+    };
+
+    const pdfResult = await generateInvoicePDF(invoiceData);
+    
+    if (!pdfResult.success) {
+      console.error('Error generando boleta:', pdfResult.error);
+      // Continuar sin boleta si hay error
+    }
+
+    // Enviar email con confirmación
     await resend.emails.send({
       from: 'Agendalook <noreply@agendalook.cl>',
       to: userEmail,
-      subject: PLAN_ACTIVATED_EMAIL.subject,
-      html: PLAN_ACTIVATED_EMAIL.html(userName, planName, planPrice),
+      subject: `✅ Plan ${planName} activado - Boleta #${pdfResult.invoiceNumber}`,
+      html: `
+        <div style="font-family: Inter, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="color: #0ea5e9; font-size: 28px; margin: 0;">Agendalook</h1>
+            <p style="color: #64748b; margin: 10px 0 0 0;">Tu plan ha sido activado exitosamente</p>
+          </div>
+          
+          <div style="background: #f0f9ff; padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+            <h2 style="color: #0c4a6e; margin: 0 0 15px 0;">🎉 ¡Plan ${planName} Activado!</h2>
+            <p style="color: #075985; margin: 0;">Hola ${userName},</p>
+            <p style="color: #075985; margin: 10px 0 0 0;">
+              Tu plan <strong>${planName}</strong> ha sido activado exitosamente. 
+              Ahora puedes disfrutar de todas las funcionalidades premium.
+            </p>
+          </div>
+
+          <div style="background: #f8fafc; padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+            <h3 style="color: #1e293b; margin: 0 0 15px 0;">📋 Detalles del Pago</h3>
+            <p style="margin: 5px 0; color: #475569;"><strong>Plan:</strong> ${planName}</p>
+            <p style="margin: 5px 0; color: #475569;"><strong>Precio:</strong> $${planPrice.toLocaleString()} CLP</p>
+            <p style="margin: 5px 0; color: #475569;"><strong>Método de pago:</strong> ${paymentMethod || 'Tarjeta de crédito'}</p>
+            <p style="margin: 5px 0; color: #475569;"><strong>Boleta:</strong> #${pdfResult.invoiceNumber}</p>
+            ${transactionId ? `<p style="margin: 5px 0; color: #475569;"><strong>ID de transacción:</strong> ${transactionId}</p>` : ''}
+          </div>
+
+          <div style="background: #ecfdf5; padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+            <h3 style="color: #065f46; margin: 0 0 15px 0;">🚀 Próximos Pasos</h3>
+            <ul style="color: #047857; margin: 0; padding-left: 20px;">
+              <li>Configura tus servicios en el dashboard</li>
+              <li>Establece tu disponibilidad</li>
+              <li>Personaliza tu página pública</li>
+              <li>Invita a tus clientes a reservar</li>
+            </ul>
+          </div>
+
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="https://www.agendalook.cl/dashboard" 
+               style="background: #0ea5e9; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 600; display: inline-block;">
+              Ir al Dashboard
+            </a>
+          </div>
+
+          <div style="text-align: center; color: #64748b; font-size: 14px; margin-top: 30px;">
+            <p>¿Necesitas ayuda? Contacta a soporte@agendalook.cl</p>
+            <p>© 2025 Agendalook. Todos los derechos reservados.</p>
+          </div>
+        </div>
+      `,
     });
 
-    console.log(`Email de plan activado enviado a ${userEmail}`);
-    return { success: true };
+    console.log(`Email de plan activado con boleta #${pdfResult.invoiceNumber} enviado a ${userEmail}`);
+    return { success: true, invoiceNumber: pdfResult.invoiceNumber };
   } catch (error) {
     console.error('Error enviando email de plan activado:', error);
     return { success: false, error };
