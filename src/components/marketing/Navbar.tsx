@@ -11,7 +11,7 @@ export function Navbar() {
           <img 
             src="/logo-compact.png" 
             alt="Agendalook" 
-            className="h-8 w-8 sm:h-10 sm:w-10 object-contain"
+            className="h-12 w-12 sm:h-14 sm:w-14 object-contain"
           />
         </Link>
         
