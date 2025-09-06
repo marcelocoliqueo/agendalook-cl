@@ -1,0 +1,18 @@
+<svg width="200" height="60" viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="horizontalGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#0ea5e9;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#10b981;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Círculo con degradado -->
+  <circle cx="30" cy="30" r="25" fill="url(#horizontalGradient)" />
+  
+  <!-- Letra A blanca -->
+  <path d="M30 10 L40 50 L37 50 L34 40 L26 40 L23 50 L20 50 L30 10 Z M30 15 L28 35 L32 35 L30 15 Z" fill="white" />
+  
+  <!-- Texto Agendalook -->
+  <text x="70" y="25" font-family="Inter, sans-serif" font-size="18" font-weight="600" fill="#1e293b">Agendalook</text>
+  <text x="70" y="45" font-family="Inter, sans-serif" font-size="12" font-weight="400" fill="#64748b">Gestiona tu negocio</text>
+</svg>
