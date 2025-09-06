@@ -28,8 +28,8 @@ export async function POST(request: NextRequest) {
     const service = createServiceClient(supabaseUrl, serviceKey);
 
     // 0) Verificar si el email ya existe
-    const { data: existingUsers } = await (service as any).auth.admin.listUsers({ email });
-    const existing = existingUsers?.users?.[0];
+    const { data: existingUsers } = await (service as any).auth.admin.listUsers();
+    const existing = existingUsers?.users?.find((user: any) => user.email === email);
     if (existing) {
       // Si existe y NO está verificado, reenviar OTP y guiar al usuario
       const isVerified = Boolean(existing.email_confirmed_at || existing.user_metadata?.verified);
