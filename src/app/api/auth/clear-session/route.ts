@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@/lib/supabase-server';
+import { createServerSupabaseClient } from '@/lib/supabase-server';
 
 export async function POST(request: NextRequest) {
   try {
     console.log('🧹 Limpiando sesión del usuario...');
     
-    const supabase = await createServerClient();
+    const supabase = await createServerSupabaseClient();
     
     // Cerrar sesión en Supabase
     const { error } = await supabase.auth.signOut();
