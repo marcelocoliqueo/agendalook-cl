@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     
     console.log(`🧹 Limpiando usuario: ${email}`);
     
-    const supabase = await createServerClient();
+    const supabase = await createServerSupabaseClient();
     
     // 1. Buscar el usuario en auth.users
     console.log('🔍 Buscando usuario en auth.users...');
