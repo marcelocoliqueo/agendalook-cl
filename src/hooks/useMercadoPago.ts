@@ -112,12 +112,14 @@ export function useMercadoPago(): UseMercadoPagoReturn {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Error generando card token');
+        console.error('❌ Error de la API:', errorData);
+        throw new Error(errorData.error || errorData.message || 'Error generando card token');
       }
 
       const result = await response.json();
       
       if (!result.id) {
+        console.error('❌ Respuesta sin ID:', result);
         throw new Error('No se pudo generar el card token');
       }
 
