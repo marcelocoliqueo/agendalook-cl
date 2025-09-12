@@ -36,42 +36,42 @@
 
 ### **APRO** - Pago Aprobado ✅
 - **Nombre:** `APRO`
-- **RUT:** `123456789`
+- **RUT:** `11111111-1`
 - **Resultado:** Pago exitoso
 
 ### **OTHE** - Rechazado por Error General ❌
 - **Nombre:** `OTHE`
-- **RUT:** `123456789`
+- **RUT:** `11111111-1`
 - **Resultado:** Error general
 
 ### **CONT** - Pendiente de Pago ⏳
 - **Nombre:** `CONT`
-- **RUT:** `123456789`
+- **RUT:** `11111111-1`
 - **Resultado:** Pendiente
 
 ### **CALL** - Rechazado con Validación 📞
 - **Nombre:** `CALL`
-- **RUT:** `123456789`
+- **RUT:** `11111111-1`
 - **Resultado:** Requiere autorización
 
 ### **FUND** - Fondos Insuficientes 💰
 - **Nombre:** `FUND`
-- **RUT:** `123456789`
+- **RUT:** `11111111-1`
 - **Resultado:** Sin fondos
 
 ### **SECU** - Código de Seguridad Inválido 🔒
 - **Nombre:** `SECU`
-- **RUT:** `123456789`
+- **RUT:** `11111111-1`
 - **Resultado:** CVV inválido
 
 ### **EXPI** - Problema de Fecha 📅
 - **Nombre:** `EXPI`
-- **RUT:** `123456789`
+- **RUT:** `11111111-1`
 - **Resultado:** Tarjeta expirada
 
 ### **FORM** - Error de Formulario 📝
 - **Nombre:** `FORM`
-- **RUT:** `123456789`
+- **RUT:** `11111111-1`
 - **Resultado:** Error de datos
 
 ## 🚀 Cómo Usar

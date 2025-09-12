@@ -59,16 +59,16 @@ export async function POST(request: NextRequest) {
       identification_number: mpTokenData.cardholder.identification.number.replace(/\d(?=\d{2})/g, '*')
     });
 
-    const publicKey = process.env.NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY;
-    if (!publicKey) {
-      return NextResponse.json({ error: 'NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY no está configurado' }, { status: 500 });
+    const accessToken = process.env.MERCADOPAGO_ACCESS_TOKEN;
+    if (!accessToken) {
+      return NextResponse.json({ error: 'MERCADOPAGO_ACCESS_TOKEN no está configurado' }, { status: 500 });
     }
 
     // Llamar a la API de MercadoPago desde el backend
     const response = await fetch('https://api.mercadopago.com/v1/card_tokens', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${publicKey}`,
+        'Authorization': `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
         'User-Agent': 'Agendalook/1.0'
       },
