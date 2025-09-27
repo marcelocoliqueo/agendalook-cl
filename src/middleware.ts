@@ -67,13 +67,14 @@ export async function middleware(request: NextRequest) {
     if (sessionError) {
       console.error('Middleware session error:', sessionError);
       
-      // Si es error de refresh token, limpiar cookies y redirigir
+      // Si es error de refresh token, redirigir al login en lugar de clear-session
       if (sessionError.message?.includes('refresh_token_not_found') || 
           sessionError.message?.includes('Invalid Refresh Token')) {
-        console.log('Middleware: Refresh token inválido, limpiando sesión');
-        const response = NextResponse.redirect(new URL('/clear-session', request.url));
-        setSecurityHeaders(response);
-        return response;
+        console.log('Middleware: Refresh token inválido, redirigiendo al login');
+        const url = request.nextUrl.clone();
+        url.pathname = '/login';
+        url.searchParams.set('redirect', request.nextUrl.pathname);
+        return NextResponse.redirect(url);
       }
       
       // En caso de otros errores de sesión, permitir acceso (más permisivo)
