@@ -34,7 +34,7 @@ export default function BookingsPage() {
         const profData = await getProfessionalByUserId(user.id);
         setProfessional(profData);
       } catch (error) {
-        console.error('Error loading professional:', error);
+        console.error('Error cargando profesional:', error);
       } finally {
         setProfessionalLoading(false);
       }
@@ -48,7 +48,7 @@ export default function BookingsPage() {
       const data = await getBookings();
       setBookings(data || []);
     } catch (error) {
-      console.error('Error loading bookings:', error);
+      console.error('Error cargando reservas:', error);
     } finally {
       setLoading(false);
     }

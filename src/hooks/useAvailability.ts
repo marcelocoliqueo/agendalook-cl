@@ -27,7 +27,7 @@ export function useAvailability(professionalId: string | null) {
       CacheManager.cacheAvailability(professionalId, data || []);
       return data || [];
     } catch (error) {
-      console.error('Error fetching availability:', error);
+      console.error('Error obteniendo disponibilidad:', error);
       return [];
     }
   }, [supabase]);

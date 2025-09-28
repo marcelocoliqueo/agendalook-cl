@@ -71,7 +71,7 @@ export default function DashboardLayout({
             setProfessional(profData);
           }
         } catch (error) {
-          console.error('Error loading professional:', error);
+          console.error('Error cargando profesional:', error);
           // Para admin, crear perfil temporal en caso de error
           if (isAdmin) {
             console.log('🔧 Creando perfil temporal para admin debido a error');

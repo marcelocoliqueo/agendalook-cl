@@ -58,7 +58,7 @@ export function useNotifications(professionalId: string | null) {
       setNotifications(data || []);
       updateCounts(data || []);
     } catch (error) {
-      console.error('Error loading notifications:', error);
+      console.error('Error cargando notificaciones:', error);
     } finally {
       setLoading(false);
     }

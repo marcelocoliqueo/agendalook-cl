@@ -35,7 +35,7 @@ export function useBookings(professionalId: string | null) {
       
       return data;
     } catch (error) {
-      console.error('Error fetching bookings:', error);
+      console.error('Error obteniendo reservas:', error);
       return [];
     }
   };

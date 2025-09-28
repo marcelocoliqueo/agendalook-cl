@@ -36,7 +36,7 @@ export function useServices(professionalId: string | null) {
       
       return data || [];
     } catch (error) {
-      console.error('Error fetching services:', error);
+      console.error('Error obteniendo servicios:', error);
       return [];
     }
   }, [supabase]);

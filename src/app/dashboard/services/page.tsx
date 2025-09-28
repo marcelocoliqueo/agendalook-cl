@@ -54,7 +54,7 @@ export default function ServicesPage() {
         const profData = await getProfessionalByUserId(user.id);
         setProfessional(profData);
       } catch (error) {
-        console.error('Error loading professional:', error);
+        console.error('Error cargando profesional:', error);
       } finally {
         setProfessionalLoading(false);
       }

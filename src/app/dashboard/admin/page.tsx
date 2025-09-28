@@ -68,7 +68,7 @@ export default function AdminDashboard() {
       // Cargar estadísticas de cache
       setCacheStats(CacheManager.getStats());
     } catch (error) {
-      console.error('Error loading admin data:', error);
+      console.error('Error cargando datos de administración:', error);
       setError('Error al cargar los datos de administración. Por favor, intenta de nuevo.');
     } finally {
       setLoading(false);
