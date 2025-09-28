@@ -48,16 +48,16 @@ export default function UpgradePage() {
       case 'free':
         return 'border-gray-200 bg-gray-50';
       case 'pro':
-        return 'border-lavender-300 bg-lavender-50';
+        return 'border-purple-300 bg-purple-50';
       case 'studio':
-        return 'border-coral-300 bg-coral-50';
+        return 'border-pink-300 bg-pink-50';
       default:
         return 'border-gray-200 bg-gray-50';
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-lavender-50 via-white to-coral-50">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-12">
@@ -76,14 +76,14 @@ export default function UpgradePage() {
               key={planKey}
               className={`relative rounded-2xl border-2 p-8 transition-all duration-300 hover:shadow-xl ${
                 planKey === currentPlan 
-                  ? 'ring-2 ring-lavender-500 shadow-lg' 
+                  ? 'ring-2 ring-purple-500 shadow-lg' 
                   : getPlanColor(planKey)
               }`}
             >
               {/* Badge para plan actual */}
               {planKey === currentPlan && (
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-lavender-500 text-white px-4 py-1 rounded-full text-sm font-semibold">
+                  <span className="bg-purple-500 text-white px-4 py-1 rounded-full text-sm font-semibold">
                     Plan Actual
                   </span>
                 </div>
@@ -94,8 +94,8 @@ export default function UpgradePage() {
                 <div className="flex justify-center mb-4">
                   <div className={`p-3 rounded-full ${
                     planKey === 'free' ? 'bg-gray-200' :
-                    planKey === 'pro' ? 'bg-lavender-200' :
-                    'bg-coral-200'
+                    planKey === 'pro' ? 'bg-purple-200' :
+                    'bg-pink-200'
                   }`}>
                     {getPlanIcon(planKey)}
                   </div>
@@ -134,8 +134,8 @@ export default function UpgradePage() {
                     disabled={loading}
                     className={`w-full ${
                       planKey === 'pro' 
-                        ? 'bg-gradient-to-r from-lavender-500 to-coral-500 text-white' 
-                        : 'bg-gradient-to-r from-coral-500 to-lavender-500 text-white'
+                        ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white' 
+                        : 'bg-gradient-to-r from-pink-500 to-purple-500 text-white'
                     } hover:shadow-lg transition-all duration-300`}
                   >
                     {loading ? 'Procesando...' : `Actualizar a ${plan.name}`}
@@ -154,8 +154,8 @@ export default function UpgradePage() {
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="text-center">
-                <div className="w-12 h-12 bg-lavender-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Zap className="w-6 h-6 text-lavender-600" />
+                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Zap className="w-6 h-6 text-purple-600" />
                 </div>
                 <h4 className="font-semibold text-gray-800 mb-2">Sin límites</h4>
                 <p className="text-gray-600 text-sm">
@@ -163,8 +163,8 @@ export default function UpgradePage() {
                 </p>
               </div>
               <div className="text-center">
-                <div className="w-12 h-12 bg-coral-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Star className="w-6 h-6 text-coral-600" />
+                <div className="w-12 h-12 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Star className="w-6 h-6 text-pink-600" />
                 </div>
                 <h4 className="font-semibold text-gray-800 mb-2">Más herramientas</h4>
                 <p className="text-gray-600 text-sm">
@@ -172,8 +172,8 @@ export default function UpgradePage() {
                 </p>
               </div>
               <div className="text-center">
-                <div className="w-12 h-12 bg-gold-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Crown className="w-6 h-6 text-gold-600" />
+                <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Crown className="w-6 h-6 text-yellow-600" />
                 </div>
                 <h4 className="font-semibold text-gray-800 mb-2">Soporte premium</h4>
                 <p className="text-gray-600 text-sm">
@@ -195,7 +195,7 @@ export default function UpgradePage() {
           </Button>
           <Button
             onClick={() => router.push('/dashboard/settings')}
-            className="bg-gradient-to-r from-lavender-500 to-coral-500 text-white"
+            className="bg-gradient-to-r from-purple-500 to-pink-500 text-white"
           >
             Ver Configuración
           </Button>

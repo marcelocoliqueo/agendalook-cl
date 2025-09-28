@@ -77,6 +77,12 @@ export default function WelcomePage() {
         return;
       }
       try {
+        if (!user) {
+          console.error('No hay usuario disponible');
+          router.push('/login');
+          return;
+        }
+        
         let prof = await getProfessionalByUserId(user.id);
         if (!prof) {
           const businessName = (user as any)?.user_metadata?.business_name || user.email?.split('@')[0] || 'Mi negocio';

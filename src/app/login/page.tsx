@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
@@ -9,7 +9,7 @@ import { useSupabaseClient } from '@/contexts/SupabaseContext';
 import { MarketingLayout } from '@/components/layout/MarketingLayout';
 import { RegisterButton } from '@/components/ui/AuthButtons';
 
-export default function LoginPage() {
+function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -204,5 +204,24 @@ export default function LoginPage() {
         </div>
       </div>
     </MarketingLayout>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <MarketingLayout showFooter={false}>
+        <div className="min-h-screen bg-gradient-to-b from-white to-slate-50 flex items-center justify-center p-4 sm:p-6">
+          <div className="w-full max-w-md">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-sky-500 mx-auto mb-4"></div>
+              <p className="text-slate-600">Cargando...</p>
+            </div>
+          </div>
+        </div>
+      </MarketingLayout>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 } 

@@ -41,10 +41,11 @@ export async function sendEmailWithResend(params: {
       console.error('❌ Error enviando email:', error);
       
       // Si es error de dominio no verificado, usar fallback
-      if (error.message?.includes('domain') || 
-          error.message?.includes('verification') || 
-          error.message?.includes('testing emails') ||
-          error.message?.includes('own email address')) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage?.includes('domain') || 
+          errorMessage?.includes('verification') || 
+          errorMessage?.includes('testing emails') ||
+          errorMessage?.includes('own email address')) {
         console.log('🔄 Intentando con dominio de fallback...');
         return await sendEmailWithFallback(params);
       }
@@ -58,10 +59,11 @@ export async function sendEmailWithResend(params: {
     console.error('❌ Error enviando email con Resend:', error);
     
     // Intentar con fallback si es posible
-    if (error.message?.includes('domain') || 
-        error.message?.includes('verification') || 
-        error.message?.includes('testing emails') ||
-        error.message?.includes('own email address')) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    if (errorMessage?.includes('domain') || 
+        errorMessage?.includes('verification') || 
+        errorMessage?.includes('testing emails') ||
+        errorMessage?.includes('own email address')) {
       console.log('🔄 Intentando con dominio de fallback...');
       return await sendEmailWithFallback(params);
     }
@@ -88,6 +90,11 @@ async function sendEmailWithFallback(params: {
   subject: string;
   html: string;
 }) {
+  if (!resend) {
+    console.error('❌ Resend no está configurado para fallback');
+    throw new Error('Resend no configurado');
+  }
+  
   try {
     const { data, error } = await resend.emails.send({
       from: 'Agendalook <noreply@resend.dev>',
