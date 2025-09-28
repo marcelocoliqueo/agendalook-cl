@@ -29,10 +29,17 @@ export async function POST(request: NextRequest) {
       email,
       options: { redirectTo: `${appUrl}/welcome` }
     });
-    const actionLink = (linkData as any)?.properties?.action_link || (linkData as any)?.action_link || `${appUrl}/login`;
+    
     if (linkError) {
-      // Si falla, continuamos sin magiclink y la app redirigirá a /welcome, pero sin sesión
-      return NextResponse.json({ ok: true, loginUrl: `${appUrl}/welcome` });
+      console.error('Error generando magic link:', linkError);
+      // Si falla, redirigir directamente a welcome con parámetro de verificación exitosa
+      return NextResponse.json({ ok: true, loginUrl: `${appUrl}/welcome?verified=true` });
+    }
+    
+    const actionLink = (linkData as any)?.properties?.action_link || (linkData as any)?.action_link;
+    if (!actionLink) {
+      console.error('No se pudo obtener action_link del magic link');
+      return NextResponse.json({ ok: true, loginUrl: `${appUrl}/welcome?verified=true` });
     }
 
     return NextResponse.json({ ok: true, loginUrl: actionLink });

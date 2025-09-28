@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
-import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, CheckCircle } from 'lucide-react';
 import { useSupabaseClient } from '@/contexts/SupabaseContext';
 import { MarketingLayout } from '@/components/layout/MarketingLayout';
 import { RegisterButton } from '@/components/ui/AuthButtons';
@@ -16,8 +16,17 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [verificationMessage, setVerificationMessage] = useState('');
   const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = useSupabaseClient();
+
+  useEffect(() => {
+    const message = searchParams.get('message');
+    if (message === 'verification-complete') {
+      setVerificationMessage('¡Email verificado exitosamente! Ahora puedes iniciar sesión.');
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -95,6 +104,15 @@ export default function LoginPage() {
 
           {/* Login Form */}
           <div className="bg-white rounded-2xl sm:rounded-3xl shadow-xl p-6 sm:p-8 border border-slate-200">
+            {verificationMessage && (
+              <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-2xl">
+                <div className="flex items-center space-x-2">
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                  <p className="text-green-600 text-sm font-medium">{verificationMessage}</p>
+                </div>
+              </div>
+            )}
+            
             {error && (
               <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl">
                 <p className="text-red-600 text-sm">{error}</p>

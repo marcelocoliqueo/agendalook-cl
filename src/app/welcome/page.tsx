@@ -57,8 +57,23 @@ export default function WelcomePage() {
   useEffect(() => {
     const proceed = async () => {
       if (bootstrapping || authLoading) return;
-      if (!user) {
+      
+      // Verificar si viene de verificación exitosa
+      const url = new URL(window.location.href);
+      const verified = url.searchParams.get('verified');
+      
+      if (!user && !verified) {
         router.push('/login');
+        return;
+      }
+      
+      // Si viene de verificación pero no hay usuario, esperar un poco más
+      if (!user && verified) {
+        setTimeout(() => {
+          if (!user) {
+            router.push('/login?message=verification-complete');
+          }
+        }, 2000);
         return;
       }
       try {
