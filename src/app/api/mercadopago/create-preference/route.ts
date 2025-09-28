@@ -38,35 +38,14 @@ export async function POST(request: NextRequest) {
     const supabaseCookies = allCookies.filter(c => c.name.startsWith('sb-'));
     console.log('🔍 MercadoPago API: Supabase cookies found:', supabaseCookies.map(c => c.name));
 
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    console.log('🔍 MercadoPago API: User verification result:', { user: user ? { id: user.id, email: user.email } : null, error: userError });
-
-    if (userError || !user) {
-      console.log('🔍 MercadoPago API: User not authenticated');
-      if (body.userId) {
-        console.log('🔍 MercadoPago API: Trying alternative verification with userId:', body.userId);
-        const { data: professional, error: profError } = await supabase
-          .from('professionals')
-          .select('*')
-          .eq('user_id', body.userId)
-          .single();
-        if (profError || !professional) {
-          console.log('🔍 MercadoPago API: Professional not found in alternative verification');
-          return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
-        }
-        console.log('🔍 MercadoPago API: Alternative verification successful, using userId from body');
-      } else {
-        return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
-      }
-    } else {
-      console.log('🔍 MercadoPago API: User authenticated successfully:', user.id);
+    // Verificar que tenemos userId en el body
+    if (!body.userId) {
+      console.log('🔍 MercadoPago API: No userId provided in request body');
+      return NextResponse.json({ error: 'ID de usuario requerido' }, { status: 400 });
     }
 
-    const verifiedUserId = user?.id || body.userId;
-    if (body.userId !== verifiedUserId) {
-      console.log('🔍 MercadoPago API: User ID mismatch:', { bodyUserId: body.userId, verifiedUserId });
-      return NextResponse.json({ error: 'ID de usuario no coincide' }, { status: 400 });
-    }
+    console.log('🔍 MercadoPago API: Using userId from request body:', body.userId);
+    const verifiedUserId = body.userId;
 
     const { data: professional, error: professionalError } = await supabase
       .from('professionals')
