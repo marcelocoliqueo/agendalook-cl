@@ -20,28 +20,36 @@ export async function POST(request: NextRequest) {
     const { data: userResp } = await (service as any).auth.admin.listUsers({ email });
     const user = userResp?.users?.[0];
     if (user) {
-      await (service as any).auth.admin.updateUserById(user.id, { email_confirm: true, user_metadata: { ...(user.user_metadata || {}), verified: true } });
+      await (service as any).auth.admin.updateUserById(user.id, { 
+        email_confirm: true, 
+        user_metadata: { ...(user.user_metadata || {}), verified: true } 
+      });
     }
 
-    // Generar magic link de login para establecer sesión automáticamente y redirigir a /welcome
-    const { data: linkData, error: linkError } = await (service as any).auth.admin.generateLink({
+    // En lugar de magic link, crear una sesión temporal y redirigir directamente
+    // Generar un token temporal para establecer sesión
+    const { data: sessionData, error: sessionError } = await (service as any).auth.admin.generateLink({
       type: 'magiclink',
       email,
-      options: { redirectTo: `${appUrl}/welcome` }
+      options: { 
+        redirectTo: `${appUrl}/welcome`,
+        createUser: false
+      }
     });
     
-    if (linkError) {
-      console.error('Error generando magic link:', linkError);
+    if (sessionError) {
+      console.error('Error generando sesión:', sessionError);
       // Si falla, redirigir directamente a welcome con parámetro de verificación exitosa
-      return NextResponse.json({ ok: true, loginUrl: `${appUrl}/welcome?verified=true` });
+      return NextResponse.json({ ok: true, loginUrl: `${appUrl}/welcome?verified=true&email=${encodeURIComponent(email)}` });
     }
     
-    const actionLink = (linkData as any)?.properties?.action_link || (linkData as any)?.action_link;
+    const actionLink = (sessionData as any)?.properties?.action_link || (sessionData as any)?.action_link;
     if (!actionLink) {
-      console.error('No se pudo obtener action_link del magic link');
-      return NextResponse.json({ ok: true, loginUrl: `${appUrl}/welcome?verified=true` });
+      console.error('No se pudo obtener action_link de la sesión');
+      return NextResponse.json({ ok: true, loginUrl: `${appUrl}/welcome?verified=true&email=${encodeURIComponent(email)}` });
     }
 
+    console.log('Magic link generado exitosamente:', actionLink);
     return NextResponse.json({ ok: true, loginUrl: actionLink });
   } catch (e: any) {
     return NextResponse.json({ error: e?.message || 'Error' }, { status: 500 });

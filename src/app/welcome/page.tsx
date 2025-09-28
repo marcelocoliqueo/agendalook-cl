@@ -61,19 +61,34 @@ export default function WelcomePage() {
       // Verificar si viene de verificación exitosa
       const url = new URL(window.location.href);
       const verified = url.searchParams.get('verified');
+      const email = url.searchParams.get('email');
       
       if (!user && !verified) {
         router.push('/login');
         return;
       }
       
-      // Si viene de verificación pero no hay usuario, esperar un poco más
+      // Si viene de verificación pero no hay usuario, intentar establecer sesión
       if (!user && verified) {
-        setTimeout(() => {
-          if (!user) {
-            router.push('/login?message=verification-complete');
-          }
-        }, 2000);
+        console.log('Verificación exitosa detectada, esperando sesión...');
+        
+        // Si tenemos el email, intentar hacer login automático
+        if (email) {
+          console.log('Intentando login automático con email:', email);
+          // Aquí podríamos intentar hacer un login automático si tenemos las credenciales
+          // Por ahora, redirigir al login con mensaje de verificación
+          setTimeout(() => {
+            if (!user) {
+              router.push(`/login?message=verification-complete&email=${encodeURIComponent(email)}`);
+            }
+          }, 3000);
+        } else {
+          setTimeout(() => {
+            if (!user) {
+              router.push('/login?message=verification-complete');
+            }
+          }, 2000);
+        }
         return;
       }
       try {

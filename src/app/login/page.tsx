@@ -23,8 +23,15 @@ function LoginForm() {
 
   useEffect(() => {
     const message = searchParams.get('message');
+    const email = searchParams.get('email');
+    
     if (message === 'verification-complete') {
-      setVerificationMessage('¡Email verificado exitosamente! Ahora puedes iniciar sesión.');
+      if (email) {
+        setVerificationMessage(`¡Email verificado exitosamente! Ahora puedes iniciar sesión con ${email}.`);
+        setEmail(email); // Pre-llenar el email
+      } else {
+        setVerificationMessage('¡Email verificado exitosamente! Ahora puedes iniciar sesión.');
+      }
     }
   }, [searchParams]);
 
