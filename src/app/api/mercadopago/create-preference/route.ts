@@ -4,33 +4,33 @@ import { createSubscriptionPreference, createMPCustomer, isMercadoPagoSandbox } 
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('🔍 MercadoPago API: Request received');
+    console.log('🔍 API MercadoPago: Solicitud recibida');
     
     // Verificar token de autorización si está configurado
     const authHeader = request.headers.get('authorization');
     const expectedToken = process.env.CRON_SECRET_TOKEN;
     if (expectedToken && authHeader !== `Bearer ${expectedToken}`) {
-      console.log('🔍 MercadoPago API: Auth header:', authHeader ? 'Present' : 'Missing');
-      console.log('🔍 MercadoPago API: Expected token:', expectedToken ? 'Configured' : 'Not configured');
+      console.log('🔍 API MercadoPago: Header de autorización:', authHeader ? 'Presente' : 'Faltante');
+      console.log('🔍 API MercadoPago: Token esperado:', expectedToken ? 'Configurado' : 'No configurado');
     }
 
     const body = await request.json();
-    console.log('🔍 MercadoPago API: Request body:', body);
+    console.log('🔍 API MercadoPago: Datos de la solicitud:', body);
 
     // Usar service role key para acceso completo a la base de datos
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
-    console.log('🔍 MercadoPago API: Supabase client created with service role key');
+    console.log('🔍 API MercadoPago: Cliente Supabase creado con service role key');
 
     // Verificar que tenemos userId en el body
     if (!body.userId) {
-      console.log('🔍 MercadoPago API: No userId provided in request body');
+      console.log('🔍 API MercadoPago: No se proporcionó userId en el cuerpo de la solicitud');
       return NextResponse.json({ error: 'ID de usuario requerido' }, { status: 400 });
     }
 
-    console.log('🔍 MercadoPago API: Using userId from request body:', body.userId);
+    console.log('🔍 API MercadoPago: Usando userId del cuerpo de la solicitud:', body.userId);
     const verifiedUserId = body.userId;
 
     const { data: professional, error: professionalError } = await supabase
@@ -40,20 +40,20 @@ export async function POST(request: NextRequest) {
       .single();
     
     if (professionalError || !professional) {
-      console.log('🔍 MercadoPago API: Professional not found:', professionalError);
+      console.log('🔍 API MercadoPago: Profesional no encontrado:', professionalError);
       return NextResponse.json({ error: 'Profesional no encontrado' }, { status: 404 });
     }
 
-    console.log('🔍 MercadoPago API: Professional found:', professional.id);
+    console.log('🔍 API MercadoPago: Profesional encontrado:', professional.id);
 
     const plan = body.plan;
     if (!plan || !['free', 'pro', 'premium'].includes(plan)) {
-      console.log('🔍 MercadoPago API: Invalid plan:', plan);
+      console.log('🔍 API MercadoPago: Plan inválido:', plan);
       return NextResponse.json({ error: 'Plan inválido' }, { status: 400 });
     }
 
     if (plan === 'free') {
-      console.log('🔍 MercadoPago API: Free plan selected, no payment needed');
+      console.log('🔍 API MercadoPago: Plan gratuito seleccionado, no se requiere pago');
       return NextResponse.json({ 
         message: 'Plan gratuito seleccionado',
         plan: 'free',
@@ -61,14 +61,14 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    console.log('🔍 MercadoPago API: Environment variables check:', {
+    console.log('🔍 API MercadoPago: Verificación de variables de entorno:', {
       hasAccessToken: !!process.env.MERCADOPAGO_ACCESS_TOKEN,
       accessTokenPrefix: process.env.MERCADOPAGO_ACCESS_TOKEN?.substring(0, 10),
       isSandbox: process.env.MERCADOPAGO_IS_SANDBOX,
       appUrl: process.env.NEXT_PUBLIC_APP_URL
     });
 
-    console.log('🔍 MercadoPago API: Creating MercadoPago subscription plan for plan:', plan);
+    console.log('🔍 API MercadoPago: Creando plan de suscripción de MercadoPago para el plan:', plan);
 
     try {
       // Crear el plan de suscripción usando el nuevo flujo
@@ -80,10 +80,10 @@ export async function POST(request: NextRequest) {
         payerEmail: body.userEmail
       });
 
-      console.log('🔍 MercadoPago API: Subscription plan created successfully:', subscriptionPlan);
+      console.log('🔍 API MercadoPago: Plan de suscripción creado exitosamente:', subscriptionPlan);
 
       if (!subscriptionPlan) {
-        console.log('🔍 MercadoPago API: No subscription plan returned');
+        console.log('🔍 API MercadoPago: No se devolvió plan de suscripción');
         return NextResponse.json({ error: 'Error creando plan de suscripción' }, { status: 500 });
       }
 
@@ -97,26 +97,26 @@ export async function POST(request: NextRequest) {
       });
 
     } catch (preferenceError) {
-      console.error('🔍 MercadoPago API: Error creating subscription plan:', preferenceError);
-      console.error('🔍 MercadoPago API: Error details:', {
-        message: preferenceError instanceof Error ? preferenceError.message : 'Unknown error',
-        stack: preferenceError instanceof Error ? preferenceError.stack : 'No stack trace',
+      console.error('🔍 API MercadoPago: Error creando plan de suscripción:', preferenceError);
+      console.error('🔍 API MercadoPago: Detalles del error:', {
+        message: preferenceError instanceof Error ? preferenceError.message : 'Error desconocido',
+        stack: preferenceError instanceof Error ? preferenceError.stack : 'Sin stack trace',
         error: preferenceError,
-        errorType: preferenceError?.constructor?.name || 'Unknown type',
-        errorKeys: preferenceError ? Object.keys(preferenceError) : 'No keys'
+        errorType: preferenceError?.constructor?.name || 'Tipo desconocido',
+        errorKeys: preferenceError ? Object.keys(preferenceError) : 'Sin claves'
       });
       return NextResponse.json({ 
         error: 'Error creando plan de suscripción de MercadoPago', 
-        details: preferenceError instanceof Error ? preferenceError.message : 'Unknown error', 
-        errorType: preferenceError?.constructor?.name || 'Unknown type' 
+        details: preferenceError instanceof Error ? preferenceError.message : 'Error desconocido', 
+        errorType: preferenceError?.constructor?.name || 'Tipo desconocido'
       }, { status: 500 });
     }
 
   } catch (error) {
-    console.error('🔍 MercadoPago API: Unexpected error:', error);
+    console.error('🔍 API MercadoPago: Error inesperado:', error);
     return NextResponse.json({ 
       error: 'Error interno del servidor',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      details: error instanceof Error ? error.message : 'Error desconocido'
     }, { status: 500 });
   }
-} 
+}
