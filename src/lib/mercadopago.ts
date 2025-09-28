@@ -219,7 +219,7 @@ export async function createSubscriptionPreference(preferenceData: {
     configureMercadoPago();
     
     const planName = preferenceData.plan === 'pro' ? 'Pro' : 'Premium';
-    const planPrice = preferenceData.plan === 'pro' ? 9900 : 19900;
+    const planPrice = preferenceData.plan === 'pro' ? 9990 : 19990;
 
     console.log('🔍 MercadoPago: Creating subscription preference for plan:', preferenceData.plan);
 
