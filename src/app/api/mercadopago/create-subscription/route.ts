@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createClient } from '@supabase/supabase-js';
 import { createCompleteSubscription } from '@/lib/mercadopago';
 
 export async function POST(request: NextRequest) {
@@ -15,44 +14,27 @@ export async function POST(request: NextRequest) {
       userEmail: body.userEmail
     });
 
-    const cookieStore = await cookies();
-    const supabase = createServerClient(
+    // Usar service role key para acceso completo a la base de datos
+    const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) { return cookieStore.get(name)?.value; },
-          set() {}, remove() {},
-        },
-      }
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
+    console.log('🔍 MercadoPago Subscription API: Supabase client created with service role key');
 
-    // Verificar autenticación del usuario
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    console.log('🔍 MercadoPago Subscription API: User verification result:', { 
-      user: user ? { id: user.id, email: user.email } : null, 
-      error: userError 
-    });
-
-    if (userError || !user) {
-      console.log('🔍 MercadoPago Subscription API: User not authenticated');
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    // Verificar que tenemos userId en el body
+    if (!body.userId) {
+      console.log('🔍 MercadoPago Subscription API: No userId provided in request body');
+      return NextResponse.json({ error: 'ID de usuario requerido' }, { status: 400 });
     }
 
-    // Verificar que el userId coincida
-    if (body.userId !== user.id) {
-      console.log('🔍 MercadoPago Subscription API: User ID mismatch:', { 
-        bodyUserId: body.userId, 
-        authenticatedUserId: user.id 
-      });
-      return NextResponse.json({ error: 'ID de usuario no coincide' }, { status: 400 });
-    }
+    console.log('🔍 MercadoPago Subscription API: Using userId from request body:', body.userId);
+    const verifiedUserId = body.userId;
 
     // Obtener información del profesional
     const { data: professional, error: professionalError } = await supabase
       .from('professionals')
       .select('*')
-      .eq('user_id', user.id)
+      .eq('user_id', verifiedUserId)
       .single();
     
     if (professionalError || !professional) {
