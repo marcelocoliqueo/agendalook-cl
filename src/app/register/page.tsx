@@ -7,6 +7,8 @@ import Image from 'next/image';
 import { User, Building, Mail, Lock, Eye, EyeOff, CheckCircle } from 'lucide-react';
 import { MarketingLayout } from '@/components/layout/MarketingLayout';
 import { LoginButton } from '@/components/ui/AuthButtons';
+import { PasswordStrength } from '@/components/ui/PasswordStrength';
+import { validatePasswordSecurity } from '@/lib/password-security';
 
 interface FormData {
   name: string;
@@ -53,8 +55,10 @@ export default function RegisterPage() {
       return false;
     }
 
-    if (formData.password.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres');
+    // Validación de seguridad de contraseña
+    const passwordValidation = validatePasswordSecurity(formData.password);
+    if (!passwordValidation.isValid) {
+      setError(`Contraseña insegura: ${passwordValidation.issues.join(', ')}`);
       return false;
     }
 
@@ -253,6 +257,8 @@ export default function RegisterPage() {
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
+                {/* Indicador de fortaleza de contraseña */}
+                <PasswordStrength password={formData.password} showDetails={true} />
               </div>
 
               <div>

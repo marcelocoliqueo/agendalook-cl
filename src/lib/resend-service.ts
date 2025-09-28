@@ -1,4 +1,4 @@
-import { resend as sharedResend } from '@/lib/resend';
+import { resend as sharedResend, sendEmailWithResend } from '@/lib/resend';
 
 const resend = sharedResend;
 
@@ -90,16 +90,13 @@ export class ResendService {
         action: null,
       });
 
-      const { data, error } = await resend.emails.send({
-        from: fromEmail,
-        to: [email],
+      const result = await sendEmailWithResend({
+        to: email,
         subject: 'Tu código de verificación - Agendalook',
         html,
-        text: `Tu código de verificación es: ${code}\nEl código expira en 10 minutos.`,
       });
 
-      if (error) throw error;
-      return data;
+      return result;
     } catch (error) {
       console.error('Error in sendVerificationCode:', error);
       throw error;

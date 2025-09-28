@@ -408,7 +408,7 @@ export async function testMercadoPagoConnection() {
         repetitions: 12,
         billing_day: 10,
         billing_day_proportional: true,
-        transaction_amount: 100,
+        transaction_amount: 1000,
         currency_id: 'CLP',
       },
       back_url: 'https://example.com/success',
