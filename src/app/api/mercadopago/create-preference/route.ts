@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createClient } from '@supabase/supabase-js';
 import { createSubscriptionPreference, createMPCustomer, isMercadoPagoSandbox } from '@/lib/mercadopago';
 
 export async function POST(request: NextRequest) {
@@ -18,25 +17,12 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     console.log('🔍 MercadoPago API: Request body:', body);
 
-    const cookieStore = await cookies();
-    const supabase = createServerClient(
+    // Usar service role key para acceso completo a la base de datos
+    const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) { return cookieStore.get(name)?.value; },
-          set() {}, remove() {},
-        },
-      }
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
-    console.log('🔍 MercadoPago API: Supabase client created');
-
-    const supabaseCookie = cookieStore.get('sb-access-token');
-    console.log('🔍 MercadoPago API: Supabase cookie:', supabaseCookie ? 'Present' : 'Missing');
-    const allCookies = cookieStore.getAll();
-    console.log('🔍 MercadoPago API: All cookies:', allCookies.map(c => ({ name: c.name, value: c.value ? 'Present' : 'Missing' })));
-    const supabaseCookies = allCookies.filter(c => c.name.startsWith('sb-'));
-    console.log('🔍 MercadoPago API: Supabase cookies found:', supabaseCookies.map(c => c.name));
+    console.log('🔍 MercadoPago API: Supabase client created with service role key');
 
     // Verificar que tenemos userId en el body
     if (!body.userId) {
