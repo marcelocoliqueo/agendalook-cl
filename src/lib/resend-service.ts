@@ -34,8 +34,10 @@ function renderBaseEmail(params: {
           <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width:600px; width:100%; background:#ffffff; border:1px solid #e5e7eb; border-radius:12px;">
             <tr>
               <td style="padding:20px 24px 8px 24px; text-align:center; font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;">
-                <img src="${appUrl}/logo-main.png" width="40" height="40" alt="Agendalook" style="display:inline-block; width:40px; height:40px; border-radius:8px; margin-bottom:8px;"/>
-                <div style="font-size:16px; font-weight:600; color:#111827;">Agendalook</div>
+                <div style="display:flex; align-items:center; justify-content:center; margin-bottom:8px;">
+                  <img src="${appUrl}/logo-square.png" width="48" height="48" alt="Agendalook" style="display:inline-block; width:48px; height:48px; border-radius:12px; margin-right:12px;"/>
+                  <div style="font-size:20px; font-weight:700; color:#111827; letter-spacing:-0.025em;">Agendalook</div>
+                </div>
               </td>
             </tr>
             <tr>
