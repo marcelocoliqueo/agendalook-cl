@@ -155,22 +155,6 @@ export default function RegisterPage() {
 
           {/* Register Form */}
           <div className="bg-white rounded-2xl sm:rounded-3xl shadow-xl p-6 sm:p-8 border border-slate-200">
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-2xl mb-4">
-                {error}
-              </div>
-            )}
-
-            {message && (
-              <div className={`border px-4 py-3 rounded-2xl mb-4 ${
-                message.type === 'success' 
-                  ? 'bg-green-50 border-green-200 text-green-700' 
-                  : 'bg-red-50 border-red-200 text-red-700'
-              }`}>
-                {message.text}
-              </div>
-            )}
-
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-slate-700 mb-2">
@@ -321,6 +305,23 @@ export default function RegisterPage() {
               >
                 {loading ? 'Creando cuenta...' : 'Crear cuenta'}
               </button>
+
+              {/* Mensajes de error y éxito debajo del botón */}
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-2xl">
+                  {error}
+                </div>
+              )}
+
+              {message && (
+                <div className={`border px-4 py-3 rounded-2xl ${
+                  message.type === 'success' 
+                    ? 'bg-green-50 border-green-200 text-green-700' 
+                    : 'bg-red-50 border-red-200 text-red-700'
+                }`}>
+                  {message.text}
+                </div>
+              )}
             </form>
 
             <div className="mt-8 text-center">
