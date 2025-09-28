@@ -28,8 +28,8 @@ function configureMercadoPago() {
   }
 
   // Verificar formato del access token
-  if (!accessToken.startsWith('APP_USR-')) {
-    throw new Error('Access Token no tiene el formato correcto (debe empezar con APP_USR-)');
+  if (!accessToken.startsWith('APP_USR-') && !accessToken.startsWith('TEST-')) {
+    throw new Error('Access Token no tiene el formato correcto (debe empezar con APP_USR- o TEST-)');
   }
 
   try {
