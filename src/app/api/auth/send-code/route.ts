@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     await ResendService.sendVerificationCode(email, code);
     return NextResponse.json({ ok: true, expiresAt });
   } catch (e: any) {
-    return NextResponse.json({ error: e?.message || 'Error' }, { status: 500 });
+    return NextResponse.json({ error: e?.message || 'Error interno del servidor' }, { status: 500 });
   }
 }
 

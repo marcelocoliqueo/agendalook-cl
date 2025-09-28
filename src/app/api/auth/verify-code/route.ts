@@ -42,17 +42,17 @@ export async function POST(request: NextRequest) {
       // Si falla, redirigir directamente a welcome con parámetro de verificación exitosa
       return NextResponse.json({ ok: true, loginUrl: `${appUrl}/welcome?verified=true&email=${encodeURIComponent(email)}` });
     }
-    
+
     const actionLink = (sessionData as any)?.properties?.action_link || (sessionData as any)?.action_link;
     if (!actionLink) {
       console.error('No se pudo obtener action_link de la sesión');
       return NextResponse.json({ ok: true, loginUrl: `${appUrl}/welcome?verified=true&email=${encodeURIComponent(email)}` });
     }
 
-    console.log('Magic link generado exitosamente:', actionLink);
+    console.log('Enlace mágico generado exitosamente:', actionLink);
     return NextResponse.json({ ok: true, loginUrl: actionLink });
   } catch (e: any) {
-    return NextResponse.json({ error: e?.message || 'Error' }, { status: 500 });
+    return NextResponse.json({ error: e?.message || 'Error interno del servidor' }, { status: 500 });
   }
 }
 

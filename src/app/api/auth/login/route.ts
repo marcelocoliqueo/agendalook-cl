@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
     if (error) {
       // Log de intento fallido
       securityLogger.logLoginFailed(ip, email, error.message, userAgent);
-      console.warn('Failed login attempt:', {
+      console.warn('Intento de login fallido:', {
         email,
         ip,
         error: error.message,
@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
 
     // Log de login exitoso
     securityLogger.logLoginSuccess(ip, data.user?.id || '', email, userAgent);
-    console.log('Successful login:', {
+    console.log('Login exitoso:', {
       email,
       ip,
       timestamp: new Date().toISOString(),

@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: true, method: 'otp', message: 'Cuenta existente sin verificar. Reenviamos el código.' });
       }
       // Si ya está verificado, informar conflicto
-      return NextResponse.json({ error: 'A user with this email address has already been registered' }, { status: 409 });
+      return NextResponse.json({ error: 'Ya existe un usuario registrado con esta dirección de email' }, { status: 409 });
     }
 
     // 1) Crear usuario sin enviar email de Supabase

@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
     if (!supabaseUrl || !anonKey || !serviceKey) {
-      return NextResponse.json({ error: 'Supabase config missing' }, { status: 500 });
+      return NextResponse.json({ error: 'Configuración de Supabase faltante' }, { status: 500 });
     }
 
     // Obtener usuario autenticado desde cookies
@@ -25,12 +25,12 @@ export async function POST(request: NextRequest) {
 
     const { data: { user } } = await supabase.auth.getUser();
     if (!user || !user.email) {
-      return NextResponse.json({ error: 'No authenticated user' }, { status: 401 });
+      return NextResponse.json({ error: 'Usuario no autenticado' }, { status: 401 });
     }
 
     // Evitar reenviar si ya está confirmado
     if (user.email_confirmed_at) {
-      return NextResponse.json({ success: true, message: 'Email already verified' });
+      return NextResponse.json({ success: true, message: 'Email ya verificado' });
     }
 
     const redirectTo = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/verify-email`;
@@ -49,8 +49,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error resending verification email:', error);
-    return NextResponse.json({ error: 'Internal error' }, { status: 500 });
+    console.error('Error reenviando email de verificación:', error);
+    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
   }
 }
 
