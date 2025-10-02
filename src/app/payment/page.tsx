@@ -440,7 +440,7 @@ function PaymentPageContent() {
 
 export default function PaymentPage() {
   return (
-    <MarketingLayout>
+    <MarketingLayout showNavbar={false} showFooter={false}>
       <Suspense fallback={
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-sky-50 flex items-center justify-center">
           <div className="text-center">
