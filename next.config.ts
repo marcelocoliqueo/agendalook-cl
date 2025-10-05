@@ -5,8 +5,16 @@ const nextConfig: NextConfig = {
     // Evitar fallos de build por ESLint en Vercel; se puede reactivar luego
     ignoreDuringBuilds: true,
   },
+  typescript: {
+    // Evitar errores de TypeScript durante el build
+    ignoreBuildErrors: false,
+  },
   images: {
     domains: ['localhost'],
+  },
+  // Optimizaciones para reducir warnings
+  experimental: {
+    optimizePackageImports: ['lucide-react', '@supabase/supabase-js'],
   },
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
