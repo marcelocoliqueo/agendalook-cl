@@ -1,0 +1,61 @@
+<!-- Open Graph Cover Image para Agendalook -->
+<!-- Dimensiones: 1200x630px -->
+<!-- Guardar como og-cover.svg y convertir a JPG -->
+
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fondo degradado -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f8fafc;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#e2e8f0;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="textGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#0ea5e9;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#22c55e;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Fondo -->
+  <rect width="1200" height="630" fill="url(#bgGradient)"/>
+  
+  <!-- Elementos decorativos -->
+  <circle cx="200" cy="150" r="80" fill="#0ea5e9" opacity="0.1"/>
+  <circle cx="1000" cy="480" r="120" fill="#22c55e" opacity="0.1"/>
+  <circle cx="600" cy="100" r="60" fill="#f59e0b" opacity="0.1"/>
+  
+  <!-- Logo/Icono -->
+  <rect x="100" y="200" width="80" height="80" rx="20" fill="url(#textGradient)"/>
+  <text x="140" y="250" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="white" text-anchor="middle">A</text>
+  
+  <!-- Título principal -->
+  <text x="220" y="250" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#1e293b">
+    Agendalook
+  </text>
+  
+  <!-- Subtítulo -->
+  <text x="220" y="300" font-family="Arial, sans-serif" font-size="24" fill="#64748b">
+    Agenda online para belleza, salud y bienestar
+  </text>
+  
+  <!-- Características -->
+  <text x="220" y="360" font-family="Arial, sans-serif" font-size="18" fill="#475569">
+    ✓ Recordatorios por WhatsApp
+  </text>
+  <text x="220" y="390" font-family="Arial, sans-serif" font-size="18" fill="#475569">
+    ✓ Pagos online con MercadoPago
+  </text>
+  <text x="220" y="420" font-family="Arial, sans-serif" font-size="18" fill="#475569">
+    ✓ 30 días gratis sin tarjeta
+  </text>
+  
+  <!-- CTA -->
+  <rect x="220" y="460" width="200" height="50" rx="25" fill="url(#textGradient)"/>
+  <text x="320" y="490" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="white" text-anchor="middle">
+    Comienza gratis
+  </text>
+  
+  <!-- URL -->
+  <text x="1000" y="600" font-family="Arial, sans-serif" font-size="20" fill="#64748b" text-anchor="end">
+    agendalook.cl
+  </text>
+</svg>

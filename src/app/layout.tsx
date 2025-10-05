@@ -10,10 +10,10 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'Agendalook — Agenda simple y profesional',
-  description: 'Agenda online simple para psicólogos, estilistas, coaches y más. Recordatorios por WhatsApp, reservas y gestión de clientes.',
-  keywords: 'agenda online, reservas, citas, psicólogos, estilistas, coaches, recordatorios, WhatsApp, gestión de clientes',
-  authors: [{ name: 'Agendalook Team' }],
+  title: 'Agendalook | Agenda online para belleza, salud y bienestar',
+  description: 'Agenda, cobra y confirma tus citas con facilidad. Agendalook conecta tu negocio con tus clientes: recordatorios por WhatsApp, pagos online y prueba gratis de 30 días.',
+  keywords: 'agenda online, agendamiento, reservas, belleza, salud, bienestar, psicólogos, spas, clínicas, peluquerías, agendamiento Chile, WhatsApp, MercadoPago',
+  authors: [{ name: 'Agendalook' }],
   creator: 'Agendalook',
   publisher: 'Agendalook',
   formatDetection: {
@@ -26,16 +26,16 @@ export const metadata: Metadata = {
     canonical: '/',
   },
   openGraph: {
-    title: 'Agendalook — Agenda simple y profesional',
-    description: 'Agenda online simple para psicólogos, estilistas, coaches y más. Recordatorios por WhatsApp, reservas y gestión de clientes.',
+    title: 'Agendalook | Agenda online para belleza, salud y bienestar',
+    description: 'Simplifica tus reservas, recordatorios y pagos en un solo lugar. 30 días gratis sin tarjeta.',
     url: 'https://agendalook.cl',
     siteName: 'Agendalook',
     images: [
       {
-        url: '/logo-main.png',
-        width: 200,
-        height: 200,
-        alt: 'Agendalook Logo',
+        url: 'https://agendalook.cl/og-cover.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Agendalook - Agenda online para belleza, salud y bienestar'
       },
     ],
     locale: 'es_CL',
@@ -43,9 +43,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Agendalook — Agenda simple y profesional',
-    description: 'Agenda online simple para psicólogos, estilistas, coaches y más.',
-    images: ['/logo-main.png'],
+    title: 'Agendalook | Agenda online para belleza, salud y bienestar',
+    description: 'Gestiona tus reservas, recordatorios y pagos. Prueba gratis 30 días.',
+    images: ['https://agendalook.cl/og-cover.jpg'],
   },
   robots: {
     index: true,
