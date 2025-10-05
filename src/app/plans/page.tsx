@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { usePlanManagement } from '@/hooks/usePlanManagement';
@@ -88,7 +88,7 @@ const plans = [
   }
 ];
 
-export default function PlansPage() {
+function PlansPageContent() {
   const { user, loading: authLoading } = useAuth();
   const { selectPlan, isLoading } = usePlanManagement();
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
@@ -325,5 +325,22 @@ export default function PlansPage() {
         </div>
       </div>
     </MarketingLayout>
+  );
+}
+
+export default function PlansPage() {
+  return (
+    <Suspense fallback={
+      <MarketingLayout showFooter={false}>
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-sky-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-sky-500 mx-auto mb-4"></div>
+            <p className="text-slate-600">Cargando...</p>
+          </div>
+        </div>
+      </MarketingLayout>
+    }>
+      <PlansPageContent />
+    </Suspense>
   );
 } 
