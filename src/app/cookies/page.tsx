@@ -54,7 +54,6 @@ export default function CookiesPage() {
               </p>
               <ul className="list-disc pl-6 text-slate-600 space-y-2">
                 <li><strong>Google Analytics:</strong> Para analizar el tráfico y uso del sitio</li>
-                <li><strong>Stripe:</strong> Para procesar pagos de forma segura</li>
                 <li><strong>MercadoPago:</strong> Para procesar pagos en Chile</li>
                 <li><strong>Supabase:</strong> Para autenticación y base de datos</li>
               </ul>
