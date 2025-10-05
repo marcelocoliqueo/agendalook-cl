@@ -32,13 +32,13 @@ export function Hero() {
         <div className="grid lg:grid-cols-2 gap-14 items-center">
           <div>
             <p className="inline-flex items-center gap-2 text-xs font-semibold px-3 py-1 rounded-full border border-sky-200 text-sky-700 bg-sky-50">
-              Nuevo · Confirmaciones por WhatsApp
+              Nuevo · 30 días gratis sin tarjeta
             </p>
             <h1 className="mt-4 text-4xl sm:text-6xl font-extrabold leading-tight text-slate-900">
-              <span className="gradient-text">Agenda simple</span> y profesional para tus clientes
+              Tu agenda online todo en uno para <span className="gradient-text">belleza, salud y bienestar</span>
             </h1>
             <p className="mt-5 text-lg text-slate-700 max-w-prose">
-              La plataforma todo en uno para <span className="font-semibold">psicólogos</span>, <span className="font-semibold">estilistas</span>, <span className="font-semibold">coaches</span>, <span className="font-semibold">manicuristas</span> y más. Publica tu agenda, recibe reservas y confirma por WhatsApp.
+              Gestiona tus reservas, recordatorios y pagos en un solo lugar. Perfecto para <span className="font-semibold">peluquerías</span>, <span className="font-semibold">spas</span>, <span className="font-semibold">clínicas</span>, <span className="font-semibold">psicólogos</span> y <span className="font-semibold">terapeutas</span>.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row gap-3">
               <CTAPrimaryButton />
@@ -46,7 +46,7 @@ export function Hero() {
                 href="#contacto" 
                 className="inline-flex items-center justify-center rounded-2xl bg-white hover:bg-slate-50 text-slate-900 px-6 py-3 font-semibold border border-slate-200 shadow-sm focus-ring transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
               >
-                Solicita una demo
+                Ver planes y precios
               </Link>
             </div>
             <div className="mt-6 flex items-center gap-4 text-xs text-slate-600">

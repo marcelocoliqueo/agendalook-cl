@@ -90,8 +90,8 @@ export function CTAPrimaryButton({ className = '', ...props }: Omit<AuthButtonPr
       className={`shine magnet ${className}`}
       {...props}
     >
-      <span className="hidden sm:inline">Empieza Gratis</span>
-      <span className="sm:hidden">Empezar</span>
+      <span className="hidden sm:inline">Comienza tu prueba gratis de 30 días</span>
+      <span className="sm:hidden">Prueba gratis</span>
     </AuthButton>
   );
 }
