@@ -1,9 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { usePlanManagement } from '@/hooks/usePlanManagement';
 import { MarketingLayout } from '@/components/layout/MarketingLayout';
+import { TrialAlert } from '@/components/ui/TrialAlert';
 import { 
   Check, 
   Zap, 
@@ -90,6 +92,11 @@ export default function PlansPage() {
   const { user, loading: authLoading } = useAuth();
   const { selectPlan, isLoading } = usePlanManagement();
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  
+  // Verificar si viene de trial expirado
+  const trialExpired = searchParams.get('trial-expired') === 'true';
+  const trialMessage = searchParams.get('message');
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -130,6 +137,27 @@ export default function PlansPage() {
   return (
     <MarketingLayout showFooter={false}>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-sky-50">
+        {/* Alerta de trial expirado */}
+        {trialExpired && trialMessage && (
+          <div className="max-w-7xl mx-auto px-6 pt-8">
+            <div className="bg-red-50 border border-red-200 rounded-xl p-6 mb-8">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                  <span className="text-red-600 font-bold text-sm">!</span>
+                </div>
+                <div>
+                  <h3 className="text-red-800 font-semibold text-lg">
+                    Período de Prueba Expirado
+                  </h3>
+                  <p className="text-red-700 text-sm mt-1">
+                    {trialMessage}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Header */}
         <div className="max-w-7xl mx-auto px-6 py-16 text-center">
           <div className="max-w-3xl mx-auto">

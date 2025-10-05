@@ -43,7 +43,7 @@ export const PLAN_LIMITS: Record<PlanType, PlanLimits> = {
   pro: {
     maxServices: null,
     maxBookingsPerMonth: null,
-    whatsappReminders: false,
+    whatsappReminders: true,
     customSubdomain: false, // Temporalmente deshabilitado
     clientHistory: true,
     priceCLP: 9990,
@@ -51,7 +51,7 @@ export const PLAN_LIMITS: Record<PlanType, PlanLimits> = {
   studio: {
     maxServices: null,
     maxBookingsPerMonth: null,
-    whatsappReminders: false, // Temporalmente deshabilitado
+    whatsappReminders: true, // Habilitado para Studio
     customSubdomain: false, // Temporalmente deshabilitado
     clientHistory: true,
     priceCLP: 19990,

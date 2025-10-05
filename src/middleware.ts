@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
+import { checkTrialExpiration, handleTrialExpiration } from './middleware/checkTrial';
 
 export async function middleware(request: NextRequest) {
   // Rutas que requieren autenticación
@@ -120,6 +121,50 @@ export async function middleware(request: NextRequest) {
       url.pathname = '/verify-code';
       if (user?.email) url.searchParams.set('email', user.email);
       return NextResponse.redirect(url);
+    }
+
+    // Verificar expiración de trial para rutas protegidas
+    if (isProtectedRoute) {
+      console.log('🔍 Middleware: Verificando expiración de trial para:', user.id);
+      
+      try {
+        // Consultar información del profesional directamente
+        const { data: professional, error } = await supabase
+          .from('professionals')
+          .select('plan, trial_end_date, subscription_status')
+          .eq('user_id', user.id)
+          .single();
+
+        if (error) {
+          console.error('❌ Error consultando profesional en middleware:', error);
+          // En caso de error, permitir acceso (más permisivo)
+        } else if (professional?.plan === 'trial') {
+          const isExpired = new Date() > new Date(professional.trial_end_date);
+          
+          if (isExpired) {
+            console.log('⚠️ Middleware: Trial expirado, actualizando estado y redirigiendo');
+            
+            // Actualizar estado a 'expired'
+            await supabase
+              .from('professionals')
+              .update({ subscription_status: 'expired' })
+              .eq('user_id', user.id);
+            
+            // Redirigir a /pricing
+            const url = request.nextUrl.clone();
+            url.pathname = '/pricing';
+            url.searchParams.set('trial-expired', 'true');
+            url.searchParams.set('message', 'Tu período de prueba ha expirado. Elige un plan para continuar.');
+            return NextResponse.redirect(url);
+          } else {
+            const daysRemaining = Math.ceil((new Date(professional.trial_end_date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+            console.log(`ℹ️ Middleware: Trial activo, quedan ${daysRemaining} días`);
+          }
+        }
+      } catch (error) {
+        console.error('💥 Error inesperado verificando trial en middleware:', error);
+        // En caso de error, permitir acceso (más permisivo)
+      }
     }
 
     // Usuario autenticado y verificado, permitir acceso

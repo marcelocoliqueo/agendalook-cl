@@ -21,6 +21,7 @@ import {
 import { NotificationBell } from '@/components/ui/NotificationBell';
 import { Toast } from '@/components/ui/Toast';
 import { FullPageLoader } from '@/components/ui/LoadingSpinner';
+import { TrialAlert } from '@/components/ui/TrialAlert';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfessional } from '@/hooks/useProfessional';
 import { Professional } from '@/types';
@@ -314,6 +315,8 @@ export default function DashboardLayout({
           {/* Main Content */}
           <main className="flex-1">
             <div className="bg-white/60 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20 p-6 sm:p-8">
+              {/* Alerta de trial */}
+              <TrialAlert />
               {children}
             </div>
           </main>
