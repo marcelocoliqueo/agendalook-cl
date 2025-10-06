@@ -13,18 +13,41 @@ export function Testimonio() {
               <div className="mt-4 font-semibold">Carla, Psicóloga</div>
             </div>
             <div className="flex justify-center lg:justify-end">
-              <div className="rounded-2xl bg-white border border-slate-200 p-6 shadow-sm text-sm min-w-[220px]">
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-slate-600">Ausencias</span>
-                  <span className="font-semibold text-green-600">−15%</span>
+              <div className="rounded-2xl bg-white border border-slate-200 p-6 shadow-lg text-sm min-w-[240px]">
+                <div className="text-center mb-4">
+                  <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Resultados con Agendalook</h3>
                 </div>
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-slate-600">Reservas al mes</span>
-                  <span className="font-semibold text-blue-600">+20%</span>
+                
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span className="text-slate-600 font-medium">Ausencias</span>
+                    </div>
+                    <span className="font-bold text-green-600 text-lg">−15%</span>
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      <span className="text-slate-600 font-medium">Reservas al mes</span>
+                    </div>
+                    <span className="font-bold text-blue-600 text-lg">+20%</span>
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                      <span className="text-slate-600 font-medium">Tiempo ahorrado</span>
+                    </div>
+                    <span className="font-bold text-purple-600 text-lg">2 h/sem</span>
+                  </div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-slate-600">Tiempo ahorrado</span>
-                  <span className="font-semibold text-blue-600">2 h/sem</span>
+                
+                <div className="mt-4 pt-4 border-t border-slate-100">
+                  <p className="text-xs text-slate-500 text-center">
+                    Datos reales de usuarios
+                  </p>
                 </div>
               </div>
             </div>
