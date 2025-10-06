@@ -1,9 +1,32 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter, usePathname } from 'next/navigation';
 import { LoginButton, RegisterButton } from '@/components/ui/AuthButtons';
 
 export function Navbar() {
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const handleNavClick = (hash: string) => {
+    if (pathname === "/") {
+      // Si ya estamos en la página principal, hacer scroll suave
+      const section = document.querySelector(hash);
+      if (section) {
+        section.scrollIntoView({ behavior: "smooth" });
+      }
+    } else {
+      // Si estamos en otra página, redirigir y luego hacer scroll
+      router.push(`/${hash}`);
+      setTimeout(() => {
+        const section = document.querySelector(hash);
+        if (section) {
+          section.scrollIntoView({ behavior: "smooth" });
+        }
+      }, 400);
+    }
+  };
+
   return (
     <header className="sticky top-0 z-50 backdrop-blur border-b border-slate-200 bg-white/70">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -17,10 +40,30 @@ export function Navbar() {
         
         {/* Navegación desktop */}
         <nav className="hidden md:flex items-center gap-8 text-sm">
-          <Link href="/#beneficios" scroll={false} className="hover:text-sky-600 transition-colors duration-200">Beneficios</Link>
-          <Link href="/#profesionales" scroll={false} className="hover:text-sky-600 transition-colors duration-200">Profesionales</Link>
-          <Link href="/#precios" scroll={false} className="hover:text-sky-600 transition-colors duration-200">Precios</Link>
-          <Link href="/#contacto" scroll={false} className="hover:text-sky-600 transition-colors duration-200">Demo</Link>
+          <button 
+            onClick={() => handleNavClick("#beneficios")} 
+            className="hover:text-sky-600 transition-colors duration-200 cursor-pointer"
+          >
+            Beneficios
+          </button>
+          <button 
+            onClick={() => handleNavClick("#profesionales")} 
+            className="hover:text-sky-600 transition-colors duration-200 cursor-pointer"
+          >
+            Profesionales
+          </button>
+          <button 
+            onClick={() => handleNavClick("#precios")} 
+            className="hover:text-sky-600 transition-colors duration-200 cursor-pointer"
+          >
+            Precios
+          </button>
+          <button 
+            onClick={() => handleNavClick("#contacto")} 
+            className="hover:text-sky-600 transition-colors duration-200 cursor-pointer"
+          >
+            Demo
+          </button>
         </nav>
         
         {/* Botones de autenticación */}

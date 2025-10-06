@@ -1,13 +1,35 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter, usePathname } from 'next/navigation';
 import { useParallax } from '@/hooks/useParallax';
 import { CTAPrimaryButton } from '@/components/ui/AuthButtons';
 
 export function Hero() {
+  const router = useRouter();
+  const pathname = usePathname();
   const blob1Ref = useParallax({ speed: 0.02, direction: 'up' });
   const blob2Ref = useParallax({ speed: 0.02, direction: 'down' });
   const blob3Ref = useParallax({ speed: 0.01, direction: 'up' });
+
+  const handleNavClick = (hash: string) => {
+    if (pathname === "/") {
+      // Si ya estamos en la página principal, hacer scroll suave
+      const section = document.querySelector(hash);
+      if (section) {
+        section.scrollIntoView({ behavior: "smooth" });
+      }
+    } else {
+      // Si estamos en otra página, redirigir y luego hacer scroll
+      router.push(`/${hash}`);
+      setTimeout(() => {
+        const section = document.querySelector(hash);
+        if (section) {
+          section.scrollIntoView({ behavior: "smooth" });
+        }
+      }, 400);
+    }
+  };
 
   return (
     <section className="relative overflow-hidden">
@@ -42,13 +64,12 @@ export function Hero() {
             </p>
             <div className="mt-8 flex flex-col sm:flex-row gap-3">
               <CTAPrimaryButton />
-              <Link 
-                href="/#precios" 
-                scroll={false}
+              <button 
+                onClick={() => handleNavClick("#precios")} 
                 className="inline-flex items-center justify-center rounded-2xl bg-white hover:bg-slate-50 text-slate-900 px-4 py-2.5 font-semibold border border-slate-200 shadow-sm focus-ring transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
               >
                 Ver planes
-              </Link>
+              </button>
             </div>
             <div className="mt-6 flex items-center gap-4 text-xs text-slate-600">
               <span className="inline-flex items-center gap-1">⭐️⭐️⭐️⭐️⭐️</span>
