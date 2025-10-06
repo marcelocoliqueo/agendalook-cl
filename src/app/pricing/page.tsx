@@ -2,8 +2,8 @@
 
 import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { PlanCard } from '@/components/pricing/PlanCard';
-import { PLANS } from '@/lib/plans';
+import Link from 'next/link';
+import { CheckCircle, MinusCircle, CircleDashed, Check } from 'lucide-react';
 
 function PricingPageContent() {
   const searchParams = useSearchParams();
@@ -12,67 +12,8 @@ function PricingPageContent() {
   const trialExpired = searchParams.get('trial-expired') === 'true';
   const trialMessage = searchParams.get('message');
 
-  // Datos de los planes según especificaciones del usuario
-  const plansData = [
-    {
-      name: 'Lite',
-      price: '$9.990',
-      users: 'Hasta 3 usuarios',
-      branches: '1 sucursal',
-      whatsapp: '80 mensajes',
-      features: [
-        'Agenda básica completa',
-        'Página pública personalizada',
-        'Notificaciones por email',
-        'Dashboard básico',
-        'Soporte por email',
-        'Hasta 10 reservas por mes'
-      ],
-      highlighted: false,
-      actionUrl: '/api/mercadopago/checkout?plan=lite'
-    },
-    {
-      name: 'Pro',
-      price: '$16.990',
-      users: 'Hasta 8 usuarios',
-      branches: '1 sucursal',
-      whatsapp: '180 mensajes',
-      features: [
-        'Todo lo del Lite',
-        'Reservas ilimitadas',
-        'Servicios ilimitados',
-        'Historial de clientes',
-        'Estadísticas básicas',
-        'Soporte prioritario',
-        'Sin marca de Agendalook',
-        'Filtros avanzados'
-      ],
-      highlighted: true,
-      actionUrl: '/api/mercadopago/checkout?plan=pro'
-    },
-    {
-      name: 'Studio',
-      price: '$24.990',
-      users: 'Hasta 20 usuarios',
-      branches: '2 sucursales',
-      whatsapp: '300 mensajes',
-      features: [
-        'Todo lo del Pro',
-        'Multi-sucursal',
-        'Roles y permisos',
-        'Reportes detallados',
-        'Exportación de datos',
-        'Personalización avanzada',
-        'Soporte dedicado',
-        'Funciones premium'
-      ],
-      highlighted: false,
-      actionUrl: '/api/mercadopago/checkout?plan=studio'
-    }
-  ];
-
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-sky-50">
       {/* Alerta de trial expirado */}
       {trialExpired && trialMessage && (
         <div className="bg-red-50 border-b border-red-200 py-4">
@@ -94,43 +35,329 @@ function PricingPageContent() {
         </div>
       )}
 
-      {/* Header */}
-      <div className="bg-gradient-to-br from-slate-50 to-white py-20">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center max-w-4xl mx-auto">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 leading-tight">
-              Planes pensados para hacer crecer tu negocio
-            </h1>
-            <p className="mt-6 text-lg sm:text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
-              Agendalook te ofrece la forma más simple y económica de gestionar tus reservas, clientes y pagos.
-            </p>
-          </div>
+      {/* Encabezado */}
+      <section className="text-center py-20">
+        <div className="max-w-4xl mx-auto px-6">
+          <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 mb-6">
+            Elige el plan ideal para tu negocio
+          </h1>
+          <p className="text-slate-600 text-lg max-w-2xl mx-auto">
+            Prueba cualquier plan gratis por 30 días. Sin compromisos.
+          </p>
         </div>
-      </div>
+      </section>
 
-      {/* Cards de planes */}
-      <div className="py-20 bg-white">
+      {/* Grid de planes */}
+      <section className="py-12">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
-            {plansData.map((plan, index) => (
-              <PlanCard
-                key={index}
-                name={plan.name}
-                price={plan.price}
-                users={plan.users}
-                branches={plan.branches}
-                whatsapp={plan.whatsapp}
-                features={plan.features}
-                highlighted={plan.highlighted}
-                actionUrl={plan.actionUrl}
-              />
-            ))}
+          <div className="grid gap-8 md:grid-cols-3">
+            
+            {/* Plan Look */}
+            <div className="bg-white/60 backdrop-blur border rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 p-6">
+              <h2 className="text-2xl font-semibold mb-1 text-slate-900">Plan Look</h2>
+              <p className="text-sm text-slate-500 mb-4">Para profesionales y negocios pequeños.</p>
+              <p className="text-3xl font-bold text-slate-900 mb-2">
+                $9.990 <span className="text-base font-normal text-slate-500">/mes</span>
+              </p>
+              <p className="text-sm text-slate-500 mb-6">3 usuarios • 1 sucursal • 80 WhatsApp</p>
+              
+              {/* Características */}
+              <ul className="space-y-3 mb-6">
+                <li className="flex items-start gap-3 text-sm text-slate-700">
+                  <Check className="h-4 w-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+                  <span>Agenda online ilimitada</span>
+                </li>
+                <li className="flex items-start gap-3 text-sm text-slate-700">
+                  <Check className="h-4 w-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+                  <span>Recordatorios y confirmaciones por WhatsApp</span>
+                </li>
+                <li className="flex items-start gap-3 text-sm text-slate-700">
+                  <Check className="h-4 w-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+                  <span>Pagos online con MercadoPago</span>
+                </li>
+                <li className="flex items-start gap-3 text-sm text-slate-700">
+                  <Check className="h-4 w-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+                  <span>Página pública de reservas (link o QR)</span>
+                </li>
+                <li className="flex items-start gap-3 text-sm text-slate-700">
+                  <Check className="h-4 w-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+                  <span>Reportes básicos (reservas, ingresos)</span>
+                </li>
+                <li className="flex items-start gap-3 text-sm text-slate-700">
+                  <Check className="h-4 w-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+                  <span>CRM básico (clientes y contactos)</span>
+                </li>
+                <li className="flex items-start gap-3 text-sm text-slate-700">
+                  <Check className="h-4 w-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+                  <span>Soporte por email</span>
+                </li>
+              </ul>
+
+              {/* Extras opcionales */}
+              <div className="border-t border-slate-200 pt-4 mb-6">
+                <p className="font-medium text-slate-900 mb-2">Extras opcionales:</p>
+                <ul className="space-y-1 text-sm text-slate-500">
+                  <li>👤 Usuario adicional → $1.990/mes</li>
+                  <li>🏢 Sucursal adicional → $3.990/mes</li>
+                </ul>
+              </div>
+
+              {/* CTAs */}
+              <Link 
+                href="/register" 
+                className="w-full inline-flex items-center justify-center rounded-2xl bg-sky-500 hover:bg-sky-600 text-white px-6 py-3 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 focus-ring"
+              >
+                Suscribirme
+              </Link>
+              <Link 
+                href="/register" 
+                className="text-sm text-sky-600 hover:text-sky-700 hover:underline block text-center mt-3"
+              >
+                Prueba 30 días gratis
+              </Link>
+            </div>
+
+            {/* Plan Pro */}
+            <div className="bg-white/60 backdrop-blur border-2 border-sky-500 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 p-6 relative">
+              <span className="absolute -top-3 right-6 rounded-full bg-sky-500 text-white text-xs px-3 py-1 font-semibold">
+                Recomendado
+              </span>
+              
+              <h2 className="text-2xl font-semibold mb-1 text-slate-900">Plan Pro</h2>
+              <p className="text-sm text-slate-500 mb-4">Para equipos que buscan más control y automatización.</p>
+              <p className="text-3xl font-bold text-slate-900 mb-2">
+                $16.990 <span className="text-base font-normal text-slate-500">/mes</span>
+              </p>
+              <p className="text-sm text-slate-500 mb-6">8 usuarios • 1 sucursal • 180 WhatsApp</p>
+              
+              {/* Características */}
+              <ul className="space-y-3 mb-6">
+                <li className="flex items-start gap-3 text-sm text-slate-700">
+                  <Check className="h-4 w-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+                  <span>Todo lo del Plan Look</span>
+                </li>
+                <li className="flex items-start gap-3 text-sm text-slate-700">
+                  <Check className="h-4 w-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+                  <span>Reportes avanzados (cancelaciones, ingresos por servicio)</span>
+                </li>
+                <li className="flex items-start gap-3 text-sm text-slate-700">
+                  <Check className="h-4 w-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+                  <span>Ficha de cliente/paciente avanzada (historial, notas, archivos)</span>
+                </li>
+                <li className="flex items-start gap-3 text-sm text-slate-700">
+                  <Check className="h-4 w-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+                  <span>Comisiones por profesional</span>
+                </li>
+                <li className="flex items-start gap-3 text-sm text-slate-700">
+                  <Check className="h-4 w-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+                  <span>Automatizaciones simples (recordatorios extra, mensajes post-servicio)</span>
+                </li>
+                <li className="flex items-start gap-3 text-sm text-slate-700">
+                  <Check className="h-4 w-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+                  <span>Integración con Google Calendar</span>
+                </li>
+                <li className="flex items-start gap-3 text-sm text-slate-700">
+                  <Check className="h-4 w-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+                  <span>Soporte prioritario nivel medio</span>
+                </li>
+              </ul>
+
+              {/* Extras opcionales */}
+              <div className="border-t border-slate-200 pt-4 mb-6">
+                <p className="font-medium text-slate-900 mb-2">Extras opcionales:</p>
+                <ul className="space-y-1 text-sm text-slate-500">
+                  <li>👤 Usuario adicional → $1.490/mes</li>
+                  <li>🏢 Sucursal adicional → $2.990/mes</li>
+                </ul>
+              </div>
+
+              {/* CTAs */}
+              <Link 
+                href="/register" 
+                className="w-full inline-flex items-center justify-center rounded-2xl bg-sky-500 hover:bg-sky-600 text-white px-6 py-3 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 focus-ring"
+              >
+                Suscribirme
+              </Link>
+              <Link 
+                href="/register" 
+                className="text-sm text-sky-600 hover:text-sky-700 hover:underline block text-center mt-3"
+              >
+                Prueba 30 días gratis
+              </Link>
+            </div>
+
+            {/* Plan Studio */}
+            <div className="bg-white/60 backdrop-blur border rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 p-6">
+              <h2 className="text-2xl font-semibold mb-1 text-slate-900">Plan Studio</h2>
+              <p className="text-sm text-slate-500 mb-4">Para clínicas, spas y cadenas con múltiples profesionales.</p>
+              <p className="text-3xl font-bold text-slate-900 mb-2">
+                $24.990 <span className="text-base font-normal text-slate-500">/mes</span>
+              </p>
+              <p className="text-sm text-slate-500 mb-6">20 usuarios • 2 sucursales • 300 WhatsApp</p>
+              
+              {/* Características */}
+              <ul className="space-y-3 mb-6">
+                <li className="flex items-start gap-3 text-sm text-slate-700">
+                  <Check className="h-4 w-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+                  <span>Todo lo del Plan Pro</span>
+                </li>
+                <li className="flex items-start gap-3 text-sm text-slate-700">
+                  <Check className="h-4 w-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+                  <span>Roles y permisos (administrador, recepcionista, profesional)</span>
+                </li>
+                <li className="flex items-start gap-3 text-sm text-slate-700">
+                  <Check className="h-4 w-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+                  <span>Consentimientos digitales (PDF o firma)</span>
+                </li>
+                <li className="flex items-start gap-3 text-sm text-slate-700">
+                  <Check className="h-4 w-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+                  <span>Giftcards, bonos y paquetes de sesiones</span>
+                </li>
+                <li className="flex items-start gap-3 text-sm text-slate-700">
+                  <Check className="h-4 w-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+                  <span>Multi-sucursal con panel unificado</span>
+                </li>
+                <li className="flex items-start gap-3 text-sm text-slate-700">
+                  <Check className="h-4 w-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+                  <span>Personalización de marca (logo, colores)</span>
+                </li>
+                <li className="flex items-start gap-3 text-sm text-slate-700">
+                  <Check className="h-4 w-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+                  <span>Soporte prioritario (email + WhatsApp)</span>
+                </li>
+              </ul>
+
+              {/* Extras opcionales */}
+              <div className="border-t border-slate-200 pt-4 mb-6">
+                <p className="font-medium text-slate-900 mb-2">Extras opcionales:</p>
+                <ul className="space-y-1 text-sm text-slate-500">
+                  <li>👤 Usuario adicional → $990/mes</li>
+                  <li>🏢 Sucursal adicional → $2.490/mes</li>
+                </ul>
+              </div>
+
+              {/* CTAs */}
+              <Link 
+                href="/register" 
+                className="w-full inline-flex items-center justify-center rounded-2xl bg-sky-500 hover:bg-sky-600 text-white px-6 py-3 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 focus-ring"
+              >
+                Suscribirme
+              </Link>
+              <Link 
+                href="/register" 
+                className="text-sm text-sky-600 hover:text-sky-700 hover:underline block text-center mt-3"
+              >
+                Prueba 30 días gratis
+              </Link>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
+
+      {/* Tabla comparativa */}
+      <section className="py-20 bg-white">
+        <div className="max-w-6xl mx-auto px-6">
+          <h2 className="text-3xl font-bold text-center text-slate-900 mb-12">
+            Comparación de planes
+          </h2>
+          
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse bg-white rounded-2xl shadow-lg overflow-hidden">
+              <thead>
+                <tr className="bg-slate-50">
+                  <th className="text-left p-6 font-semibold text-slate-900">Característica</th>
+                  <th className="text-center p-6 font-semibold text-slate-900">Look</th>
+                  <th className="text-center p-6 font-semibold text-sky-600">Pro</th>
+                  <th className="text-center p-6 font-semibold text-slate-900">Studio</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="border-t border-slate-200">
+                  <td className="p-6 font-medium text-slate-700">Usuarios incluidos</td>
+                  <td className="p-6 text-center text-slate-600">3</td>
+                  <td className="p-6 text-center text-slate-600">8</td>
+                  <td className="p-6 text-center text-slate-600">20</td>
+                </tr>
+                <tr className="border-t border-slate-200 bg-slate-50">
+                  <td className="p-6 font-medium text-slate-700">Sucursales incluidas</td>
+                  <td className="p-6 text-center text-slate-600">1</td>
+                  <td className="p-6 text-center text-slate-600">1</td>
+                  <td className="p-6 text-center text-slate-600">2</td>
+                </tr>
+                <tr className="border-t border-slate-200">
+                  <td className="p-6 font-medium text-slate-700">WhatsApp/mes</td>
+                  <td className="p-6 text-center text-slate-600">80</td>
+                  <td className="p-6 text-center text-slate-600">180</td>
+                  <td className="p-6 text-center text-slate-600">300</td>
+                </tr>
+                <tr className="border-t border-slate-200 bg-slate-50">
+                  <td className="p-6 font-medium text-slate-700">Reportes avanzados</td>
+                  <td className="p-6 text-center">
+                    <MinusCircle className="h-5 w-5 text-gray-400 mx-auto" />
+                  </td>
+                  <td className="p-6 text-center">
+                    <CheckCircle className="h-5 w-5 text-green-600 mx-auto" />
+                  </td>
+                  <td className="p-6 text-center">
+                    <CheckCircle className="h-5 w-5 text-green-600 mx-auto" />
+                  </td>
+                </tr>
+                <tr className="border-t border-slate-200">
+                  <td className="p-6 font-medium text-slate-700">Comisiones automáticas</td>
+                  <td className="p-6 text-center">
+                    <MinusCircle className="h-5 w-5 text-gray-400 mx-auto" />
+                  </td>
+                  <td className="p-6 text-center">
+                    <CheckCircle className="h-5 w-5 text-green-600 mx-auto" />
+                  </td>
+                  <td className="p-6 text-center">
+                    <CheckCircle className="h-5 w-5 text-green-600 mx-auto" />
+                  </td>
+                </tr>
+                <tr className="border-t border-slate-200 bg-slate-50">
+                  <td className="p-6 font-medium text-slate-700">Consentimientos digitales</td>
+                  <td className="p-6 text-center">
+                    <MinusCircle className="h-5 w-5 text-gray-400 mx-auto" />
+                  </td>
+                  <td className="p-6 text-center">
+                    <MinusCircle className="h-5 w-5 text-gray-400 mx-auto" />
+                  </td>
+                  <td className="p-6 text-center">
+                    <CheckCircle className="h-5 w-5 text-green-600 mx-auto" />
+                  </td>
+                </tr>
+                <tr className="border-t border-slate-200">
+                  <td className="p-6 font-medium text-slate-700">Roles y permisos</td>
+                  <td className="p-6 text-center">
+                    <MinusCircle className="h-5 w-5 text-gray-400 mx-auto" />
+                  </td>
+                  <td className="p-6 text-center">
+                    <MinusCircle className="h-5 w-5 text-gray-400 mx-auto" />
+                  </td>
+                  <td className="p-6 text-center">
+                    <CheckCircle className="h-5 w-5 text-green-600 mx-auto" />
+                  </td>
+                </tr>
+                <tr className="border-t border-slate-200 bg-slate-50">
+                  <td className="p-6 font-medium text-slate-700">Soporte prioritario</td>
+                  <td className="p-6 text-center">
+                    <MinusCircle className="h-5 w-5 text-gray-400 mx-auto" />
+                  </td>
+                  <td className="p-6 text-center">
+                    <CircleDashed className="h-5 w-5 text-blue-500 mx-auto" />
+                  </td>
+                  <td className="p-6 text-center">
+                    <CheckCircle className="h-5 w-5 text-green-600 mx-auto" />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
 
       {/* Sección de contacto */}
-      <div className="py-16 bg-slate-50">
+      <section className="py-16 bg-slate-50">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-4">
             ¿Tienes dudas o necesitas un plan personalizado?
@@ -150,57 +377,7 @@ function PricingPageContent() {
             Contáctanos por WhatsApp
           </a>
         </div>
-      </div>
-
-      {/* FAQ Section */}
-      <div className="py-20 bg-white">
-        <div className="max-w-4xl mx-auto px-6">
-          <h2 className="text-3xl font-extrabold text-center text-slate-900 mb-12">
-            Preguntas frecuentes
-          </h2>
-          <div className="space-y-4">
-            <details className="group rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-              <summary className="font-semibold cursor-pointer flex justify-between items-center text-slate-900">
-                ¿Puedo cambiar de plan en cualquier momento?
-                <span className="text-sky-500 group-open:rotate-45 transition-transform duration-200 text-xl">＋</span>
-              </summary>
-              <p className="mt-4 text-slate-600 leading-relaxed">
-                Sí, puedes cambiar de plan o cancelar tu suscripción en cualquier momento. Los cambios se aplicarán en tu próximo ciclo de facturación.
-              </p>
-            </details>
-            
-            <details className="group rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-              <summary className="font-semibold cursor-pointer flex justify-between items-center text-slate-900">
-                ¿Qué incluye la prueba gratuita de 30 días?
-                <span className="text-sky-500 group-open:rotate-45 transition-transform duration-200 text-xl">＋</span>
-              </summary>
-              <p className="mt-4 text-slate-600 leading-relaxed">
-                Los 30 días gratis te permiten probar todas las funcionalidades del plan que elijas sin costo. No se requiere tarjeta de crédito para comenzar.
-              </p>
-            </details>
-            
-            <details className="group rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-              <summary className="font-semibold cursor-pointer flex justify-between items-center text-slate-900">
-                ¿Cómo funcionan los recordatorios por WhatsApp?
-                <span className="text-sky-500 group-open:rotate-45 transition-transform duration-200 text-xl">＋</span>
-              </summary>
-              <p className="mt-4 text-slate-600 leading-relaxed">
-                Los planes Pro y Studio incluyen recordatorios automáticos por WhatsApp. Puedes configurar cuándo enviarlos y personalizar los mensajes según tus necesidades.
-              </p>
-            </details>
-            
-            <details className="group rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-              <summary className="font-semibold cursor-pointer flex justify-between items-center text-slate-900">
-                ¿Qué métodos de pago aceptan?
-                <span className="text-sky-500 group-open:rotate-45 transition-transform duration-200 text-xl">＋</span>
-              </summary>
-              <p className="mt-4 text-slate-600 leading-relaxed">
-                Aceptamos todas las tarjetas de crédito y débito principales, además de transferencias bancarias a través de MercadoPago.
-              </p>
-            </details>
-          </div>
-        </div>
-      </div>
+      </section>
     </div>
   );
 }
@@ -208,7 +385,7 @@ function PricingPageContent() {
 export default function PricingPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-sky-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-sky-500 mx-auto mb-4"></div>
           <p className="text-slate-600">Cargando...</p>
