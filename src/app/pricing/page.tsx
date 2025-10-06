@@ -4,6 +4,7 @@ import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { CheckCircle, MinusCircle, CircleDashed, Check } from 'lucide-react';
+import { MarketingLayout } from '@/components/layout/MarketingLayout';
 
 function PricingPageContent() {
   const searchParams = useSearchParams();
@@ -13,7 +14,8 @@ function PricingPageContent() {
   const trialMessage = searchParams.get('message');
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-sky-50">
+    <MarketingLayout>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-sky-50">
       {/* Alerta de trial expirado */}
       {trialExpired && trialMessage && (
         <div className="bg-red-50 border-b border-red-200 py-4">
@@ -378,19 +380,22 @@ function PricingPageContent() {
           </a>
         </div>
       </section>
-    </div>
+      </div>
+    </MarketingLayout>
   );
 }
 
 export default function PricingPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-sky-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-sky-500 mx-auto mb-4"></div>
-          <p className="text-slate-600">Cargando...</p>
+      <MarketingLayout>
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-sky-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-sky-500 mx-auto mb-4"></div>
+            <p className="text-slate-600">Cargando...</p>
+          </div>
         </div>
-      </div>
+      </MarketingLayout>
     }>
       <PricingPageContent />
     </Suspense>
