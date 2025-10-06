@@ -20,6 +20,9 @@ export function Precios() {
               <div className="text-sm font-semibold text-slate-600">Lite</div>
               <div className="mt-1 text-2xl font-extrabold text-slate-900">Desde $9.990</div>
               <div className="text-sm text-slate-500">/mes</div>
+              <div className="text-sm text-slate-500 mt-2 leading-relaxed">
+                Todo lo esencial para profesionales individuales que recién comienzan.
+              </div>
             </div>
           </Link>
           <Link 
@@ -31,6 +34,9 @@ export function Precios() {
               <div className="text-sm font-semibold text-slate-700">Pro</div>
               <div className="mt-1 text-2xl font-extrabold text-slate-900">Desde $16.990</div>
               <div className="text-sm text-slate-500">/mes</div>
+              <div className="text-sm text-slate-500 mt-2 leading-relaxed">
+                Herramientas para equipos: reportes, comisiones y ficha avanzada.
+              </div>
             </div>
           </Link>
           <Link 
@@ -41,6 +47,9 @@ export function Precios() {
               <div className="text-sm font-semibold text-slate-600">Studio</div>
               <div className="mt-1 text-2xl font-extrabold text-slate-900">Desde $24.990</div>
               <div className="text-sm text-slate-500">/mes</div>
+              <div className="text-sm text-slate-500 mt-2 leading-relaxed">
+                Pensado para clínicas, spas y cadenas con múltiples sucursales.
+              </div>
             </div>
           </Link>
         </div>

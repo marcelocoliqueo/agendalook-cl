@@ -16,15 +16,15 @@ export function Testimonio() {
               <div className="rounded-2xl bg-white border border-slate-200 p-4 shadow-sm text-sm">
                 <div className="flex items-center justify-between">
                   <span className="text-slate-600">Ausencias</span>
-                  <span className="font-semibold text-emerald-600">−62%</span>
+                  <span className="font-semibold text-green-600">−15%</span>
                 </div>
                 <div className="flex items-center justify-between mt-2">
                   <span className="text-slate-600">Reservas al mes</span>
-                  <span className="font-semibold">+38%</span>
+                  <span className="font-semibold text-blue-600">+20%</span>
                 </div>
                 <div className="flex items-center justify-between mt-2">
                   <span className="text-slate-600">Tiempo ahorrado</span>
-                  <span className="font-semibold">3 h/sem</span>
+                  <span className="font-semibold text-blue-600">2 h/sem</span>
                 </div>
               </div>
             </div>
