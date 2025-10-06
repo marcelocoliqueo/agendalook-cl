@@ -43,7 +43,8 @@ export function Hero() {
             <div className="mt-8 flex flex-col sm:flex-row gap-3">
               <CTAPrimaryButton />
               <Link 
-                href="#contacto" 
+                href="/#precios" 
+                scroll={false}
                 className="inline-flex items-center justify-center rounded-2xl bg-white hover:bg-slate-50 text-slate-900 px-4 py-2.5 font-semibold border border-slate-200 shadow-sm focus-ring transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
               >
                 Ver planes

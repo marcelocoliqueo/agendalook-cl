@@ -17,10 +17,10 @@ export function Navbar() {
         
         {/* Navegación desktop */}
         <nav className="hidden md:flex items-center gap-8 text-sm">
-          <Link href="#beneficios" className="hover:text-sky-600 transition-colors duration-200">Beneficios</Link>
-          <Link href="#profesionales" className="hover:text-sky-600 transition-colors duration-200">Profesionales</Link>
-          <Link href="#precios" className="hover:text-sky-600 transition-colors duration-200">Precios</Link>
-          <Link href="#contacto" className="hover:text-sky-600 transition-colors duration-200">Demo</Link>
+          <Link href="/#beneficios" scroll={false} className="hover:text-sky-600 transition-colors duration-200">Beneficios</Link>
+          <Link href="/#profesionales" scroll={false} className="hover:text-sky-600 transition-colors duration-200">Profesionales</Link>
+          <Link href="/#precios" scroll={false} className="hover:text-sky-600 transition-colors duration-200">Precios</Link>
+          <Link href="/#contacto" scroll={false} className="hover:text-sky-600 transition-colors duration-200">Demo</Link>
         </nav>
         
         {/* Botones de autenticación */}

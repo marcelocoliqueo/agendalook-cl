@@ -15,7 +15,7 @@ export function Footer() {
         </div>
         <ul className="flex items-center gap-6 text-sm text-slate-600 justify-center">
           <li><Link href="#" className="hover:text-sky-600">Sobre nosotros</Link></li>
-          <li><Link href="#precios" className="hover:text-sky-600">Precios</Link></li>
+          <li><Link href="/#precios" scroll={false} className="hover:text-sky-600">Precios</Link></li>
           <li><Link href="#" className="hover:text-sky-600">Soporte</Link></li>
           <li><Link href="#" className="hover:text-sky-600">Contacto</Link></li>
         </ul>
