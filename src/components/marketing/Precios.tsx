@@ -14,41 +14,59 @@ export function Precios() {
         <div className="mt-12 flex flex-col sm:flex-row gap-4 justify-center items-center">
           <Link 
             href="/pricing"
-            className="lift rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 px-8 py-4 shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5"
+            className="block group hover:scale-[1.02] transition-all duration-300 cursor-pointer"
+            aria-label="Ver detalles del plan Lite"
           >
-            <div className="text-center">
-              <div className="text-sm font-semibold text-slate-600">Lite</div>
-              <div className="mt-1 text-2xl font-extrabold text-slate-900">Desde $9.990</div>
-              <div className="text-sm text-slate-500">/mes</div>
-              <div className="text-sm text-slate-500 mt-2 leading-relaxed">
-                Todo lo esencial para profesionales individuales que recién comienzan.
+            <div className="rounded-2xl border border-slate-200 bg-white/60 backdrop-blur px-8 py-4 shadow-sm group-hover:shadow-md group-hover:border-slate-300 transition-all duration-300">
+              <div className="text-center">
+                <div className="text-sm font-semibold text-slate-600">Lite</div>
+                <div className="mt-1 text-2xl font-extrabold text-slate-900">Desde $9.990</div>
+                <div className="text-sm text-slate-500">/mes</div>
+                <div className="text-sm text-slate-500 mt-2 leading-relaxed">
+                  Todo lo esencial para profesionales individuales que recién comienzan.
+                </div>
+                <div className="text-xs text-sky-600 mt-3 font-medium group-hover:text-sky-700 transition-colors">
+                  Ver detalles del plan Lite →
+                </div>
               </div>
             </div>
           </Link>
           <Link 
             href="/pricing"
-            className="lift rounded-2xl border-2 border-sky-500 bg-white hover:bg-sky-50 px-8 py-4 shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 relative"
+            className="block group hover:scale-[1.02] transition-all duration-300 cursor-pointer relative"
+            aria-label="Ver detalles del plan Pro"
           >
-            <span className="absolute -top-2 right-4 rounded-full bg-sky-500 text-white text-xs px-2 py-1">Recomendado</span>
-            <div className="text-center">
-              <div className="text-sm font-semibold text-slate-700">Pro</div>
-              <div className="mt-1 text-2xl font-extrabold text-slate-900">Desde $16.990</div>
-              <div className="text-sm text-slate-500">/mes</div>
-              <div className="text-sm text-slate-500 mt-2 leading-relaxed">
-                Herramientas para equipos: reportes, comisiones y ficha avanzada.
+            <span className="absolute -top-2 right-4 rounded-full bg-sky-500 text-white text-xs px-2 py-1 z-10">Recomendado</span>
+            <div className="rounded-2xl border-2 border-sky-500 bg-white/60 backdrop-blur px-8 py-4 shadow-md group-hover:shadow-lg group-hover:border-sky-600 transition-all duration-300">
+              <div className="text-center">
+                <div className="text-sm font-semibold text-slate-700">Pro</div>
+                <div className="mt-1 text-2xl font-extrabold text-slate-900">Desde $16.990</div>
+                <div className="text-sm text-slate-500">/mes</div>
+                <div className="text-sm text-slate-500 mt-2 leading-relaxed">
+                  Herramientas para equipos: reportes, comisiones y ficha avanzada.
+                </div>
+                <div className="text-xs text-sky-600 mt-3 font-medium group-hover:text-sky-700 transition-colors">
+                  Ver detalles del plan Pro →
+                </div>
               </div>
             </div>
           </Link>
           <Link 
             href="/pricing"
-            className="lift rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 px-8 py-4 shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5"
+            className="block group hover:scale-[1.02] transition-all duration-300 cursor-pointer"
+            aria-label="Ver detalles del plan Studio"
           >
-            <div className="text-center">
-              <div className="text-sm font-semibold text-slate-600">Studio</div>
-              <div className="mt-1 text-2xl font-extrabold text-slate-900">Desde $24.990</div>
-              <div className="text-sm text-slate-500">/mes</div>
-              <div className="text-sm text-slate-500 mt-2 leading-relaxed">
-                Pensado para clínicas, spas y cadenas con múltiples sucursales.
+            <div className="rounded-2xl border border-slate-200 bg-white/60 backdrop-blur px-8 py-4 shadow-sm group-hover:shadow-md group-hover:border-slate-300 transition-all duration-300">
+              <div className="text-center">
+                <div className="text-sm font-semibold text-slate-600">Studio</div>
+                <div className="mt-1 text-2xl font-extrabold text-slate-900">Desde $24.990</div>
+                <div className="text-sm text-slate-500">/mes</div>
+                <div className="text-sm text-slate-500 mt-2 leading-relaxed">
+                  Pensado para clínicas, spas y cadenas con múltiples sucursales.
+                </div>
+                <div className="text-xs text-sky-600 mt-3 font-medium group-hover:text-sky-700 transition-colors">
+                  Ver detalles del plan Studio →
+                </div>
               </div>
             </div>
           </Link>
