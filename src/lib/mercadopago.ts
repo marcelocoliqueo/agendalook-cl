@@ -9,6 +9,31 @@ export function isMercadoPagoSandbox(): boolean {
   return (process.env.MERCADOPAGO_IS_SANDBOX || 'false').toLowerCase() === 'true';
 }
 
+// Función para validar credenciales de producción
+export function validateProductionCredentials(): boolean {
+  const accessToken = process.env.MERCADOPAGO_ACCESS_TOKEN;
+  
+  if (!accessToken) {
+    console.error('❌ MERCADOPAGO_ACCESS_TOKEN no está configurado');
+    return false;
+  }
+  
+  // Verificar que sea una credencial de producción
+  if (!accessToken.startsWith('APP_USR-')) {
+    console.error('❌ Access Token no es de producción (debe empezar con APP_USR-)');
+    return false;
+  }
+  
+  // Verificar que no esté en modo sandbox para suscripciones
+  if (isMercadoPagoSandbox()) {
+    console.warn('⚠️ MERCADOPAGO_IS_SANDBOX está en true, pero las suscripciones requieren credenciales de producción');
+    return false;
+  }
+  
+  console.log('✅ Credenciales de producción validadas correctamente');
+  return true;
+}
+
 // Función para configurar MercadoPago
 function configureMercadoPago() {
   const accessToken = process.env.MERCADOPAGO_ACCESS_TOKEN;
@@ -27,9 +52,9 @@ function configureMercadoPago() {
     throw new Error('MERCADOPAGO_CLIENT_SECRET no está configurado');
   }
 
-  // Verificar formato del access token
-  if (!accessToken.startsWith('APP_USR-') && !accessToken.startsWith('TEST-')) {
-    throw new Error('Access Token no tiene el formato correcto (debe empezar con APP_USR- o TEST-)');
+  // Validar credenciales de producción para suscripciones
+  if (!validateProductionCredentials()) {
+    throw new Error('Las suscripciones requieren credenciales de producción válidas');
   }
 
   try {
@@ -144,8 +169,15 @@ export async function createSubscriptionPlan(planData: {
         currency_id: planData.currency,
       },
       payment_methods_allowed: {
-        payment_types: [{}], // Todos los tipos de pago
-        payment_methods: [{}] // Todos los métodos de pago
+        payment_types: [
+          { id: "credit_card" },
+          { id: "debit_card" }
+        ],
+        payment_methods: [
+          { id: "visa" },
+          { id: "master" },
+          { id: "amex" }
+        ]
       },
       back_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`
     };
@@ -174,6 +206,13 @@ export async function createSubscriptionWithPlan(subscriptionData: {
 }) {
   try {
     configureMercadoPago();
+    
+    // Validar que el email sea chileno para evitar errores de país
+    if (!subscriptionData.payerEmail.endsWith('.cl') && 
+        !subscriptionData.payerEmail.includes('@testuser.cl') &&
+        !subscriptionData.payerEmail.includes('@mercadopago.com')) {
+      console.warn('⚠️ Email no es chileno, puede causar errores de país:', subscriptionData.payerEmail);
+    }
     
     const preapproval = new PreApproval(mpConfig);
     
@@ -413,8 +452,15 @@ export async function testMercadoPagoConnection() {
       },
       back_url: 'https://example.com/success',
       payment_methods_allowed: {
-        payment_types: [{}],
-        payment_methods: [{}]
+        payment_types: [
+          { id: "credit_card" },
+          { id: "debit_card" }
+        ],
+        payment_methods: [
+          { id: "visa" },
+          { id: "master" },
+          { id: "amex" }
+        ]
       }
     };
     
