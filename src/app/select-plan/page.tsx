@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfessional } from '@/hooks/useProfessional';
@@ -63,7 +63,7 @@ const PLANS = {
 
 type PlanType = 'look' | 'pro' | 'studio';
 
-export default function SelectPlanPage() {
+function SelectPlanContent() {
   const [selectedPlan, setSelectedPlan] = useState<PlanType>('look');
   const [loading, setLoading] = useState(false);
   const [professional, setProfessional] = useState<any>(null);
@@ -308,5 +308,25 @@ export default function SelectPlanPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SelectPlanPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-white to-sky-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-sky-500 mx-auto mb-4"></div>
+          <h2 className="text-xl font-semibold text-slate-800 mb-2">
+            Cargando planes...
+          </h2>
+          <p className="text-slate-600">
+            Preparando las opciones para ti
+          </p>
+        </div>
+      </div>
+    }>
+      <SelectPlanContent />
+    </Suspense>
   );
 }
