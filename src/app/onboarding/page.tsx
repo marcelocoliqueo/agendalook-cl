@@ -2,75 +2,78 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
-import Link from 'next/link';
-import { CheckCircle, ArrowRight, ArrowLeft, Settings, Calendar, Users, Zap } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfessional } from '@/hooks/useProfessional';
+import { User, Building, Mail, Phone, MapPin, FileText, ArrowRight, Check } from 'lucide-react';
+import Image from 'next/image';
 
-interface OnboardingStep {
-  id: string;
-  title: string;
+interface OnboardingData {
+  name: string;
+  businessName: string;
+  phone: string;
+  address: string;
   description: string;
-  icon: any;
-  completed: boolean;
 }
+
+const onboardingSteps = [
+  { id: 'personal', title: 'Información Personal', icon: User },
+  { id: 'business', title: 'Información del Negocio', icon: Building },
+  { id: 'contact', title: 'Información de Contacto', icon: Phone },
+  { id: 'description', title: 'Descripción del Negocio', icon: FileText },
+];
 
 export default function OnboardingPage() {
   const [currentStep, setCurrentStep] = useState(0);
-  const [steps, setSteps] = useState<OnboardingStep[]>([
-    {
-      id: 'business-info',
-      title: 'Información del Negocio',
-      description: 'Completa los datos básicos de tu negocio',
-      icon: Settings,
-      completed: false
-    },
-    {
-      id: 'services',
-      title: 'Configurar Servicios',
-      description: 'Agrega los servicios que ofreces',
-      icon: Calendar,
-      completed: false
-    },
-    {
-      id: 'availability',
-      title: 'Horarios de Trabajo',
-      description: 'Define cuándo estás disponible',
-      icon: Users,
-      completed: false
-    },
-    {
-      id: 'finish',
-      title: '¡Listo para Comenzar!',
-      description: 'Tu negocio está configurado',
-      icon: Zap,
-      completed: false
-    }
-  ]);
   const [loading, setLoading] = useState(false);
+  const [onboardingData, setOnboardingData] = useState<OnboardingData>({
+    name: '',
+    businessName: '',
+    phone: '',
+    address: '',
+    description: '',
+  });
+  
   const router = useRouter();
   const { user } = useAuth();
-  const { getProfessionalByUserId } = useProfessional();
+  const { getProfessionalByUserId, updateProfessional } = useProfessional();
 
   useEffect(() => {
     if (!user) {
       router.push('/login');
       return;
     }
-  }, [user, router]);
+
+    // Cargar datos existentes del usuario
+    const loadUserData = async () => {
+      try {
+        const professional = await getProfessionalByUserId(user!.id);
+        if (professional) {
+          setOnboardingData({
+            name: user.user_metadata?.name || '',
+            businessName: professional.business_name || '',
+            phone: professional.phone || '',
+            address: professional.address || '',
+            description: professional.description || '',
+          });
+        }
+      } catch (error) {
+        console.error('Error loading user data:', error);
+      }
+    };
+
+    loadUserData();
+  }, [user, getProfessionalByUserId, router]);
+
+  const handleInputChange = (field: keyof OnboardingData, value: string) => {
+    setOnboardingData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
 
   const handleNext = () => {
-    if (currentStep < steps.length - 1) {
-      // Marcar paso actual como completado
-      const updatedSteps = [...steps];
-      updatedSteps[currentStep].completed = true;
-      setSteps(updatedSteps);
-      
+    if (currentStep < onboardingSteps.length - 1) {
       setCurrentStep(currentStep + 1);
-    } else {
-      // Finalizar onboarding
-      handleFinish();
     }
   };
 
@@ -80,338 +83,301 @@ export default function OnboardingPage() {
     }
   };
 
-  const handleFinish = async () => {
+  const handleComplete = async () => {
     setLoading(true);
     try {
-      // Marcar onboarding como completado
-      if (user) {
-        const prof = await getProfessionalByUserId(user.id);
-        if (prof) {
-          // Aquí podrías actualizar el estado de onboarding en la base de datos
-          console.log('Onboarding completado');
-        }
+      // Actualizar datos del usuario en Supabase
+      const professional = await getProfessionalByUserId(user!.id);
+      if (professional) {
+        await updateProfessional(professional.id, {
+          business_name: onboardingData.businessName,
+          phone: onboardingData.phone,
+          address: onboardingData.address,
+          description: onboardingData.description,
+        });
       }
-      
-      // Redirigir al dashboard
-      router.push('/dashboard');
+
+      // Redirigir a selección de plan
+      router.push('/select-plan');
     } catch (error) {
       console.error('Error completing onboarding:', error);
+    } finally {
       setLoading(false);
     }
   };
 
-  const handleSkip = () => {
-    router.push('/dashboard');
+  const isStepValid = () => {
+    switch (currentStep) {
+      case 0: // Personal
+        return onboardingData.name.trim() !== '';
+      case 1: // Business
+        return onboardingData.businessName.trim() !== '';
+      case 2: // Contact
+        return onboardingData.phone.trim() !== '';
+      case 3: // Description
+        return true; // Opcional
+      default:
+        return false;
+    }
   };
 
-  const getStepContent = () => {
+  const renderStepContent = () => {
     switch (currentStep) {
-      case 0:
+      case 0: // Personal
         return (
-          <div className="text-center">
-            <div className="w-16 h-16 bg-gradient-to-br from-primary-500 to-coral-500 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Settings className="w-8 h-8 text-white" />
-            </div>
-            <h3 className="text-2xl font-bold text-gray-800 mb-4">
-              Información del Negocio
-            </h3>
-            <p className="text-gray-600 mb-8">
-              Vamos a completar los datos básicos de tu negocio para que tus clientes puedan encontrarte.
-            </p>
-            
-            <div className="bg-white rounded-2xl p-6 shadow-lg mb-8">
-              <div className="space-y-4">
-                <div className="text-left">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Descripción del negocio
-                  </label>
-                  <textarea
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    rows={3}
-                    placeholder="Describe tu negocio, especialidades, experiencia..."
-                  />
-                </div>
-                
-                <div className="text-left">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Teléfono de contacto
-                  </label>
-                  <input
-                    type="tel"
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    placeholder="+56 9 1234 5678"
-                  />
-                </div>
-                
-                <div className="text-left">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Dirección
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    placeholder="Av. Providencia 123, Santiago"
-                  />
-                </div>
+          <div className="space-y-6">
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium text-slate-700 mb-2">
+                Tu nombre completo
+              </label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+                <input
+                  id="name"
+                  type="text"
+                  value={onboardingData.name}
+                  onChange={(e) => handleInputChange('name', e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                  placeholder="Ej: María González"
+                  autoComplete="name"
+                />
               </div>
             </div>
           </div>
         );
-        
-      case 1:
+
+      case 1: // Business
         return (
-          <div className="text-center">
-            <div className="w-16 h-16 bg-gradient-to-br from-primary-500 to-coral-500 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Calendar className="w-8 h-8 text-white" />
-            </div>
-            <h3 className="text-2xl font-bold text-gray-800 mb-4">
-              Configurar Servicios
-            </h3>
-            <p className="text-gray-600 mb-8">
-              Agrega los servicios que ofreces con sus precios y duración.
-            </p>
-            
-            <div className="bg-white rounded-2xl p-6 shadow-lg mb-8">
-              <div className="space-y-4">
-                <div className="text-left">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Nombre del servicio
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    placeholder="Ej: Corte de cabello"
-                  />
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-left">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Duración (minutos)
-                    </label>
-                    <input
-                      type="number"
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                      placeholder="30"
-                    />
-                  </div>
-                  
-                  <div className="text-left">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Precio (CLP)
-                    </label>
-                    <input
-                      type="number"
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                      placeholder="15000"
-                    />
-                  </div>
-                </div>
-                
-                <button className="w-full bg-gray-100 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-colors">
-                  + Agregar otro servicio
-                </button>
+          <div className="space-y-6">
+            <div>
+              <label htmlFor="businessName" className="block text-sm font-medium text-slate-700 mb-2">
+                Nombre de tu negocio
+              </label>
+              <div className="relative">
+                <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+                <input
+                  id="businessName"
+                  type="text"
+                  value={onboardingData.businessName}
+                  onChange={(e) => handleInputChange('businessName', e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                  placeholder="Ej: Nails by Carla"
+                  autoComplete="organization"
+                />
               </div>
             </div>
           </div>
         );
-        
-      case 2:
+
+      case 2: // Contact
         return (
-          <div className="text-center">
-            <div className="w-16 h-16 bg-gradient-to-br from-primary-500 to-coral-500 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Users className="w-8 h-8 text-white" />
+          <div className="space-y-6">
+            <div>
+              <label htmlFor="phone" className="block text-sm font-medium text-slate-700 mb-2">
+                Teléfono de contacto
+              </label>
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+                <input
+                  id="phone"
+                  type="tel"
+                  value={onboardingData.phone}
+                  onChange={(e) => handleInputChange('phone', e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                  placeholder="+56 9 1234 5678"
+                  autoComplete="tel"
+                />
+              </div>
             </div>
-            <h3 className="text-2xl font-bold text-gray-800 mb-4">
-              Horarios de Trabajo
-            </h3>
-            <p className="text-gray-600 mb-8">
-              Define cuándo estás disponible para recibir citas.
-            </p>
             
-            <div className="bg-white rounded-2xl p-6 shadow-lg mb-8">
-              <div className="space-y-4">
-                <div className="text-left">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Días de trabajo
-                  </label>
-                  <div className="grid grid-cols-7 gap-2">
-                    {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map((day) => (
-                      <button
-                        key={day}
-                        className="p-2 border border-gray-300 rounded-lg hover:bg-primary-50 hover:border-primary-500 transition-colors"
-                      >
-                        {day}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-left">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Hora de inicio
-                    </label>
-                    <input
-                      type="time"
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                      defaultValue="09:00"
-                    />
-                  </div>
-                  
-                  <div className="text-left">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Hora de fin
-                    </label>
-                    <input
-                      type="time"
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                      defaultValue="18:00"
-                    />
-                  </div>
-                </div>
+            <div>
+              <label htmlFor="address" className="block text-sm font-medium text-slate-700 mb-2">
+                Dirección (opcional)
+              </label>
+              <div className="relative">
+                <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+                <input
+                  id="address"
+                  type="text"
+                  value={onboardingData.address}
+                  onChange={(e) => handleInputChange('address', e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                  placeholder="Ej: Av. Providencia 123, Santiago"
+                  autoComplete="address"
+                />
               </div>
             </div>
           </div>
         );
-        
-      case 3:
+
+      case 3: // Description
         return (
-          <div className="text-center">
-            <div className="w-16 h-16 bg-gradient-to-br from-primary-500 to-coral-500 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Zap className="w-8 h-8 text-white" />
-            </div>
-            <h3 className="text-2xl font-bold text-gray-800 mb-4">
-              ¡Listo para Comenzar!
-            </h3>
-            <p className="text-gray-600 mb-8">
-              Tu negocio está configurado y listo para recibir citas. Puedes personalizar más opciones desde tu dashboard.
-            </p>
-            
-            <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl p-6 shadow-lg mb-8">
-              <div className="space-y-4">
-                <div className="flex items-center">
-                  <CheckCircle className="w-6 h-6 text-green-500 mr-3" />
-                  <span className="text-gray-700">Información del negocio completada</span>
-                </div>
-                <div className="flex items-center">
-                  <CheckCircle className="w-6 h-6 text-green-500 mr-3" />
-                  <span className="text-gray-700">Servicios configurados</span>
-                </div>
-                <div className="flex items-center">
-                  <CheckCircle className="w-6 h-6 text-green-500 mr-3" />
-                  <span className="text-gray-700">Horarios definidos</span>
-                </div>
+          <div className="space-y-6">
+            <div>
+              <label htmlFor="description" className="block text-sm font-medium text-slate-700 mb-2">
+                Descripción de tu negocio (opcional)
+              </label>
+              <div className="relative">
+                <FileText className="absolute left-3 top-3 text-slate-400 w-5 h-5" />
+                <textarea
+                  id="description"
+                  value={onboardingData.description}
+                  onChange={(e) => handleInputChange('description', e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent resize-none"
+                  placeholder="Cuéntanos sobre tu negocio, servicios que ofreces, etc."
+                  rows={4}
+                />
               </div>
             </div>
           </div>
         );
-        
+
       default:
         return null;
     }
   };
 
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-sky-500"></div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-lavender-50 via-white to-coral-50">
-      {/* Header */}
-      <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-sky-50">
+      <div className="max-w-2xl mx-auto px-4 py-12">
+        {/* Header */}
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center justify-center mb-6">
+          <div className="w-32 h-9 flex items-center justify-center mx-auto mb-6">
             <Image
               src="/logo-main.png"
               alt="Agendalook"
-              width={160}
-              height={45}
-              className="w-40 h-11 object-contain"
+              width={128}
+              height={36}
+              className="w-32 h-9 object-contain"
             />
-          </Link>
-        </div>
-
-        {/* Progress Bar */}
-        <div className="max-w-4xl mx-auto mb-8">
-          <div className="flex items-center justify-between mb-4">
-            {steps.map((step, index) => (
-              <div key={step.id} className="flex items-center">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
-                  index < currentStep 
-                    ? 'bg-green-500 text-white' 
-                    : index === currentStep 
-                    ? 'bg-primary-500 text-white' 
-                    : 'bg-gray-200 text-gray-500'
-                }`}>
-                  {index < currentStep ? (
-                    <CheckCircle className="w-5 h-5" />
-                  ) : (
-                    index + 1
-                  )}
-                </div>
-                {index < steps.length - 1 && (
-                  <div className={`w-16 h-1 mx-2 ${
-                    index < currentStep ? 'bg-green-500' : 'bg-gray-200'
-                  }`} />
-                )}
-              </div>
-            ))}
           </div>
           
-          <div className="text-center">
-            <h2 className="text-xl font-semibold text-gray-800">
-              Paso {currentStep + 1} de {steps.length}
-            </h2>
-            <p className="text-gray-600">
-              {steps[currentStep].title}
-            </p>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent mb-2">
+            ¡Completa tu perfil!
+          </h1>
+          <p className="text-slate-600">
+            Solo necesitamos algunos datos más para personalizar tu experiencia
+          </p>
+        </div>
+
+        {/* Progress Steps */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            {onboardingSteps.map((step, index) => {
+              const Icon = step.icon;
+              const isActive = index === currentStep;
+              const isCompleted = index < currentStep;
+              
+              return (
+                <div key={step.id} className="flex flex-col items-center">
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 transition-all duration-300 ${
+                    isCompleted 
+                      ? 'bg-green-500 text-white' 
+                      : isActive 
+                        ? 'bg-sky-500 text-white' 
+                        : 'bg-slate-200 text-slate-500'
+                  }`}>
+                    {isCompleted ? (
+                      <Check className="w-6 h-6" />
+                    ) : (
+                      <Icon className="w-6 h-6" />
+                    )}
+                  </div>
+                  <span className={`text-xs font-medium ${
+                    isActive ? 'text-sky-600' : isCompleted ? 'text-green-600' : 'text-slate-500'
+                  }`}>
+                    {step.title}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+          
+          {/* Progress Bar */}
+          <div className="w-full bg-slate-200 rounded-full h-2">
+            <div 
+              className="bg-gradient-to-r from-sky-500 to-sky-600 h-2 rounded-full transition-all duration-500"
+              style={{ width: `${((currentStep + 1) / onboardingSteps.length) * 100}%` }}
+            />
           </div>
         </div>
 
         {/* Step Content */}
-        <div className="max-w-2xl mx-auto">
-          {getStepContent()}
-          
-          {/* Navigation */}
-          <div className="flex justify-between items-center">
-            <button
-              onClick={handlePrevious}
-              disabled={currentStep === 0}
-              className="flex items-center text-gray-600 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <ArrowLeft className="w-5 h-5 mr-2" />
-              Anterior
-            </button>
-            
-            <button
-              onClick={handleSkip}
-              className="text-gray-500 hover:text-gray-700 text-sm"
-            >
-              Saltar por ahora
-            </button>
-            
+        <div className="bg-white rounded-3xl shadow-xl p-8 border border-slate-200 mb-8">
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-slate-800 mb-2">
+              {onboardingSteps[currentStep].title}
+            </h2>
+            <p className="text-slate-600">
+              {currentStep === 0 && 'Cuéntanos cómo te llamas'}
+              {currentStep === 1 && '¿Cómo se llama tu negocio?'}
+              {currentStep === 2 && '¿Cómo pueden contactarte tus clientes?'}
+              {currentStep === 3 && 'Describe brevemente tu negocio'}
+            </p>
+          </div>
+
+          {renderStepContent()}
+        </div>
+
+        {/* Navigation */}
+        <div className="flex justify-between">
+          <button
+            onClick={handlePrevious}
+            disabled={currentStep === 0}
+            className={`px-6 py-3 rounded-2xl font-semibold transition-all duration-300 ${
+              currentStep === 0
+                ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
+            }`}
+          >
+            Anterior
+          </button>
+
+          {currentStep < onboardingSteps.length - 1 ? (
             <button
               onClick={handleNext}
-              disabled={loading}
-              className="bg-gradient-to-r from-primary-500 to-coral-500 text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+              disabled={!isStepValid()}
+              className={`px-6 py-3 rounded-2xl font-semibold transition-all duration-300 ${
+                isStepValid()
+                  ? 'bg-sky-500 text-white hover:bg-sky-600'
+                  : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+              }`}
+            >
+              Siguiente
+            </button>
+          ) : (
+            <button
+              onClick={handleComplete}
+              disabled={loading || !isStepValid()}
+              className={`px-6 py-3 rounded-2xl font-semibold transition-all duration-300 ${
+                loading || !isStepValid()
+                  ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-sky-500 to-sky-600 text-white hover:from-sky-600 hover:to-sky-700'
+              }`}
             >
               {loading ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Procesando...
-                </>
-              ) : currentStep === steps.length - 1 ? (
-                <>
-                  ¡Comenzar!
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </>
+                <div className="flex items-center space-x-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  <span>Completando...</span>
+                </div>
               ) : (
-                <>
-                  Siguiente
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </>
+                <div className="flex items-center space-x-2">
+                  <span>Finalizar</span>
+                  <ArrowRight className="w-4 h-4" />
+                </div>
               )}
             </button>
-          </div>
+          )}
         </div>
       </div>
     </div>
   );
-} 
+}

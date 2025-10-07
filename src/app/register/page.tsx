@@ -9,10 +9,9 @@ import { MarketingLayout } from '@/components/layout/MarketingLayout';
 import { LoginButton } from '@/components/ui/AuthButtons';
 import { PasswordStrength } from '@/components/ui/PasswordStrength';
 import { validatePasswordSecurity } from '@/lib/password-security';
+import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
 
 interface FormData {
-  name: string;
-  businessName: string;
   email: string;
   password: string;
   confirmPassword: string;
@@ -26,8 +25,6 @@ interface Message {
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState<FormData>({
-    name: '',
-    businessName: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -88,8 +85,6 @@ export default function RegisterPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: formData.name,
-          businessName: formData.businessName,
           email: formData.email,
           password: formData.password,
         }),
@@ -105,8 +100,6 @@ export default function RegisterPage() {
         
         // Limpiar formulario
         setFormData({
-          name: '',
-          businessName: '',
           email: '',
           password: '',
           confirmPassword: '',
@@ -155,47 +148,30 @@ export default function RegisterPage() {
 
           {/* Register Form */}
           <div className="bg-white rounded-2xl sm:rounded-3xl shadow-xl p-6 sm:p-8 border border-slate-200">
+            {/* Google Sign In */}
+            <div className="mb-6">
+              <GoogleSignInButton 
+                mode="signup"
+                onSuccess={() => {
+                  console.log('Google signup successful');
+                }}
+                onError={(error) => {
+                  setError(`Error con Google: ${error}`);
+                }}
+              />
+            </div>
+
+            {/* Divider */}
+            <div className="relative mb-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-slate-300" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-slate-500">o regístrate con email</span>
+              </div>
+            </div>
+
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-slate-700 mb-2">
-                  Nombre completo
-                </label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
-                  <input
-                    id="name"
-                    name="name"
-                    type="text"
-                    value={formData.name}
-                    onChange={handleChange}
-                    className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
-                    placeholder="Tu nombre completo"
-                    autoComplete="name"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label htmlFor="businessName" className="block text-sm font-medium text-slate-700 mb-2">
-                  Nombre del negocio
-                </label>
-                <div className="relative">
-                  <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
-                  <input
-                    id="businessName"
-                    name="businessName"
-                    type="text"
-                    value={formData.businessName}
-                    onChange={handleChange}
-                    className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
-                    placeholder="Ej: Nails by Carla"
-                    autoComplete="organization"
-                    required
-                  />
-                </div>
-              </div>
-
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-2">
                   Correo electrónico

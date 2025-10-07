@@ -132,7 +132,7 @@ export default function WelcomePage() {
   }, [bootstrapping, authLoading, user, router, getProfessionalByUserId, createProfessional, supabase]);
 
   const handleContinue = () => {
-    router.push('/select-plan');
+    router.push('/onboarding');
   };
 
   return (

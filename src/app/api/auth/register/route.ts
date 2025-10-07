@@ -12,9 +12,9 @@ function slugify(businessName: string): string {
 
 export async function POST(request: NextRequest) {
   try {
-    const { name, businessName, email, password } = await request.json();
+    const { email, password } = await request.json();
 
-    if (!name || !businessName || !email || !password) {
+    if (!email || !password) {
       return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 });
     }
 
@@ -46,7 +46,10 @@ export async function POST(request: NextRequest) {
     const { data: userData, error: createUserError } = await (service as any).auth.admin.createUser({
       email,
       password,
-      user_metadata: { name, business_name: businessName },
+      user_metadata: { 
+        name: email.split('@')[0], // Usar parte del email como nombre temporal
+        business_name: 'Mi Negocio' // Nombre temporal, se actualizará en onboarding
+      },
       email_confirm: false,
     });
 
@@ -56,7 +59,8 @@ export async function POST(request: NextRequest) {
 
     const userId = userData.user.id as string;
 
-    // 2) Crear profesional
+    // 2) Crear profesional con datos temporales
+    const businessName = 'Mi Negocio';
     const business_slug = slugify(businessName);
     const { error: profError } = await service.from('professionals').insert([
       {
@@ -67,7 +71,7 @@ export async function POST(request: NextRequest) {
         phone: '',
         description: '',
         address: '',
-        plan: 'free',
+        plan: 'look', // Plan por defecto
       },
     ]);
 
