@@ -181,7 +181,7 @@ export async function createSubscriptionWithPlan(subscriptionData: {
       preapproval_plan_id: subscriptionData.planId,
       reason: `Plan ${subscriptionData.planName} Agendalook`,
       external_reference: `subscription_${subscriptionData.plan}_${subscriptionData.customerId}`,
-      payer_email: isMercadoPagoSandbox() ? 'test@testuser.cl' : subscriptionData.payerEmail,
+      payer_email: subscriptionData.payerEmail,
       card_token_id: subscriptionData.cardTokenId,
       auto_recurring: {
         frequency: 1,
