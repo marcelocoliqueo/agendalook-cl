@@ -10,6 +10,12 @@
       "maxDuration": 30
     }
   },
+  "rewrites": [
+    {
+      "source": "/select-plan",
+      "destination": "/select-plan"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
