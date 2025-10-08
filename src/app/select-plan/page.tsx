@@ -1,6 +1,10 @@
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
+
+// Forzar renderizado dinámico para evitar prerenderizado
+export const dynamic = 'force-dynamic';
+
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfessional } from '@/hooks/useProfessional';
