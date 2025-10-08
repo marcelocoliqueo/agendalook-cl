@@ -97,7 +97,47 @@ export function useGoogleAuthCallback() {
         const isNewUser = data.session.user.created_at === data.session.user.updated_at;
         
         if (isNewUser) {
-          // Usuario nuevo - redirigir a selección de plan
+          // Usuario nuevo - crear perfil profesional básico
+          console.log('🔄 Creating professional profile for new Google user');
+          
+          try {
+            const businessName = data.session.user.user_metadata?.full_name || 
+                               data.session.user.email?.split('@')[0] || 
+                               'Mi Negocio';
+            const business_slug = businessName.toLowerCase()
+              .replace(/[^a-z0-9]+/g, '-')
+              .replace(/(^-|-$)/g, '');
+            
+            // Crear perfil profesional usando el service role
+            const response = await fetch('/api/auth/create-professional-profile', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                userId: data.session.user.id,
+                businessName,
+                business_slug,
+                email: data.session.user.email,
+                phone: '',
+                description: '',
+                address: '',
+                plan: 'look', // Plan por defecto
+              }),
+            });
+
+            if (!response.ok) {
+              console.error('Error creating professional profile:', await response.text());
+              // Continuar de todas formas, el usuario puede completar el perfil después
+            } else {
+              console.log('✅ Professional profile created successfully');
+            }
+          } catch (profileError) {
+            console.error('Error creating professional profile:', profileError);
+            // Continuar de todas formas
+          }
+          
+          // Redirigir a selección de plan
           router.push('/select-plan?source=google');
         } else {
           // Usuario existente - redirigir al dashboard
