@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient as createServiceClient } from '@supabase/supabase-js';
 import { ResendService } from '@/lib/resend-service';
+import { waitlistConfig } from '@/lib/waitlist-config';
 import { issueCode } from '@/lib/verification';
 
 function slugify(businessName: string): string {
@@ -16,6 +17,12 @@ export async function POST(request: NextRequest) {
 
     if (!email || !password) {
       return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 });
+    }
+
+    // Verificar configuración de waitlist
+    const redirectMessage = waitlistConfig.getRedirectMessage(email);
+    if (redirectMessage) {
+      return NextResponse.json(redirectMessage, { status: 403 });
     }
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
