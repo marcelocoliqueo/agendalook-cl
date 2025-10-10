@@ -27,7 +27,7 @@ export const waitlistConfig = {
   
   // Función para obtener el mensaje de redirección
   getRedirectMessage: (email: string) => {
-    if (canRegister(email)) {
+    if (waitlistConfig.canRegister(email)) {
       return null; // No redirigir
     }
     
