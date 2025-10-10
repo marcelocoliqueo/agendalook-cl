@@ -111,11 +111,6 @@ export default function RegisterPage() {
           router.push(`/verify-code?email=${encodeURIComponent(formData.email)}`);
         }, 2000);
       } else {
-        // Si es redirección a waitlist
-        if (data.waitlist && data.redirect) {
-          router.push(data.redirect);
-          return;
-        }
         setError(data.error || 'Error al crear la cuenta');
       }
     } catch (error) {

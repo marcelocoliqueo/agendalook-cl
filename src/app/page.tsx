@@ -8,14 +8,10 @@ import { Testimonio } from '@/components/marketing/Testimonio';
 import { Precios } from '@/components/marketing/Precios';
 import { Contacto } from '@/components/marketing/Contacto';
 import { Footer } from '@/components/marketing/Footer';
-import { WaitlistBanner } from '@/components/marketing/WaitlistBanner';
 
 export default function Home() {
   return (
     <div className="antialiased text-slate-800 bg-[var(--bg)]">
-      {/* Waitlist Banner */}
-      <WaitlistBanner />
-      
       {/* Navbar */}
       <Navbar />
       
