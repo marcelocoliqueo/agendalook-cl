@@ -258,4 +258,77 @@ export class ResendService {
       throw error;
     }
   }
+
+  async sendWaitlistConfirmation(data: {
+    email: string;
+    name: string;
+    position: number;
+    referralCode: string;
+  }) {
+    try {
+      if (!resend) {
+        console.warn('⚠️ Resend no configurado. No se envía confirmación de waitlist.');
+        return null;
+      }
+
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+      
+      const bodyHtml = `
+        <div style="text-align:center; margin-bottom:24px;">
+          <div style="background:linear-gradient(135deg, #0ea5e9, #0284c7); color:white; padding:16px; border-radius:12px; margin-bottom:16px;">
+            <div style="font-size:32px; font-weight:700; margin-bottom:4px;">#${data.position}</div>
+            <div style="font-size:14px; opacity:0.9;">Tu posición en la lista de espera</div>
+          </div>
+        </div>
+        
+        <div style="background:#f8fafc; padding:16px; border-radius:8px; margin-bottom:16px;">
+          <h3 style="margin:0 0 12px 0; font-size:16px; color:#1e293b;">¿Qué obtienes al estar en la lista?</h3>
+          <ul style="margin:0; padding-left:16px; color:#475569;">
+            <li style="margin-bottom:8px;">🚀 <strong>Acceso prioritario</strong> cuando esté listo</li>
+            <li style="margin-bottom:8px;">🎁 <strong>50% de descuento</strong> en el primer año</li>
+            <li style="margin-bottom:8px;">📧 <strong>Updates exclusivos</strong> sobre el desarrollo</li>
+            <li style="margin-bottom:8px;">👥 <strong>Comunidad privada</strong> de early adopters</li>
+          </ul>
+        </div>
+        
+        <div style="text-align:center; margin:16px 0;">
+          <p style="margin:0; font-size:14px; color:#64748b;">
+            <strong>Código de referido:</strong> <code style="background:#e2e8f0; padding:4px 8px; border-radius:4px; font-family:monospace;">${data.referralCode}</code>
+          </p>
+          <p style="margin:8px 0 0 0; font-size:12px; color:#94a3b8;">
+            Comparte este código para que otros se unan y ambos obtengan beneficios
+          </p>
+        </div>
+      `;
+
+      const html = renderBaseEmail({
+        preheader: `Te has unido a la lista de espera de Agendalook. Posición #${data.position}.`,
+        title: `¡Bienvenido a la lista de espera, ${data.name}!`,
+        intro: 'Gracias por tu interés en Agendalook. Te mantendremos informado sobre nuestro progreso.',
+        bodyHtml,
+        action: { 
+          label: 'Ver estado de la lista', 
+          url: `${appUrl}/waitlist` 
+        },
+        footerNote: '© 2025 Agendalook.cl — Tu cita, tu estilo'
+      });
+
+      const { data: result, error } = await resend.emails.send({
+        from: 'Agendalook <onboarding@resend.dev>',
+        to: [data.email],
+        subject: `🎉 ¡Estás en la lista de espera! Posición #${data.position} - Agendalook`,
+        html,
+        text: `¡Bienvenido a la lista de espera de Agendalook!\n\nHola ${data.name},\n\nTe has unido exitosamente a nuestra lista de espera.\n\nTu posición: #${data.position}\nCódigo de referido: ${data.referralCode}\n\n¿Qué obtienes?\n- Acceso prioritario cuando esté listo\n- 50% de descuento en el primer año\n- Updates exclusivos sobre el desarrollo\n- Comunidad privada de early adopters\n\nComparte tu código de referido para que otros se unan y ambos obtengan beneficios.\n\nVisita: ${appUrl}/waitlist\n\n© 2025 Agendalook.cl — Tu cita, tu estilo`,
+      });
+
+      if (error) {
+        console.error('❌ Error sending waitlist confirmation:', error);
+        throw error;
+      }
+      return result;
+    } catch (error) {
+      console.error('Error in sendWaitlistConfirmation:', error);
+      throw error;
+    }
+  }
 }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient as createServiceClient } from '@supabase/supabase-js';
+import { ResendService } from '@/lib/resend-service';
 
 export async function POST(request: NextRequest) {
   try {
@@ -68,12 +69,18 @@ export async function POST(request: NextRequest) {
       }, { status: 500 });
     }
 
-    // Enviar email de confirmación (opcional)
+    // Enviar email de confirmación
     try {
-      // Aquí podrías integrar con Resend para enviar email de confirmación
-      console.log(`✅ User ${email} added to waitlist at position ${newUser.position}`);
+      const resend = new ResendService();
+      await resend.sendWaitlistConfirmation({
+        email,
+        name,
+        position: newUser.position,
+        referralCode: newUser.referral_code
+      });
+      console.log(`✅ Email de confirmación enviado a ${email}`);
     } catch (emailError) {
-      console.warn('Email notification failed:', emailError);
+      console.warn('Email de confirmación falló:', emailError);
       // No fallar por error de email
     }
 
