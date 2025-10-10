@@ -16,6 +16,17 @@ export const metadata: Metadata = {
   authors: [{ name: 'Agendalook' }],
   creator: 'Agendalook',
   publisher: 'Agendalook',
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/favicon.jpeg', type: 'image/jpeg' },
+      { url: '/favicon.png', type: 'image/png' },
+      { url: '/favicon.svg', type: 'image/svg+xml' }
+    ],
+    apple: [
+      { url: '/logo-compact.png', sizes: '180x180' }
+    ]
+  },
   formatDetection: {
     email: false,
     address: false,
