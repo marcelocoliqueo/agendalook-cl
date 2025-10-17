@@ -50,7 +50,7 @@ professionals (
   phone TEXT,
   description TEXT,
   address TEXT,
-  plan TEXT DEFAULT 'free',
+  plan TEXT DEFAULT 'look',
   -- ... otros campos
 )
 ```

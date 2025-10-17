@@ -8,11 +8,12 @@ import { useServices } from '@/hooks/useServices';
 import { Professional, Booking } from '@/types';
 import { Calendar, Clock, TrendingUp, Sparkles, Activity, Settings, Shield, Plus } from 'lucide-react';
 import { PlanAlert } from '@/components/ui/PlanAlert';
+import { TrialBanner } from '@/components/ui/TrialBanner';
 import { PeriodFilter, PeriodType } from '@/components/ui/PeriodFilter';
 import { getCurrentPlan, getUsageProgress } from '@/lib/plans';
 import { downloadPDF } from '@/lib/pdf-generator';
 import { FullPageLoader } from '@/components/ui/LoadingSpinner';
-import { format, isWithinInterval } from 'date-fns';
+import { format, isWithinInterval, differenceInDays } from 'date-fns';
 import { es } from 'date-fns/locale';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -28,6 +29,8 @@ export default function DashboardPage() {
   const [periodStart, setPeriodStart] = useState<Date>(new Date());
   const [periodEnd, setPeriodEnd] = useState<Date>(new Date());
   const [error, setError] = useState<string | null>(null);
+  const [trialDaysRemaining, setTrialDaysRemaining] = useState<number | null>(null);
+  const [showTrialBanner, setShowTrialBanner] = useState(false);
   
   const { user } = useAuth();
   const { getProfessionalByUserId } = useProfessional();
@@ -65,7 +68,9 @@ export default function DashboardPage() {
             address: '',
             plan: 'studio',
             created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
+            updated_at: new Date().toISOString(),
+            trial_start_date: new Date().toISOString(),
+            onboarding_completed: true
           });
           setAllBookings([]);
           setServices([]);
@@ -77,12 +82,39 @@ export default function DashboardPage() {
         
         if (!profData) {
           console.log('No professional found for user');
-          setError('No se encontró el perfil profesional. Por favor, completa tu registro.');
-          setLoading(false);
+          // Redirigir al setup si no tiene perfil
+          router.push('/setup/business-slug');
+          return;
+        }
+
+        // Verificar que completó el setup
+        if (!profData.business_slug || !('trial_start_date' in profData && profData.trial_start_date)) {
+          console.log('Setup incomplete, redirecting...');
+          if (!profData.business_slug) {
+            router.push('/setup/business-slug');
+          } else if (!('trial_start_date' in profData && profData.trial_start_date)) {
+            router.push('/setup/business-info');
+          }
           return;
         }
 
         setProfessional(profData);
+        
+        // Calcular días restantes del trial si está en trial
+        if ('subscription_status' in profData && profData.subscription_status === 'trial' && 'trial_end_date' in profData && profData.trial_end_date) {
+          const now = new Date();
+          const endDate = new Date(profData.trial_end_date);
+          const daysLeft = differenceInDays(endDate, now);
+          
+          if (daysLeft >= 0) {
+            setTrialDaysRemaining(daysLeft);
+            setShowTrialBanner(true);
+          } else {
+            // Trial expirado, redirigir a pago
+            router.push(`/payment?plan=${profData.plan || 'look'}`);
+            return;
+          }
+        }
         
         // Cargar estadísticas de uso
         console.log('Loading bookings and services for professional:', profData.id);
@@ -351,6 +383,15 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8">
+      {/* Trial Banner */}
+      {showTrialBanner && trialDaysRemaining !== null && (
+        <TrialBanner
+          daysRemaining={trialDaysRemaining}
+          onUpgrade={() => router.push(`/payment?plan=${professional?.plan || 'look'}`)}
+          plan={professional?.plan || 'look'}
+        />
+      )}
+
       {/* Header */}
       <div className="text-center sm:text-left">
         <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
@@ -545,7 +586,7 @@ export default function DashboardPage() {
       )}
 
       {/* Plan Alert */}
-      {professional?.plan === 'free' && (
+      {professional?.plan === 'look' && (
         <PlanAlert 
           plan={professional.plan}
           currentBookings={filteredBookings.length}

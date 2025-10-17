@@ -41,13 +41,8 @@ export function usePlanManagement() {
     setSelectedPlan(plan);
     setIsLoading(true);
     try {
-      if (plan.id === 'free') {
-        console.log('Plan gratuito seleccionado');
-        router.push('/onboarding');
-      } else {
-        console.log(`Plan ${plan.name} seleccionado`);
-        router.push(`/payment?plan=${plan.id}`);
-      }
+      console.log(`Plan ${plan.name} seleccionado`);
+      router.push(`/payment?plan=${plan.id}`);
     } catch (error) {
       console.error('Error al seleccionar el plan:', error);
     } finally {

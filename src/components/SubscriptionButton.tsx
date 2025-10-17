@@ -52,7 +52,7 @@ export default function SubscriptionButton({
   };
 
   const isCurrentPlan = currentPlan === plan;
-  const isUpgrade = currentPlan === 'free' || (currentPlan === 'pro' && plan === 'studio');
+  const isUpgrade = currentPlan === 'look' || (currentPlan === 'pro' && plan === 'studio');
 
   return (
     <div className="inline-flex flex-col">

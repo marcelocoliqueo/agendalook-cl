@@ -120,11 +120,11 @@ export async function handleTrialExpiration(userId: string): Promise<void> {
 
     const supabase = createServiceClient(supabaseUrl, serviceKey);
 
-    // Actualizar el profesional a plan free cuando expire el trial
+    // Actualizar el profesional a plan look cuando expire el trial
     const { error } = await supabase
       .from('professionals')
       .update({
-        plan: 'free',
+        plan: 'look',
         subscription_status: 'cancelled',
         trial_end_date: null
       })

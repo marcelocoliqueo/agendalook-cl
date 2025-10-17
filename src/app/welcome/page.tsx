@@ -91,6 +91,7 @@ export default function WelcomePage() {
         }
         return;
       }
+      
       try {
         if (!user) {
           console.error('No hay usuario disponible');
@@ -98,41 +99,40 @@ export default function WelcomePage() {
           return;
         }
         
+        // Verificar si ya tiene perfil profesional
         let prof = await getProfessionalByUserId(user.id);
-        if (!prof) {
-          const businessName = (user as any)?.user_metadata?.business_name || user.email?.split('@')[0] || 'Mi negocio';
-          const business_slug = slugify(businessName);
-          prof = await createProfessional({
-            user_id: user.id,
-            business_name: businessName,
-            business_slug,
-            phone: '',
-            email: user.email || '',
-            description: '',
-            address: '',
-            plan: 'free',
-            role: 'user',
-            subscription_status: 'none',
-          } as any);
-          try {
-            // Usar la variable supabase que ya está disponible en el scope del componente
-            await supabase.auth.updateUser({ data: { ...(user as any)?.user_metadata, onboarded: true } });
-          } catch {}
+        
+        // Si ya tiene perfil Y completó onboarding, redirigir al dashboard
+        if (prof && 'onboarding_completed' in prof && prof.onboarding_completed) {
+          router.push('/dashboard');
+          return;
         }
-        setProfessional(prof);
+        
+        // Si tiene perfil pero no completó onboarding, verificar en qué paso está
+        if (prof) {
+          if (!prof.business_slug) {
+            router.push('/setup/business-slug');
+            return;
+          }
+          if (!('trial_start_date' in prof) || !prof.trial_start_date) {
+            router.push('/setup/business-info');
+            return;
+          }
+        }
+        
+        // Si no tiene perfil, guardar datos mínimos para continuar el flujo
+        setProfessional(prof || { email: user.email });
       } catch (error) {
         console.error('Error fetching professional:', error);
-        router.push('/dashboard');
-        return;
       } finally {
         setLoading(false);
       }
     };
     proceed();
-  }, [bootstrapping, authLoading, user, router, getProfessionalByUserId, createProfessional, supabase]);
+  }, [bootstrapping, authLoading, user, router, getProfessionalByUserId, supabase]);
 
   const handleContinue = () => {
-    router.push('/onboarding');
+    router.push('/select-plan');
   };
 
   return (
@@ -158,8 +158,8 @@ export default function WelcomePage() {
               </p>
             </div>
 
-            {/* Business Info */}
-            {professional && (
+            {/* User Info */}
+            {professional && professional.email && (
               <div className="bg-gradient-to-br from-sky-50 to-emerald-50 rounded-2xl p-6 mb-8 border border-sky-200">
                 <div className="flex items-center space-x-4 mb-4">
                   <div className="w-12 h-12 bg-gradient-to-br from-sky-500 to-sky-600 rounded-xl flex items-center justify-center">
@@ -167,39 +167,10 @@ export default function WelcomePage() {
                   </div>
                   <div>
                     <h2 className="text-xl font-semibold text-slate-800">
-                      {professional.business_name}
+                      {professional.email}
                     </h2>
                     <p className="text-slate-600">
-                      Negocio configurado y listo para usar
-                    </p>
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="bg-white rounded-xl p-4 border border-sky-200">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <Calendar className="w-5 h-5 text-sky-600" />
-                      <span className="font-medium text-slate-800">Plan Actual</span>
-                    </div>
-                    <p className="text-2xl font-bold text-sky-600 capitalize">
-                      {professional.plan}
-                    </p>
-                  </div>
-                  <div className="bg-white rounded-xl p-4 border border-sky-200">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <Zap className="w-5 h-5 text-emerald-600" />
-                      <span className="font-medium text-slate-800">Estado</span>
-                    </div>
-                    <p className="text-2xl font-bold text-emerald-600">
-                      Activo
-                    </p>
-                  </div>
-                  <div className="bg-white rounded-xl p-4 border border-sky-200">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <Sparkles className="w-5 h-5 text-purple-600" />
-                      <span className="font-medium text-slate-800">Próximo Paso</span>
-                    </div>
-                    <p className="text-lg font-semibold text-purple-600">
-                      Elegir Plan
+                      ¡Cuenta verificada exitosamente!
                     </p>
                   </div>
                 </div>
@@ -234,27 +205,20 @@ export default function WelcomePage() {
                   </div>
                 </button>
 
-                <Link
-                  href="/dashboard"
-                  className="group p-6 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl text-white text-left hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
-                >
+                <div className="group p-6 bg-gradient-to-br from-slate-100 to-slate-200 rounded-2xl text-slate-500 text-left border-2 border-dashed border-slate-300">
                   <div className="flex items-center space-x-4 mb-3">
-                    <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center group-hover:bg-white/30 transition-colors">
-                      <Calendar className="w-6 h-6 text-white" />
+                    <div className="w-12 h-12 bg-slate-300 rounded-xl flex items-center justify-center">
+                      <Calendar className="w-6 h-6 text-slate-500" />
                     </div>
                     <div>
-                      <h3 className="text-xl font-bold">Ir al Dashboard</h3>
-                      <p className="text-emerald-100">Comenzar a configurar tu negocio</p>
+                      <h3 className="text-xl font-bold text-slate-600">Paso siguiente</h3>
+                      <p className="text-slate-500">Después de elegir tu plan</p>
                     </div>
                   </div>
-                  <p className="text-emerald-100 text-sm">
-                    Accede directamente a tu panel de control y configura servicios
+                  <p className="text-slate-500 text-sm">
+                    Completarás la configuración de tu negocio paso a paso
                   </p>
-                  <div className="flex items-center mt-4 text-emerald-100 group-hover:text-white transition-colors">
-                    <span className="font-medium">Acceder</span>
-                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                  </div>
-                </Link>
+                </div>
               </div>
             </div>
 

@@ -9,9 +9,22 @@ export interface Professional {
   address?: string;
   plan: string;
   role?: 'user' | 'admin' | 'moderator';
-  subscription_status?: 'active' | 'pending_payment' | 'grace_period' | 'suspended' | 'cancelled' | 'past_due';
+  subscription_status?: 'active' | 'pending_payment' | 'grace_period' | 'suspended' | 'cancelled' | 'past_due' | 'trial' | 'expired' | 'none';
   created_at: string;
   updated_at: string;
+  // Nuevos campos para onboarding y trial
+  logo_url?: string;
+  whatsapp?: string;
+  website?: string;
+  instagram?: string;
+  business_category?: string;
+  branch_count?: number;
+  staff_count?: number;
+  trial_start_date?: string;
+  trial_end_date?: string;
+  onboarding_completed?: boolean;
+  tutorial_watched?: boolean;
+  selected_plan?: string;
 }
 
 export interface Notification {

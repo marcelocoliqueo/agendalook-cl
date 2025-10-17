@@ -102,14 +102,23 @@ function SelectPlanContent() {
 
   const handlePlanSelect = async (plan: PlanType) => {
     setSelectedPlan(plan);
-    
-    // Todos los planes son pagados, ir a la página de pago
     setLoading(true);
+    
     try {
-      router.push(`/payment?plan=${plan}`);
+      // Guardar plan seleccionado en el perfil profesional
+      if (professional) {
+        await updateProfessional(professional.id, {
+          selected_plan: plan,
+          updated_at: new Date().toISOString()
+        });
+      }
+      
+      // Redirigir al primer paso del setup
+      router.push('/setup/business-slug');
     } catch (error) {
-      console.error('Error navigating to payment:', error);
-      setLoading(false);
+      console.error('Error saving selected plan:', error);
+      // Continuar al setup aunque falle el guardado
+      router.push('/setup/business-slug');
     }
   };
 
@@ -279,13 +288,39 @@ function SelectPlanContent() {
 
           {selectedPlan && (
             <p className="text-sm text-slate-500">
-              Serás redirigido a MercadoPago para completar el pago
+              Iniciarás tu trial de 30 días gratis • Sin tarjeta requerida
             </p>
           )}
         </div>
 
+        {/* Trial Banner */}
+        <div className="mt-12 bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-8 border-2 border-green-200 text-center">
+          <div className="max-w-2xl mx-auto">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-green-500 rounded-full mb-4">
+              <Clock className="w-8 h-8 text-white" />
+            </div>
+            <h3 className="text-2xl font-bold text-slate-800 mb-2">
+              30 días de trial gratis
+            </h3>
+            <p className="text-slate-600 mb-4">
+              Prueba todas las funciones de tu plan sin ingresar tarjeta de crédito. 
+              Al finalizar el trial, podrás elegir si continuar con el servicio.
+            </p>
+            <div className="flex items-center justify-center gap-2 text-sm text-green-700">
+              <Check className="w-5 h-5" />
+              <span>Sin compromiso</span>
+              <span className="text-slate-400">•</span>
+              <Check className="w-5 h-5" />
+              <span>Sin tarjeta</span>
+              <span className="text-slate-400">•</span>
+              <Check className="w-5 h-5" />
+              <span>Cancelación fácil</span>
+            </div>
+          </div>
+        </div>
+        
         {/* Trust Indicators */}
-        <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+        <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
           <div className="flex flex-col items-center space-y-3">
             <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
               <Clock className="w-6 h-6 text-green-600" />

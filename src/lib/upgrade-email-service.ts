@@ -168,7 +168,7 @@ export async function scheduleUpgradeSuggestions() {
         plan,
         created_at
       `)
-      .eq('plan', 'free')
+      .eq('plan', 'look')
       .lt('created_at', sevenDaysAgo.toISOString());
 
     if (error) {
@@ -189,9 +189,9 @@ export async function scheduleUpgradeSuggestions() {
             userId: user.user_id,
             userEmail,
             userName,
-            currentPlan: 'Free',
+            currentPlan: 'Look',
             upgradePlan: 'Pro',
-            upgradePrice: 9990,
+            upgradePrice: 16990,
           });
 
           // Esperar un poco entre emails para evitar rate limiting
@@ -230,15 +230,15 @@ export async function sendWelcomeUpgradeEmail(userId: string) {
         .eq('user_id', userId)
         .single();
 
-      if (professional && professional.plan === 'free') {
+      if (professional && professional.plan === 'look') {
         // Enviar email de bienvenida con sugerencias
         await sendUpgradeSuggestionEmail({
           userId,
           userEmail,
           userName,
-          currentPlan: 'Free',
+          currentPlan: 'Look',
           upgradePlan: 'Pro',
-          upgradePrice: 9990,
+          upgradePrice: 16990,
         });
       }
     }

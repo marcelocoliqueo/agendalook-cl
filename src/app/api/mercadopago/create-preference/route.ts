@@ -47,18 +47,9 @@ export async function POST(request: NextRequest) {
     console.log('🔍 API MercadoPago: Profesional encontrado:', professional.id);
 
     const plan = body.plan;
-    if (!plan || !['free', 'pro', 'premium'].includes(plan)) {
+    if (!plan || !['look', 'pro', 'studio'].includes(plan)) {
       console.log('🔍 API MercadoPago: Plan inválido:', plan);
       return NextResponse.json({ error: 'Plan inválido' }, { status: 400 });
-    }
-
-    if (plan === 'free') {
-      console.log('🔍 API MercadoPago: Plan gratuito seleccionado, no se requiere pago');
-      return NextResponse.json({ 
-        message: 'Plan gratuito seleccionado',
-        plan: 'free',
-        redirect: '/onboarding'
-      });
     }
 
     console.log('🔍 API MercadoPago: Verificación de variables de entorno:', {

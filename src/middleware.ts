@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { checkTrialExpiration, handleTrialExpiration } from './middleware/checkTrial';
+import { checkSetupCompletion, requiresSetupCompletion, isSetupRoute } from './middleware/setupCompletion';
 
 export async function middleware(request: NextRequest) {
   // Rutas que requieren autenticación
@@ -121,6 +122,30 @@ export async function middleware(request: NextRequest) {
       url.pathname = '/verify-code';
       if (user?.email) url.searchParams.set('email', user.email);
       return NextResponse.redirect(url);
+    }
+
+    // Verificar completitud de setup para rutas protegidas (excepto admin)
+    const isAdminUser = user.email === 'admin@agendalook.cl';
+    const currentPath = request.nextUrl.pathname;
+    
+    if (!isAdminUser && requiresSetupCompletion(currentPath) && !isSetupRoute(currentPath)) {
+      console.log('🔍 Middleware: Verificando completitud de setup para:', user.id);
+      
+      try {
+        const setupStatus = await checkSetupCompletion(user.id);
+        
+        if (!setupStatus.completed) {
+          console.log(`⚠️ Middleware: Setup incompleto, redirigiendo a ${setupStatus.redirect}`);
+          const url = request.nextUrl.clone();
+          url.pathname = setupStatus.redirect || '/setup/business-slug';
+          return NextResponse.redirect(url);
+        }
+        
+        console.log('✅ Middleware: Setup completado');
+      } catch (error) {
+        console.error('💥 Error verificando setup en middleware:', error);
+        // En caso de error, permitir acceso (más permisivo)
+      }
     }
 
     // Verificar expiración de trial para rutas protegidas

@@ -300,7 +300,7 @@ export async function POST(request: NextRequest) {
         const { error: cancelError } = await supabase
           .from('professionals')
           .update({
-            plan: 'free',
+            plan: 'look',
             subscription_status: 'cancelled',
             mp_subscription_id: null,
             cancellation_date: new Date().toISOString(),

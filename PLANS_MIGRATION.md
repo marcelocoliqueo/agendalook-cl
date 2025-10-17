@@ -3,7 +3,7 @@
 ## 📋 **Resumen de Cambios**
 
 ### **✅ Implementado:**
-- ✅ **Sistema de planes** (`free`, `pro`, `studio`)
+- ✅ **Sistema de planes** (`look`, `pro`, `studio`)
 - ✅ **Validaciones** de límites en tiempo real
 - ✅ **Alertas visuales** cuando se alcanzan límites
 - ✅ **Panel de configuración** con información del plan
@@ -15,8 +15,8 @@
 ### **1. Ejecutar Migración SQL:**
 ```sql
 -- Ejecutar en Supabase SQL Editor
-ALTER TABLE professionals 
-ADD COLUMN plan TEXT DEFAULT 'free' NOT NULL;
+ALTER TABLE professionals
+ADD COLUMN plan TEXT DEFAULT 'look' NOT NULL;
 
 CREATE INDEX idx_professionals_plan ON professionals(plan);
 ```
@@ -24,59 +24,53 @@ CREATE INDEX idx_professionals_plan ON professionals(plan);
 ### **2. Verificar Migración:**
 ```sql
 -- Verificar que la columna se agregó correctamente
-SELECT 
-  id, 
-  business_name, 
-  plan, 
-  created_at 
-FROM professionals 
+SELECT
+  id,
+  business_name,
+  plan,
+  created_at
+FROM professionals
 LIMIT 5;
 ```
 
 ## 🎯 **Planes Implementados**
 
-### **📊 Free (Gratis)**
-- **Reservas**: 10/mes
-- **Servicios**: 3 máximo
-- **Características**: Básicas
-- **Precio**: $0/mes
-
-### **🚀 Pro ($19.990/mes)**
+### **💫 Look ($9.990/mes)**
 - **Reservas**: Ilimitadas
 - **Servicios**: Ilimitados
-- **Características**: Analytics, personalización
+- **Características**: Agenda online, recordatorios WhatsApp, pagos online, reportes básicos, CRM básico
+- **Precio**: $9.990/mes
+
+### **🚀 Pro ($16.990/mes)**
+- **Reservas**: Ilimitadas
+- **Servicios**: Ilimitados
+- **Características**: Todo de Look + reportes avanzados, automatizaciones, integraciones, sin marca
+- **Precio**: $16.990/mes
+
+### **👑 Studio ($19.990/mes)**
+- **Reservas**: Ilimitadas
+- **Servicios**: Ilimitados
+- **Características**: Todo de Pro + múltiples sucursales, usuarios ilimitados, API personalizada
 - **Precio**: $19.990/mes
-
-### **👑 Studio ($49.990/mes)**
-- **Reservas**: Ilimitadas
-- **Servicios**: Ilimitados
-- **Características**: Todo de Pro + múltiples usuarios
-- **Precio**: $49.990/mes
 
 ## 🔧 **Funcionalidades Técnicas**
 
 ### **1. Validaciones Automáticas:**
 ```typescript
-// Al crear reserva
-if (!canCreateBooking(plan, currentBookingsThisMonth)) {
-  throw new Error('Has alcanzado el límite de reservas de tu plan.');
-}
-
-// Al crear servicio
-if (!canCreateService(plan, currentServicesCount)) {
-  throw new Error('Has alcanzado el número máximo de servicios permitidos.');
-}
+// Todos los planes tienen reservas y servicios ilimitados
+// No hay validaciones de límites en el plan Look, Pro y Studio
 ```
 
-### **2. Alertas Visuales:**
-- **80% de uso**: Alerta amarilla
-- **100% de uso**: Alerta roja
-- **Banners informativos** con opciones de upgrade
+### **2. Sistema de Suscripción:**
+- **Período de prueba**: 30 días automáticos para nuevos usuarios
+- **MercadoPago**: Integración completa para pagos recurrentes
+- **Estados de suscripción**: active, pending_payment, grace_period, suspended, cancelled
+- **Notificaciones automáticas**: Emails de pago, recordatorios, alertas
 
-### **3. Progreso de Uso:**
-- **Barras de progreso** en tiempo real
-- **Contadores** de uso actual vs límite
-- **Porcentajes** visuales
+### **3. Funcionalidades por Plan:**
+- **Look**: Base completa para profesionales individuales
+- **Pro**: Automatizaciones y reportes avanzados
+- **Studio**: Multi-sucursal y API personalizada
 
 ## 🎨 **Componentes UI**
 
@@ -115,18 +109,19 @@ if (!canCreateService(plan, currentServicesCount)) {
 
 ## 🧪 **Testing**
 
-### **1. Probar Límites Free:**
+### **1. Probar Plan Look:**
 ```bash
-# Crear 3 servicios (límite)
-# Crear 10 reservas (límite)
-# Verificar alertas aparecen
+# Verificar acceso a todas las funcionalidades básicas
+# Probar recordatorios por WhatsApp
+# Verificar pagos con MercadoPago
 ```
 
 ### **2. Probar Planes Superiores:**
 ```bash
-# Cambiar plan manualmente en BD
-# Verificar límites se eliminan
-# Verificar características premium
+# Cambiar plan a Pro/Studio en BD
+# Verificar funcionalidades premium
+# Probar reportes avanzados (Pro)
+# Probar multi-sucursal (Studio)
 ```
 
 ## 📊 **Monitoreo**
@@ -164,7 +159,7 @@ console.log('Upgrade solicitado:', { from: currentPlan, to: newPlan });
 ```typescript
 // Fácil agregar nuevos planes
 export const PLANS = {
-  free: { /* ... */ },
+  look: { /* ... */ },
   pro: { /* ... */ },
   studio: { /* ... */ },
   enterprise: { /* ... */ }, // Futuro

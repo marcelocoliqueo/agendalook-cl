@@ -1,4 +1,4 @@
-export type PlanType = 'free' | 'pro' | 'studio';
+export type PlanType = 'look' | 'pro' | 'studio';
 export type SubscriptionStatus = 'active' | 'pending_payment' | 'grace_period' | 'suspended' | 'cancelled' | 'past_due';
 
 export interface PlanLimits {
@@ -32,13 +32,13 @@ export interface SubscriptionState {
 }
 
 export const PLAN_LIMITS: Record<PlanType, PlanLimits> = {
-  free: {
-    maxServices: 3,
-    maxBookingsPerMonth: 10,
-    whatsappReminders: false,
+  look: {
+    maxServices: null,
+    maxBookingsPerMonth: null,
+    whatsappReminders: true,
     customSubdomain: false,
-    clientHistory: false,
-    priceCLP: 0,
+    clientHistory: true,
+    priceCLP: 9990,
   },
   pro: {
     maxServices: null,
@@ -46,60 +46,62 @@ export const PLAN_LIMITS: Record<PlanType, PlanLimits> = {
     whatsappReminders: true,
     customSubdomain: false, // Temporalmente deshabilitado
     clientHistory: true,
-    priceCLP: 9990,
+    priceCLP: 16990,
   },
   studio: {
     maxServices: null,
     maxBookingsPerMonth: null,
     whatsappReminders: true, // Habilitado para Studio
-    customSubdomain: false, // Temporalmente deshabilitado
+    customSubdomain: true, // Habilitado para Studio
     clientHistory: true,
     priceCLP: 19990,
   },
 };
 
 export const PLANS: Record<PlanType, PlanDetails> = {
-  free: {
-    name: 'Free',
-    price: 0,
-    description: 'Perfecto para empezar',
-    color: 'text-gray-600',
+  look: {
+    name: 'Look',
+    price: 9990,
+    description: 'Para profesionales y negocios pequeños',
+    color: 'text-sky-600',
     features: [
-      'Hasta 10 reservas por mes',
-      'Máximo 3 servicios',
-      'Página pública personalizada',
-      'Notificaciones por email',
-      'Soporte por email',
-      'Dashboard básico'
+      'Agenda online ilimitada',
+      'Recordatorios por WhatsApp',
+      'Pagos online con MercadoPago',
+      'Página pública de reservas',
+      'Reportes básicos',
+      'CRM básico',
+      'Soporte por email'
     ],
-    limits: PLAN_LIMITS.free,
+    limits: PLAN_LIMITS.look,
   },
   pro: {
     name: 'Pro',
-    price: 9990,
-    description: 'Para profesionales establecidos',
-    color: 'text-lavender-600',
+    price: 16990,
+    description: 'Para equipos que buscan más control',
+    color: 'text-purple-600',
     features: [
-      'Reservas ilimitadas',
-      'Servicios ilimitados',
-      'Historial de clientes',
-      'Estadísticas básicas',
+      'Todo lo del Plan Look',
+      'Reportes avanzados',
+      'Ficha de cliente avanzada',
+      'Automatizaciones personalizadas',
+      'Integraciones avanzadas',
       'Soporte prioritario',
-      'Sin marca de Agendalook',
-      'Filtros avanzados'
+      'Sin marca de Agendalook'
     ],
     limits: PLAN_LIMITS.pro,
   },
   studio: {
     name: 'Studio',
     price: 19990,
-    description: 'Para estudios y equipos',
-    color: 'text-coral-600',
+    description: 'Para estudios y equipos grandes',
+    color: 'text-emerald-600',
     features: [
-      'Todo de Pro',
-      'Reportes detallados',
-      'Exportación de datos',
-      'Personalización avanzada',
+      'Todo lo del Plan Pro',
+      'Múltiples sucursales',
+      'Usuarios ilimitados',
+      'Reportes empresariales',
+      'API personalizada',
       'Soporte dedicado',
       'Funciones premium'
     ],
@@ -118,17 +120,16 @@ export function hasFeature(plan: PlanType, feature: keyof PlanLimits): boolean {
   return typeof value === 'boolean' ? value : false;
 }
 
-// Función para obtener el plan actual (con fallback a free)
+// Función para obtener el plan actual (con fallback a look)
 export function getCurrentPlan(plan?: string | null): PlanType {
   if (!plan || !(plan in PLAN_LIMITS)) {
-    return 'free';
+    return 'look';
   }
   return plan as PlanType;
 }
 
 // Función para formatear precio
 export function formatPlanPrice(price: number): string {
-  if (price === 0) return 'Gratis';
   return new Intl.NumberFormat('es-CL', {
     style: 'currency',
     currency: 'CLP',
@@ -331,7 +332,7 @@ export function formatMoney(amount: number): string {
 // Función para calcular ingresos mensuales
 export function calculateMonthlyRevenue(professionals: any[]): number {
   return professionals.reduce((total, prof) => {
-    if (prof.subscription_status === 'active' && prof.plan !== 'free') {
+    if (prof.subscription_status === 'active') {
       const planPrice = PLAN_LIMITS[prof.plan as PlanType]?.priceCLP || 0;
       return total + planPrice;
     }
@@ -341,9 +342,9 @@ export function calculateMonthlyRevenue(professionals: any[]): number {
 
 // Función para calcular tasa de cancelación (churn rate)
 export function calculateChurnRate(professionals: any[]): number {
-  const totalPaidUsers = professionals.filter(p => p.plan !== 'free').length;
+  const totalPaidUsers = professionals.length;
   const cancelledUsers = professionals.filter(p => p.subscription_status === 'cancelled').length;
-  
+
   if (totalPaidUsers === 0) return 0;
   return (cancelledUsers / totalPaidUsers) * 100;
 }
@@ -368,7 +369,7 @@ export function getSubscriptionStats(professionals: any[]): {
     monthlyRevenue: calculateMonthlyRevenue(professionals),
     churnRate: calculateChurnRate(professionals),
     usersByPlan: {
-      free: professionals.filter(p => p.plan === 'free').length,
+      look: professionals.filter(p => p.plan === 'look').length,
       pro: professionals.filter(p => p.plan === 'pro').length,
       studio: professionals.filter(p => p.plan === 'studio').length,
     }
